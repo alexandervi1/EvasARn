@@ -44,60 +44,111 @@ def get_local_ip():
 
     return "127.0.0.1"
 
-def query_gemini_vision(api_key, base64_image_data):
+yolo_model = None
+
+def query_yolo_and_ollama(base64_image_data):
     """
-    Realiza una consulta a la API de Google Gemini 1.5 Flash utilizando el feed
-    base64 de la cámara, sin requerir la librería externa google-generativeai.
+    Procesa un fotograma en Base64 de forma 100% local ejecutando YOLOv8
+    en la computadora del usuario y alimentando las etiquetas detectadas
+    a Ollama local (qwen) para armar una respuesta didáctica divertida.
     """
+    global yolo_model
+    
+    # Lazy loading para evitar que falle el servidor si ultralytics sigue instalándose
+    try:
+        from ultralytics import YOLO
+    except ImportError:
+        return "¡Procesador de visión instalándose! La librería 'ultralytics' (YOLOv8) se está configurando en segundo plano en tu PC. Por favor, espera un minuto e inténtalo de nuevo. 🐳⏳"
+
+    if yolo_model is None:
+        print("[YOLO LOCAL] Inicializando YOLOv8 Nano en memoria...")
+        # yolov8n.pt se descargará en el directorio de trabajo (6.2 MB) si no existe
+        yolo_model = YOLO("yolov8n.pt")
+        print("[YOLO LOCAL] Modelo YOLOv8 inicializado con éxito.")
+
+    # 1. Decodificar la imagen Base64 y guardarla temporalmente
     if "," in base64_image_data:
         base64_image_data = base64_image_data.split(",")[1]
+    
+    img_data = base64.b64decode(base64_image_data)
+    temp_path = "temp_capture.jpg"
+    with open(temp_path, "wb") as f:
+        f.write(img_data)
         
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-    
-    payload = {
-        "contents": [{
-            "parts": [
-                {
-                    "text": (
-                        "Actúa como Moby, la ballena mascota oficial de Docker. Responde de manera alegre, "
-                        "didáctica y en máximo 3 oraciones en español nativo. "
-                        "Analiza la siguiente imagen de la cámara del usuario. Si ves la interfaz de Docker Desktop "
-                        "o alguna terminal con comandos de Docker, identifica los contenedores, imágenes, "
-                        "volúmenes o procesos, explicando brevemente qué son y cuál es su estado (verde/activo, gris/inactivo). "
-                        "Si ves objetos del mundo real (como una computadora, laptop, teclado, ratón, taza, etc.), "
-                        "identifícalos e invéntate una analogía divertida sobre cómo se relacionan con Docker (por ejemplo, "
-                        "que la taza de café es un volumen persistente que mantiene activo el cerebro del desarrollador)."
-                    )
-                },
-                {
-                    "inlineData": {
-                        "mimeType": "image/jpeg",
-                        "data": base64_image_data
-                    }
-                }
-            ]
-        }]
-    }
-    
-    req = urllib.request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
-        method="POST"
-    )
-    
+    detecciones = []
     try:
+        # 2. Correr inferencia local con YOLOv8
+        results = yolo_model(temp_path, verbose=False)
+        
+        # 3. Filtrar detecciones con confianza > 50%
+        for box in results[0].boxes:
+            conf = float(box.conf[0])
+            if conf >= 0.50:
+                cls_id = int(box.cls[0])
+                label = results[0].names[cls_id]
+                detecciones.append(f"{label} ({int(conf * 100)}% de confianza)")
+    except Exception as e:
+        print(f"[YOLO LOCAL] Falla en la inferencia de la imagen: {str(e)}")
+    finally:
+        # Garantizar limpieza del archivo temporal
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+        
+    # 4. Crear el Prompt dinámico para Ollama
+    if not detecciones:
+        prompt_ollama = (
+            "Eres Moby, la ballena mascota oficial de Docker. El sensor de mi cámara no detectó ningún objeto "
+            "claro en el entorno inmediato. Genera una respuesta alegre de 2 oraciones en español saludando al usuario "
+            "e invitándolo a colocar una laptop, teclado, ratón o taza de café frente a la cámara para analizarlos "
+            "y explicar su relación con contenedores."
+        )
+    else:
+        objetos_detectados = ", ".join(detecciones)
+        print(f"[YOLO LOCAL] Radar detectó en el entorno real: {objetos_detectados}")
+        
+        prompt_ollama = (
+            f"Eres Moby, la ballena mascota oficial de Docker. Responde de manera alegre, didáctica y en máximo "
+            f"2 oraciones en español. El sensor de mi cámara acaba de escanear mi entorno real y detectó "
+            f"los siguientes objetos físicos: {objetos_detectados}. "
+            f"Describe brevemente qué objetos viste y haz una analogía didáctica y divertida de cómo se relacionan "
+            f"con Docker (por ejemplo, que la laptop representa portabilidad, que la taza de café es un volumen persistente, "
+            f"que el teclado es para escribir Dockerfiles o que el mouse ayuda a orquestar contenedores)."
+        )
+        
+    # 5. Consultar a tu Ollama local (qwen)
+    try:
+        url_ollama = "http://localhost:11434/api/generate"
+        payload = {
+            "model": "qwen",
+            "prompt": prompt_ollama,
+            "stream": False
+        }
+        
+        req = urllib.request.Request(
+            url_ollama,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        
         with urllib.request.urlopen(req) as response:
             res_data = json.loads(response.read().decode("utf-8"))
-            text = res_data["candidates"][0]["content"]["parts"][0]["text"]
-            return text
-    except urllib.error.HTTPError as e:
-        error_msg = e.read().decode("utf-8")
-        print(f"[ERROR DE VISION] HTTP Error: {error_msg}")
-        raise Exception(f"Falla de API de Gemini: {e.code} - {e.reason}")
+            return res_data.get("response", "¡Ups! No pude procesar los datos de mi radar.")
+            
     except Exception as e:
-        print(f"[ERROR DE VISION] Falla general: {str(e)}")
-        raise e
+        print(f"[OLLAMA ERROR] Error al conectar al servicio local Ollama: {str(e)}")
+        # Fallback elegante si Ollama está caído
+        if detecciones:
+            return (
+                f"¡Hola! Mi sonar local detectó: {', '.join(detecciones)}. "
+                "Lamentablemente no pude conectar con mi cerebro de Ollama en el puerto 11434, "
+                "¡pero sé que esos objetos son claves para tu estación de trabajo Docker! 🐳🔌"
+            )
+        else:
+            return "¡Sonar activo! No detecté objetos claros, pero asegúrate de tener Ollama activo en el puerto 11434 para que pueda hablar contigo sobre tu entorno. 🐳📡"
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -113,35 +164,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             
             try:
-                # 1. Buscar API Key de Gemini (entorno o archivos locales)
-                api_key = os.environ.get("GEMINI_API_KEY")
-                
-                # Buscar en carpeta raíz del proyecto (un nivel arriba del servicio)
-                if not api_key:
-                    key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "gemini_key.txt")
-                    if os.path.exists(key_path):
-                        with open(key_path, "r", encoding="utf-8") as f:
-                            api_key = f.read().strip()
-                
-                # Buscar en carpeta actual del servicio
-                if not api_key:
-                    key_path_local = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gemini_key.txt")
-                    if os.path.exists(key_path_local):
-                        with open(key_path_local, "r", encoding="utf-8") as f:
-                            api_key = f.read().strip()
-                
-                if not api_key:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json')
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.end_headers()
-                    response_body = json.dumps({
-                        "error": "Clave API de Gemini no configurada. Por favor, crea un archivo llamado 'gemini_key.txt' en la carpeta raíz del proyecto e ingresa tu API Key gratuita para activar mi Ojo de Sonar. 🐳🔒"
-                    })
-                    self.wfile.write(response_body.encode('utf-8'))
-                    return
-
-                # 2. Leer JSON del cliente
+                # 1. Leer JSON del cliente
                 data = json.loads(post_data.decode('utf-8'))
                 image_base64 = data.get("image")
                 
@@ -154,12 +177,12 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(response_body.encode('utf-8'))
                     return
 
-                # 3. Ejecutar Inferencia de Gemini
-                print("[VISION] Procesando fotograma y consultando a Gemini 1.5 Flash...")
-                analisis = query_gemini_vision(api_key, image_base64)
-                print("[VISION] Análisis completado con éxito.")
+                # 2. Ejecutar Inferencia de YOLOv8 local + Ollama local
+                print("[VISION LOCAL] Procesando fotograma mediante YOLOv8 + Ollama...")
+                analisis = query_yolo_and_ollama(image_base64)
+                print("[VISION LOCAL] Análisis de radar completado con éxito.")
 
-                # 4. Enviar Respuesta
+                # 3. Enviar Respuesta
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
