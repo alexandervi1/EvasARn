@@ -862,6 +862,28 @@
             }
 
             try {
+                // Diagnosticar dispositivos de video antes de iniciar
+                if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+                    try {
+                        const devices = await navigator.mediaDevices.enumerateDevices();
+                        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                        console.log("[Sonar Diagnóstico] Cámaras disponibles:", videoDevices);
+                        
+                        if (videoDevices.length === 0) {
+                            escribirTexto("⚠️ [Sonar Diagnóstico] ¡Error! No se detectó ninguna cámara física conectada en tu equipo. Conecta un dispositivo de captura e inténtalo de nuevo.", 15);
+                            hablar("No se detectaron cámaras.");
+                            return;
+                        } else {
+                            escribirTexto(`[Sonar Diagnóstico] Detectadas ${videoDevices.length} cámaras físicas. Conectando con la cámara trasera... 📸🐳`, 15);
+                        }
+                    } catch (enumErr) {
+                        console.warn("Falla en la enumeración de dispositivos:", enumErr);
+                    }
+                }
+
+                // Esperar un breve instante para que el usuario logre leer el diagnóstico
+                await new Promise(resolve => setTimeout(resolve, 800));
+
                 escribirTexto("Solicitando acceso a la cámara trasera para Realidad Aumentada... 📸🐳", 15);
                 hablar("Solicitando acceso a la cámara.");
 
@@ -922,7 +944,15 @@
                     <span>Cámara RA On</span>
                 `;
 
-                escribirTexto("¡Excelente! Ahora Moby y los hologramas de Docker flotan en tu espacio físico real. 🐳🏠✨", 15);
+                // Obtener detalles del stream enlazado con éxito para diagnóstico en pantalla
+                const activeTrack = cameraStream.getVideoTracks()[0];
+                const settings = activeTrack ? activeTrack.getSettings() : {};
+                console.log("[Sonar Diagnóstico] Cámara enlazada:", settings);
+
+                const resString = settings.width ? `${settings.width}x${settings.height}` : "estándar";
+                const trackName = activeTrack ? activeTrack.label : "Cámara del dispositivo";
+
+                escribirTexto(`¡Conexión exitosa! Sonar enlazado a cámara: "${trackName}" (${resString}). Ahora Moby y los hologramas de Docker flotan en tu espacio físico real. 🐳🏠✨`, 15);
                 hablar("Acceso concedido. Ahora floto en tu espacio real.");
 
             } catch (err) {
