@@ -348,8 +348,9 @@
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
         }
 
-        a-scene {
+        a-scene, .a-canvas {
             background: transparent !important;
+            background-color: transparent !important;
         }
 
         /* Radar de Orientación Estilo Pokémon Go */
@@ -832,6 +833,9 @@
                     }
                 }, 500);
                 
+                // Restaurar fondo del body
+                document.body.style.backgroundColor = "#05070f";
+                
                 skyEl.setAttribute("visible", "true");
                 
                 // Cambiar estado visual del botón
@@ -894,6 +898,9 @@
                 videoEl.style.opacity = "1";
                 videoEl.style.pointerEvents = "auto";
                 videoEl.srcObject = cameraStream;
+                
+                // Hacer transparente el fondo del body
+                document.body.style.backgroundColor = "transparent";
                 
                 // Forzar reproducción del flujo de video (crítico para iOS Safari)
                 try {
