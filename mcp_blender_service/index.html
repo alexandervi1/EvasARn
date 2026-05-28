@@ -575,7 +575,7 @@
         autoplay 
         playsinline 
         muted 
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none;">
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0; pointer-events: none; transition: opacity 0.5s ease;">
     </video>
 
     <!-- Escena A-Frame WebXR con soporte de transparencia para la cámara -->
@@ -822,7 +822,8 @@
                 const tracks = cameraStream.getTracks();
                 tracks.forEach(track => track.stop());
                 cameraStream = null;
-                videoEl.style.display = "none";
+                videoEl.style.opacity = "0";
+                videoEl.style.pointerEvents = "none";
                 skyEl.setAttribute("visible", "true");
                 
                 // Cambiar estado visual del botón
@@ -880,7 +881,8 @@
                     }
                 }
 
-                videoEl.style.display = "block";
+                videoEl.style.opacity = "1";
+                videoEl.style.pointerEvents = "auto";
                 videoEl.srcObject = cameraStream;
                 
                 // Forzar reproducción del flujo de video (crítico para iOS Safari)
