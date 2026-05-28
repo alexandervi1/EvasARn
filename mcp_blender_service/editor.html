@@ -683,6 +683,224 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+
+        /* === BUSCADOR POLY PIZZA === */
+        .search-bar-wrap {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 10px;
+            color: #fff;
+            padding: 9px 12px;
+            font-family: var(--font-main);
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: var(--color-docker);
+        }
+
+        .search-input::placeholder { color: #475569; }
+
+        .btn-search {
+            background: var(--color-docker-blue);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-search:hover { background: #0369a1; }
+        .btn-search:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .search-results-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .search-result-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 10px;
+            padding: 9px 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .search-result-card:hover {
+            border-color: rgba(0, 243, 255, 0.35);
+            background: rgba(0, 243, 255, 0.03);
+        }
+
+        .search-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 7px;
+            object-fit: cover;
+            background: rgba(255,255,255,0.04);
+            flex-shrink: 0;
+            border: 1px solid var(--color-border-glass);
+        }
+
+        .search-thumb-placeholder {
+            width: 44px;
+            height: 44px;
+            border-radius: 7px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--color-border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .search-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-author {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-licence {
+            font-size: 9px;
+            color: #475569;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 4px;
+            padding: 1px 5px;
+            display: inline-block;
+            margin-top: 3px;
+        }
+
+        .btn-add-model {
+            background: rgba(0,243,255,0.08);
+            border: 1px solid rgba(0,243,255,0.25);
+            border-radius: 7px;
+            color: var(--color-docker);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .btn-add-model:hover { background: rgba(0,243,255,0.18); transform: scale(1.1); }
+        .btn-add-model:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        /* === API KEY CONFIG === */
+        .api-key-section {
+            border: 1px solid var(--color-border-glass);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.01);
+            flex-shrink: 0;
+        }
+
+        .api-key-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .api-key-input {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 8px;
+            color: #94a3b8;
+            padding: 7px 10px;
+            font-family: monospace;
+            font-size: 11px;
+            outline: none;
+            transition: border-color 0.2s;
+            letter-spacing: 1px;
+        }
+
+        .api-key-input:focus { border-color: var(--color-docker); color: #fff; }
+
+        .btn-save-key {
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: var(--color-success);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: var(--font-main);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-save-key:hover { background: rgba(34,197,94,0.22); }
+
+        .api-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .api-status-dot.ok   { background: var(--color-success); box-shadow: 0 0 6px var(--color-success); }
+        .api-status-dot.err  { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+        .api-status-dot.none { background: #475569; }
+
+        .search-empty {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-empty-icon { font-size: 28px; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -716,7 +934,7 @@
             <!-- TABS HEADER -->
             <div class="sidebar-tabs">
                 <button class="sidebar-tab active" id="tab-models" onclick="cambiarTabSidebar('models')">📦 Modelos</button>
-                <button class="sidebar-tab" id="tab-blender" onclick="cambiarTabSidebar('blender')">🤖 Blender</button>
+                <button class="sidebar-tab" id="tab-buscar" onclick="cambiarTabSidebar('buscar')">🔍 Buscar</button>
                 <button class="sidebar-tab" id="tab-media" onclick="cambiarTabSidebar('media')">🗂️ Medios</button>
             </div>
 
@@ -815,6 +1033,58 @@
                     <!-- Se llena dinámicamente con /api/list-models -->
                     <div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">⏳ Cargando mediateca...</div>
                 </div>
+            </div>
+
+            <!-- === PANEL 4: BUSCADOR POLY PIZZA === -->
+            <div class="sidebar-panel" id="panel-buscar" style="gap: 12px;">
+
+                <!-- Sección API Key -->
+                <div class="api-key-section">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px;">🍕 Poly Pizza API</div>
+                        <div style="display: flex; align-items: center; gap: 5px; font-size: 10px; color: #64748b;">
+                            <div id="api-status-dot" class="api-status-dot none"></div>
+                            <span id="api-status-text">Sin configurar</span>
+                        </div>
+                    </div>
+                    <div class="api-key-row">
+                        <input
+                            type="password"
+                            id="poly-api-key-input"
+                            class="api-key-input"
+                            placeholder="Pega tu API key aquí..."
+                            autocomplete="off"
+                            onkeydown="if(event.key==='Enter') guardarPolyApiKey()"
+                        >
+                        <button class="btn-save-key" onclick="guardarPolyApiKey()">Guardar</button>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 10px; color: #475569; line-height: 1.5;">
+                        Crea cuenta gratis en
+                        <a href="https://poly.pizza" target="_blank" style="color: var(--color-docker); text-decoration: none;">poly.pizza</a>
+                        → Settings → API Key. Se guarda solo en tu navegador (localStorage).
+                    </div>
+                </div>
+
+                <!-- Barra de búsqueda -->
+                <div class="search-bar-wrap">
+                    <input
+                        type="text"
+                        id="poly-search-input"
+                        class="search-input"
+                        placeholder="laptop, whale, car, robot..."
+                        onkeydown="if(event.key==='Enter') buscarEnPolyPizza()"
+                    >
+                    <button id="btn-poly-search" class="btn-search" onclick="buscarEnPolyPizza()" title="Buscar (Enter)">🔍</button>
+                </div>
+
+                <!-- Resultados -->
+                <div id="poly-results" class="search-results-grid">
+                    <div class="search-empty">
+                        <div class="search-empty-icon">🍕</div>
+                        <div>Busca entre miles de modelos<br>3D gratuitos de Poly Pizza</div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -1123,9 +1393,9 @@
         });
 
         // Crear una nueva entidad 3D en el lienzo
-        function crearEntidad(modelId, nombreBase) {
+        function crearEntidad(modelId, nombreBase, glbUrl = null) {
             contadorIds++;
-            const uuid = `objeto-${nombreBase}-${contadorIds}`;
+            const uuid = `objeto-${nombreBase.replace(/\s+/g,'-').toLowerCase()}-${contadorIds}`;
             
             // Definir coordenadas iniciales por defecto en el centro de visión
             const nuevoObjeto = {
@@ -1134,7 +1404,8 @@
                 nombre: `${nombreBase} #${contadorIds}`,
                 posicion: { x: 0, y: 1.1, z: -3.5 },
                 rotacion: { y: 180 },
-                escala: 0.85
+                escala: 0.85,
+                glbUrl: glbUrl   // URL directa para modelos externos (ej. Poly Pizza)
             };
 
             // Ajustar escala y rotación por defecto según el tipo de objeto para una mejor presentación inicial
@@ -1162,7 +1433,14 @@
             // Crear el elemento de A-Frame
             const el = document.createElement('a-entity');
             el.setAttribute('id', obj.uuid);
-            el.setAttribute('gltf-model', `#${obj.modelId}`);
+
+            // Si hay URL directa (ej. Poly Pizza CDN), usarla directamente
+            if (obj.glbUrl) {
+                el.setAttribute('gltf-model', obj.glbUrl);
+            } else {
+                el.setAttribute('gltf-model', `#${obj.modelId}`);
+            }
+
             el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
             el.setAttribute('rotation', `0 ${obj.rotacion.y} 0`);
             el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
@@ -1171,6 +1449,7 @@
             
             container.appendChild(el);
         }
+
 
         // Seleccionar un objeto en la escena 3D y cargar sus valores en el Inspector del HUD
         function seleccionarObjeto(obj) {
@@ -1510,8 +1789,235 @@
             document.getElementById(`tab-${tab}`).classList.add('active');
             document.getElementById(`panel-${tab}`).classList.add('active');
             if (tab === 'media') cargarMediateca();
-            if (tab === 'blender') validarServicios();
+            if (tab === 'buscar') inicializarBuscadorPoly();
         }
+
+        // ================================================================
+        // === INTEGRACIÓN POLY PIZZA — BUSCADOR DE MODELOS GLB GRATIS ===
+        // ================================================================
+
+        const POLY_API_KEY_STORAGE = 'moby_studio_poly_pizza_api_key';
+        const POLY_API_BASE = 'https://api.poly.pizza/v1';
+
+        /**
+         * Inicializa el buscador: carga la key de localStorage y actualiza el status dot.
+         * Llamado automáticamente al abrir la pestaña "Buscar".
+         */
+        function inicializarBuscadorPoly() {
+            const storedKey = localStorage.getItem(POLY_API_KEY_STORAGE);
+            const input = document.getElementById('poly-api-key-input');
+            if (storedKey) {
+                // Mostrar key enmascarada (los primeros 4 + asteriscos)
+                input.value = storedKey;
+                input.placeholder = '••••••••••••••••••••';
+                actualizarEstadoApiKey(true, `Configurada (${storedKey.substring(0,4)}...)`);
+            } else {
+                actualizarEstadoApiKey(false, 'Sin configurar');
+            }
+        }
+
+        /**
+         * Guarda la API key en localStorage cuando el dev hace clic en "Guardar".
+         * Cualquier dev puede poner su propia key — se guarda solo en su navegador.
+         */
+        function guardarPolyApiKey() {
+            const input = document.getElementById('poly-api-key-input');
+            const key = input.value.trim();
+
+            if (!key) {
+                // Si está vacío, borrar la key guardada
+                localStorage.removeItem(POLY_API_KEY_STORAGE);
+                actualizarEstadoApiKey(false, 'Sin configurar');
+                mostrarNotificacion('🔑 API Key eliminada', 'error');
+                return;
+            }
+
+            localStorage.setItem(POLY_API_KEY_STORAGE, key);
+            actualizarEstadoApiKey(true, `Configurada (${key.substring(0,4)}...)`);
+            mostrarNotificacion('✅ API Key guardada correctamente', 'success');
+
+            // Hacer una búsqueda de prueba para validar la key
+            validarPolyApiKey(key);
+        }
+
+        /**
+         * Valida la key haciendo una búsqueda de prueba silenciosa.
+         */
+        async function validarPolyApiKey(key) {
+            try {
+                const r = await fetch(`${POLY_API_BASE}/search?q=test&limit=1`, {
+                    headers: { 'x-auth-token': key }
+                });
+                if (r.ok) {
+                    actualizarEstadoApiKey(true, 'Verificada ✅');
+                } else {
+                    actualizarEstadoApiKey(false, `Error ${r.status} — key inválida`);
+                    mostrarNotificacion(`❌ Key inválida (HTTP ${r.status})`, 'error');
+                }
+            } catch(e) {
+                // CORS puede bloquear esto desde localhost — no es error de key
+                actualizarEstadoApiKey(true, 'Guardada (sin validar CORS)');
+            }
+        }
+
+        /**
+         * Actualiza el indicador visual de estado de la API key.
+         */
+        function actualizarEstadoApiKey(isOk, mensaje) {
+            const dot = document.getElementById('api-status-dot');
+            const text = document.getElementById('api-status-text');
+            if (!dot || !text) return;
+            dot.className = 'api-status-dot ' + (isOk ? 'ok' : 'err');
+            text.textContent = mensaje;
+        }
+
+        /**
+         * Ejecuta la búsqueda en Poly Pizza con el texto del input.
+         * Requiere API key guardada. La petición se hace desde el navegador
+         * con el header x-auth-token (recomendado usar proxy en producción).
+         */
+        async function buscarEnPolyPizza() {
+            const apiKey = localStorage.getItem(POLY_API_KEY_STORAGE);
+            const query = document.getElementById('poly-search-input').value.trim();
+            const resultsEl = document.getElementById('poly-results');
+            const btnSearch = document.getElementById('btn-poly-search');
+
+            if (!apiKey) {
+                resultsEl.innerHTML = `
+                    <div class="search-empty">
+                        <div class="search-empty-icon">🔑</div>
+                        <div>Primero configura tu API Key<br>de Poly Pizza arriba</div>
+                    </div>`;
+                return;
+            }
+
+            if (!query) {
+                document.getElementById('poly-search-input').focus();
+                return;
+            }
+
+            // Estado: buscando
+            btnSearch.disabled = true;
+            btnSearch.textContent = '⏳';
+            resultsEl.innerHTML = `<div class="search-empty"><div class="search-empty-icon" style="animation: spin 1s linear infinite;">⏳</div><div>Buscando "${query}"...</div></div>`;
+
+            try {
+                const url = `${POLY_API_BASE}/search?q=${encodeURIComponent(query)}&limit=20`;
+                const response = await fetch(url, {
+                    headers: { 'x-auth-token': apiKey }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        actualizarEstadoApiKey(false, 'Key inválida o expirada');
+                        throw new Error('API Key inválida. Revisa tu key de Poly Pizza.');
+                    }
+                    throw new Error(`Error del servidor: HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Poly Pizza devuelve { result: [...modelos] } o directamente el array
+                const modelos = Array.isArray(data) ? data : (data.results || data.result || []);
+
+                if (!modelos || modelos.length === 0) {
+                    resultsEl.innerHTML = `<div class="search-empty"><div class="search-empty-icon">🔍</div><div>Sin resultados para "${query}".<br>Intenta otro término.</div></div>`;
+                    return;
+                }
+
+                renderizarResultadosPoly(modelos, resultsEl);
+
+            } catch(err) {
+                resultsEl.innerHTML = `<div class="search-empty" style="color: var(--color-error);">
+                    <div class="search-empty-icon">❌</div>
+                    <div>${err.message}</div>
+                </div>`;
+                mostrarNotificacion(`Error buscando: ${err.message}`, 'error');
+            } finally {
+                btnSearch.disabled = false;
+                btnSearch.textContent = '🔍';
+            }
+        }
+
+        /**
+         * Renderiza la lista de modelos devuelta por la API de Poly Pizza.
+         */
+        function renderizarResultadosPoly(modelos, container) {
+            container.innerHTML = '';
+
+            // Contador de resultados
+            const countEl = document.createElement('div');
+            countEl.style.cssText = 'font-size: 10px; color: #64748b; font-weight: 600; padding: 0 2px; flex-shrink: 0;';
+            countEl.textContent = `${modelos.length} resultados encontrados`;
+            container.appendChild(countEl);
+
+            modelos.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'search-result-card';
+
+                // Determinar thumbnail
+                const thumbHtml = m.Thumbnail
+                    ? `<img class="search-thumb" src="${m.Thumbnail}" alt="${m.Title}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=search-thumb-placeholder>📦</div>'">`
+                    : `<div class="search-thumb-placeholder">📦</div>`;
+
+                // Licencia
+                const licence = m.Licence?.SPDX || m.Licence?.title || 'CC';
+                const authorName = m.Creator?.username || m.Creator?.name || 'Anónimo';
+
+                card.innerHTML = `
+                    ${thumbHtml}
+                    <div class="search-info">
+                        <div class="search-title" title="${m.Title}">${m.Title}</div>
+                        <div class="search-author">por ${authorName}</div>
+                        <span class="search-licence">${licence}</span>
+                    </div>
+                    <button
+                        class="btn-add-model"
+                        title="Añadir '${m.Title}' a la escena"
+                        onclick="importarDesdePolyPizza('${m.ID}', '${(m.Download || '').replace(/'/g, '')}', '${m.Title.replace(/'/g, '').replace(/"/g, '')}', '${authorName}')"
+                    >＋</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /**
+         * Importa un modelo de Poly Pizza a la escena A-Frame.
+         * Usa la URL directa del .glb que devuelve la API (static.poly.pizza CDN).
+         */
+        async function importarDesdePolyPizza(modelId, glbUrl, title, author) {
+            if (!glbUrl) {
+                mostrarNotificacion(`❌ El modelo "${title}" no tiene descarga disponible`, 'error');
+                return;
+            }
+
+            mostrarNotificacion(`⬇️ Cargando "${title}"...`);
+
+            // ID único para el asset en A-Frame
+            const assetId = `poly-${modelId}-${Date.now()}`;
+
+            // Registrar en A-Frame assets
+            const assets = document.querySelector('a-assets');
+            const assetItem = document.createElement('a-asset-item');
+            assetItem.setAttribute('id', assetId);
+            assetItem.setAttribute('src', glbUrl);
+            assetItem.setAttribute('crossorigin', 'anonymous');
+
+            assets.appendChild(assetItem);
+
+            // Esperar a que el asset cargue antes de instanciar
+            assetItem.addEventListener('loaded', () => {
+                crearEntidad(assetId, title);
+                mostrarNotificacion(`✨ "${title}" por ${author} añadido a la escena`, 'success');
+            });
+
+            assetItem.addEventListener('error', (e) => {
+                mostrarNotificacion(`❌ No se pudo cargar "${title}" — CORS o URL inválida`, 'error');
+                // Intentar carga directa sin el asset system como fallback
+                crearEntidad(assetId, title, glbUrl);
+            });
+        }
+
 
         // --- MEDIATECA: Cargar lista de modelos desde el servidor ---
         async function cargarMediateca() {
