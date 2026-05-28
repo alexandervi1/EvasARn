@@ -437,38 +437,6 @@
             border-color: rgba(239, 68, 68, 0.2);
         }
 
-        /* BLENDER PROCEDURAL STUDIO PANEL STYLES */
-        .blender-select {
-            width: 100%;
-            background: rgba(10, 15, 30, 0.85);
-            border: 1px solid var(--color-border-glass);
-            border-radius: 12px;
-            color: #fff;
-            padding: 10px 15px;
-            font-size: 13px;
-            outline: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: border-color 0.2s;
-            margin-bottom: 12px;
-        }
-
-        .blender-select:focus {
-            border-color: var(--color-docker);
-        }
-
-        .blender-btn {
-            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
-            border: 1px solid #ea580c !important;
-            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3) !important;
-        }
-
-        .blender-btn:hover {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
-            box-shadow: 0 0 15px rgba(234, 88, 12, 0.5) !important;
-            transform: translateY(-2px);
-        }
-
         /* INDICADOR ACTIVO DE MODO EN EL INSPECTOR */
         .mode-indicator-badge {
             background: rgba(255, 255, 255, 0.03);
@@ -638,9 +606,8 @@
         .media-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; color: #fff; }
         .media-btn.add:hover { border-color: var(--color-docker); color: var(--color-docker); background: rgba(0,243,255,0.08); }
         .media-btn.del:hover { border-color: var(--color-error); color: var(--color-error); background: rgba(239,68,68,0.08); }
-        .media-btn.zip:hover { border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.08); }
 
-        /* === ESTADO DE VALIDACIÓN BLENDER === */
+        /* === ESTADO DE VALIDACIÓN — Status Badges (usados en index.html) === */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -657,18 +624,6 @@
         .status-warn { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
         .status-err { background: rgba(239,68,68,0.15); color: var(--color-error); border: 1px solid rgba(239,68,68,0.3); }
         .status-loading { background: rgba(0,243,255,0.08); color: var(--color-docker); border: 1px solid rgba(0,243,255,0.2); }
-
-        .blender-status-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 10px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--color-border-glass);
-            border-radius: 8px;
-            font-size: 11px;
-            color: #94a3b8;
-        }
 
         /* === TOOLBAR SNAP / UNDO / REDO === */
         .toolbar-snap-active {
@@ -970,52 +925,6 @@
                         Subir Modelo GLB
                     </button>
                     <div class="asset-list" id="imported-assets-list" style="margin-top: 12px;"></div>
-                </div>
-            </div>
-
-            <!-- === PANEL 2: BLENDER PROCEDURAL STUDIO === -->
-            <div class="sidebar-panel" id="panel-blender">
-
-                <!-- Status Row -->
-                <div>
-                    <div class="panel-section-title" style="margin-bottom: 8px;"><span style="color: #ea580c;">🤖</span> Motor Blender</div>
-                    <div class="blender-status-row">
-                        <span>Estado Blender</span>
-                        <span id="blender-status-badge" class="status-badge status-loading">⏳ Verificando...</span>
-                    </div>
-                    <div class="blender-status-row" style="margin-top: 6px;">
-                        <span>Ollama (qwen)</span>
-                        <span id="ollama-status-badge" class="status-badge status-loading">⏳ Verificando...</span>
-                    </div>
-                    <button class="btn" style="width: 100%; justify-content: center; margin-top: 8px; font-size: 11px; padding: 7px; pointer-events: auto;" onclick="validarServicios()">🔍 Verificar Servicios</button>
-                </div>
-
-                <!-- Script selector + generate -->
-                <div>
-                    <div class="panel-section-title" style="margin-bottom: 8px;">⚙️ Compilar Modelo</div>
-                    <div class="asset-card-desc" style="margin-bottom: 10px; font-size: 11px;">Ejecuta Blender en modo silencioso (headless) en tu computadora para compilar un modelo procedural GLB.</div>
-                    <select id="blender-script-select" class="blender-select" style="pointer-events: auto;">
-                        <option value="generar_contenedor.py">📦 Contenedor Estándar</option>
-                        <option value="gen_ballena.py">🐳 Moby la Ballena</option>
-                        <option value="gen_buque.py">🚢 Buque de Carga</option>
-                        <option value="gen_laptop.py">💻 Laptop de Caos</option>
-                        <option value="gen_server.py">🖥️ Servidor Rack</option>
-                    </select>
-                    <button id="btn-blender-generate" class="btn blender-btn" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="generarConBlender()">
-                        <span id="blender-btn-icon">⚙️</span>
-                        <span id="blender-btn-text">Generar con Blender</span>
-                    </button>
-                </div>
-
-                <!-- Compress Draco -->
-                <div style="border-top: 1px solid var(--color-border-glass); padding-top: 14px;">
-                    <div class="panel-section-title" style="margin-bottom: 8px;">🗜️ Comprimir Modelo</div>
-                    <div class="asset-card-desc" style="margin-bottom: 10px; font-size: 11px;">Aplica compresión Draco sobre la Ballena Azul original para reducir su tamaño significativamente sin perder calidad visual.</div>
-                    <button id="btn-draco-compress" class="btn" style="width: 100%; justify-content: center; gap: 6px; pointer-events: auto; border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.05);" onclick="comprimirConDraco()">
-                        <span id="draco-btn-icon">🗜️</span>
-                        <span id="draco-btn-text">Comprimir con Draco</span>
-                    </button>
-                    <div id="draco-result" style="display:none; margin-top: 8px; font-size: 11px; text-align: center; color: #a855f7; font-weight: 600;"></div>
                 </div>
             </div>
 
@@ -2121,89 +2030,6 @@
             }
         }
 
-        // --- BLENDER: Validar estado de Blender y Ollama ---
-        async function validarServicios() {
-            const blenderBadge = document.getElementById('blender-status-badge');
-            const ollamaBadge = document.getElementById('ollama-status-badge');
-
-            blenderBadge.className = 'status-badge status-loading';
-            blenderBadge.textContent = '⏳ Verificando...';
-            ollamaBadge.className = 'status-badge status-loading';
-            ollamaBadge.textContent = '⏳ Verificando...';
-
-            // Verificar Ollama haciendo ping a su API local
-            try {
-                const oRes = await fetch('http://localhost:11434/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: 'qwen', prompt: 'ping', stream: false }),
-                    signal: AbortSignal.timeout(4000)
-                });
-                if (oRes.ok) {
-                    ollamaBadge.className = 'status-badge status-ok';
-                    ollamaBadge.textContent = '✅ En línea (qwen)';
-                } else {
-                    ollamaBadge.className = 'status-badge status-warn';
-                    ollamaBadge.textContent = '⚠️ Respondió con error';
-                }
-            } catch {
-                ollamaBadge.className = 'status-badge status-err';
-                ollamaBadge.textContent = '❌ Fuera de línea';
-            }
-
-            // Verificar Blender intentando generar con un script vacío y capturando el error esperado
-            try {
-                const bRes = await fetch('/api/generate-model?script=gen_server.py', {
-                    method: 'POST',
-                    signal: AbortSignal.timeout(8000)
-                });
-                if (bRes.ok || bRes.status === 500) {
-                    // Si el servidor respondió (aunque falle la generación), Blender está configurado
-                    blenderBadge.className = 'status-badge status-ok';
-                    blenderBadge.textContent = '✅ Disponible';
-                } else {
-                    blenderBadge.className = 'status-badge status-warn';
-                    blenderBadge.textContent = '⚠️ No encontrado';
-                }
-            } catch {
-                blenderBadge.className = 'status-badge status-err';
-                blenderBadge.textContent = '❌ Sin conexión';
-            }
-        }
-
-        // --- BLENDER: Comprimir modelo con Draco ---
-        async function comprimirConDraco() {
-            const btn = document.getElementById('btn-draco-compress');
-            const icon = document.getElementById('draco-btn-icon');
-            const text = document.getElementById('draco-btn-text');
-            const result = document.getElementById('draco-result');
-
-            btn.disabled = true;
-            icon.textContent = '⏳';
-            text.textContent = 'Comprimiendo...';
-            result.style.display = 'none';
-            mostrarNotificacion('Ejecutando compresión Draco con Blender... 🗜️');
-
-            try {
-                const response = await fetch('/api/compress-model', { method: 'POST' });
-                const data = await response.json();
-
-                if (response.ok && data.status === 'success') {
-                    result.style.display = 'block';
-                    result.textContent = `✅ Comprimido con éxito. Nuevo tamaño: ${data.newSize}`;
-                    mostrarNotificacion(`¡Compresión Draco exitosa! Tamaño: ${data.newSize}`, 'success');
-                } else {
-                    mostrarNotificacion(`Error Draco: ${data.error || 'Falla desconocida'}`, 'error');
-                }
-            } catch(err) {
-                mostrarNotificacion(`Error de red: ${err.message}`, 'error');
-            } finally {
-                btn.disabled = false;
-                icon.textContent = '🗜️';
-                text.textContent = 'Comprimir con Draco';
-            }
-        }
-
         // --- TOOLBAR: Snap Toggle ---
         let isSnapEnabled = false;
         function toggleSnap() {
@@ -2281,91 +2107,8 @@
             if (btnRedo) btnRedo.disabled = historialIndice >= historialTransformaciones.length - 1;
         }
 
-        // --- EVOLUCIÓN: GENERADOR PROCEDURAL BLENDER ENGINE ---
-        async function generarConBlender() {
-            const selectEl = document.getElementById('blender-script-select');
-            const scriptName = selectEl.value;
-            const scriptLabel = selectEl.options[selectEl.selectedIndex].text;
-            
-            const btnEl = document.getElementById('btn-blender-generate');
-            const btnIcon = document.getElementById('blender-btn-icon');
-            const btnText = document.getElementById('blender-btn-text');
-            
-            // Estado de Carga
-            btnEl.disabled = true;
-            btnEl.style.opacity = '0.6';
-            btnIcon.innerText = '⏳';
-            btnText.innerText = 'Compilando en host...';
-            
-            mostrarNotificacion(`Iniciando motor Blender para: ${scriptLabel}... 🚀`);
-            
-            try {
-                const response = await fetch(`/api/generate-model?script=${encodeURIComponent(scriptName)}`, {
-                    method: 'POST'
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `Falla de servidor: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.status === "success") {
-                    // 1. Registrar dinámicamente el nuevo recurso de modelo en el A-Frame <a-assets> si no existe ya
-                    let assetItem = document.getElementById(data.modelId);
-                    if (!assetItem) {
-                        const assets = document.querySelector('a-assets');
-                        assetItem = document.createElement('a-asset-item');
-                        assetItem.setAttribute('id', data.modelId);
-                        assetItem.setAttribute('src', data.src);
-                        assets.appendChild(assetItem);
-                    } else {
-                        // Forzar refresco del asset
-                        assetItem.setAttribute('src', `${data.src}?t=${Date.now()}`);
-                    }
 
-                    // 2. Agregar a la lista HUD del Sidebar para poder instanciarlo
-                    const list = document.getElementById('imported-assets-list');
-                    const idTarjeta = `card-${data.modelId}`;
-                    
-                    // Si ya existe la tarjeta para este modelo generado, no duplicarla, solo resaltar
-                    let card = document.getElementById(idTarjeta);
-                    if (!card) {
-                        card = document.createElement('div');
-                        card.id = idTarjeta;
-                        card.className = 'asset-card';
-                        card.style.borderColor = '#ea580c';
-                        card.style.background = 'rgba(234, 88, 12, 0.04)';
-                        card.style.position = 'relative';
-                        card.onclick = () => crearEntidad(data.modelId, `Blender_${scriptLabel.split(' ')[1]}`);
-                        card.innerHTML = `
-                            <div style="padding-right: 30px;">
-                                <div class="asset-card-title">🤖 ${scriptLabel.split(' ')[1]}</div>
-                                <div class="asset-card-desc">Compilado por Blender.</div>
-                            </div>
-                            <button class="btn btn-delete" style="position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; margin: 0; font-size: 11px;" onclick="eliminarModeloImportado(event, '${data.src.replace('output/', '')}', this.parentNode, '${data.modelId}')" title="Eliminar modelo de la red">
-                                🗑️
-                            </button>
-                        `;
-                        list.appendChild(card);
-                    }
-                    
-                    mostrarNotificacion(`¡${scriptLabel} generado con éxito por Blender! 🎉`, "success");
-                } else {
-                    mostrarNotificacion(`Error en motor: ${data.message}`, "error");
-                }
-            } catch (err) {
-                console.error("Error al generar modelo con Blender:", err);
-                mostrarNotificacion(`Falla en Blender: ${err.message}`, "error");
-            } finally {
-                // Restaurar Estado del Botón
-                btnEl.disabled = false;
-                btnEl.style.opacity = '1.0';
-                btnIcon.innerText = '⚙️';
-                btnText.innerText = 'Generar con Blender';
-            }
-        }
+
     </script>
 </body>
 </html>

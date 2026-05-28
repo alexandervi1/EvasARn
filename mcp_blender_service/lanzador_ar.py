@@ -8,8 +8,8 @@ import socketserver
 import qrcode
 import json
 import urllib.request
-import urllib.error
 import urllib.parse
+
 import base64
 import subprocess
 import shutil

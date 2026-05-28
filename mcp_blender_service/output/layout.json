@@ -1,16 +1,16 @@
 [
     {
-        "uuid": "objeto-modelo-ballena-1",
+        "uuid": "objeto-blue whale 3d model-1",
         "modelId": "modelo-ballena",
-        "nombre": "Blue Whale #1",
+        "nombre": "blue whale 3d model #1",
         "posicion": {
-            "x": -0.3,
-            "y": 1.5,
+            "x": 0,
+            "y": 1.1,
             "z": -3.5
         },
         "rotacion": {
-            "y": 190
+            "y": 180
         },
-        "escala": 1.8
+        "escala": 1.5
     }
 ]
