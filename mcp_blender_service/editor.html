@@ -488,6 +488,201 @@
             font-weight: 600;
             text-transform: uppercase;
         }
+
+        /* === PESTAÑAS DEL SIDEBAR === */
+        .sidebar-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--color-border-glass);
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-family: var(--font-main);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 6px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-tab.active {
+            color: var(--color-docker);
+            border-bottom-color: var(--color-docker);
+        }
+
+        .sidebar-tab:hover:not(.active) {
+            color: #cbd5e1;
+        }
+
+        .sidebar-panel {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar-panel.active {
+            display: flex;
+        }
+
+        /* === MEDIATECA (GESTOR DE MEDIOS) === */
+        .media-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .media-stats {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .btn-refresh {
+            background: transparent;
+            border: 1px solid var(--color-border-glass);
+            color: #94a3b8;
+            border-radius: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-refresh:hover {
+            border-color: var(--color-docker);
+            color: var(--color-docker);
+            transform: rotate(30deg);
+        }
+
+        .media-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .media-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .media-item:hover {
+            border-color: rgba(0, 243, 255, 0.3);
+        }
+
+        .media-item-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            width: 28px;
+            text-align: center;
+        }
+
+        .media-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .media-item-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .media-item-meta {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        .media-item-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .media-btn {
+            background: transparent;
+            border: 1px solid var(--color-border-glass);
+            border-radius: 6px;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            color: #94a3b8;
+        }
+
+        .media-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; color: #fff; }
+        .media-btn.add:hover { border-color: var(--color-docker); color: var(--color-docker); background: rgba(0,243,255,0.08); }
+        .media-btn.del:hover { border-color: var(--color-error); color: var(--color-error); background: rgba(239,68,68,0.08); }
+        .media-btn.zip:hover { border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.08); }
+
+        /* === ESTADO DE VALIDACIÓN BLENDER === */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-ok { background: rgba(34,197,94,0.15); color: var(--color-success); border: 1px solid rgba(34,197,94,0.3); }
+        .status-warn { background: rgba(234,179,8,0.15); color: #eab308; border: 1px solid rgba(234,179,8,0.3); }
+        .status-err { background: rgba(239,68,68,0.15); color: var(--color-error); border: 1px solid rgba(239,68,68,0.3); }
+        .status-loading { background: rgba(0,243,255,0.08); color: var(--color-docker); border: 1px solid rgba(0,243,255,0.2); }
+
+        .blender-status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 8px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* === TOOLBAR SNAP / UNDO / REDO === */
+        .toolbar-snap-active {
+            color: #a855f7 !important;
+            background: rgba(168, 85, 247, 0.12) !important;
+            border-color: rgba(168, 85, 247, 0.3) !important;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.2) !important;
+        }
+
+        .toolbar-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -515,67 +710,113 @@
             </div>
         </header>
 
-        <!-- SIDEBAR DE ASSETS (IZQUIERDA) -->
-        <div class="sidebar">
-            <div>
-                <div class="panel-section-title">
-                    <span style="color: var(--color-docker);">📦</span> Modelos Disponibles
+        <!-- SIDEBAR CON PESTAÑAS -->
+        <div class="sidebar" style="padding: 16px 16px 16px; gap: 0;">
+
+            <!-- TABS HEADER -->
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" id="tab-models" onclick="cambiarTabSidebar('models')">📦 Modelos</button>
+                <button class="sidebar-tab" id="tab-blender" onclick="cambiarTabSidebar('blender')">🤖 Blender</button>
+                <button class="sidebar-tab" id="tab-media" onclick="cambiarTabSidebar('media')">🗂️ Medios</button>
+            </div>
+
+            <!-- === PANEL 1: MODELOS INTEGRADOS === -->
+            <div class="sidebar-panel active" id="panel-models">
+                <div class="panel-section-title" style="margin-bottom: 4px;">
+                    <span style="color: var(--color-docker);">📦</span> Modelos Base
                 </div>
                 <div class="asset-list">
                     <div class="asset-card" onclick="crearEntidad('modelo-ballena', 'blue whale 3d model')">
                         <div class="asset-card-title">🐳 Ballena Azul</div>
-                        <div class="asset-card-desc">Tu modelo personalizado Draco de alta fidelidad.</div>
+                        <div class="asset-card-desc">Modelo Draco de alta fidelidad.</div>
                     </div>
                     <div class="asset-card" onclick="crearEntidad('modelo-laptop', 'laptop_caos')">
                         <div class="asset-card-title">💻 Laptop de Caos</div>
-                        <div class="asset-card-desc">Laptop con dependencias inestables en desarrollo.</div>
+                        <div class="asset-card-desc">Laptop con dependencias en desarrollo.</div>
                     </div>
                     <div class="asset-card" onclick="crearEntidad('modelo-rack', 'servidor_rack')">
                         <div class="asset-card-title">🖥️ Servidor Rack</div>
-                        <div class="asset-card-desc">Infraestructura escalable de servidores en producción.</div>
+                        <div class="asset-card-desc">Infraestructura de producción.</div>
                     </div>
                     <div class="asset-card" onclick="crearEntidad('modelo-buque', 'buque_carga')">
                         <div class="asset-card-title">🚢 Buque de Carga</div>
-                        <div class="asset-card-desc">Barco carguero industrial de contenedores.</div>
+                        <div class="asset-card-desc">Carguero industrial de contenedores.</div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- SECCIÓN EVOLUCIÓN: IMPORTADOR DE MODELOS -->
-            <div style="margin-top: 25px; border-top: 1px solid var(--color-border-glass); padding-top: 20px;">
-                <div class="panel-section-title">
-                    <span style="color: var(--color-docker);">➕</span> Importar Escenario
-                </div>
-                <input type="file" id="model-upload-input" accept=".glb,.gltf" style="display: none;" onchange="subirModelo3D(this.files[0])">
-                <button class="btn btn-save" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="document.getElementById('model-upload-input').click()">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Subir Modelo GLB
-                </button>
-                <div class="asset-list" id="imported-assets-list" style="margin-top: 15px;">
-                    <!-- Los modelos subidos aparecerán aquí -->
+
+                <div style="border-top: 1px solid var(--color-border-glass); padding-top: 14px; margin-top: 4px;">
+                    <div class="panel-section-title" style="margin-bottom: 8px;"><span style="color: var(--color-docker);">⬆️</span> Importar GLB</div>
+                    <input type="file" id="model-upload-input" accept=".glb,.gltf" style="display: none;" onchange="subirModelo3D(this.files[0])">
+                    <button class="btn btn-save" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="document.getElementById('model-upload-input').click()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Subir Modelo GLB
+                    </button>
+                    <div class="asset-list" id="imported-assets-list" style="margin-top: 12px;"></div>
                 </div>
             </div>
 
-            <!-- SECCIÓN EVOLUCIÓN: BLENDER PROCEDURAL STUDIO -->
-            <div style="margin-top: 25px; border-top: 1px solid var(--color-border-glass); padding-top: 20px; padding-bottom: 10px;">
-                <div class="panel-section-title">
-                    <span style="color: #ea580c;">🤖</span> Blender Procedural
+            <!-- === PANEL 2: BLENDER PROCEDURAL STUDIO === -->
+            <div class="sidebar-panel" id="panel-blender">
+
+                <!-- Status Row -->
+                <div>
+                    <div class="panel-section-title" style="margin-bottom: 8px;"><span style="color: #ea580c;">🤖</span> Motor Blender</div>
+                    <div class="blender-status-row">
+                        <span>Estado Blender</span>
+                        <span id="blender-status-badge" class="status-badge status-loading">⏳ Verificando...</span>
+                    </div>
+                    <div class="blender-status-row" style="margin-top: 6px;">
+                        <span>Ollama (qwen)</span>
+                        <span id="ollama-status-badge" class="status-badge status-loading">⏳ Verificando...</span>
+                    </div>
+                    <button class="btn" style="width: 100%; justify-content: center; margin-top: 8px; font-size: 11px; padding: 7px; pointer-events: auto;" onclick="validarServicios()">🔍 Verificar Servicios</button>
                 </div>
-                <div class="asset-card-desc" style="margin-bottom: 12px; font-size: 11px;">
-                    Compila modelos 3D procedurales ejecutando Blender de forma directa y silenciosa en el host.
+
+                <!-- Script selector + generate -->
+                <div>
+                    <div class="panel-section-title" style="margin-bottom: 8px;">⚙️ Compilar Modelo</div>
+                    <div class="asset-card-desc" style="margin-bottom: 10px; font-size: 11px;">Ejecuta Blender en modo silencioso (headless) en tu computadora para compilar un modelo procedural GLB.</div>
+                    <select id="blender-script-select" class="blender-select" style="pointer-events: auto;">
+                        <option value="generar_contenedor.py">📦 Contenedor Estándar</option>
+                        <option value="gen_ballena.py">🐳 Moby la Ballena</option>
+                        <option value="gen_buque.py">🚢 Buque de Carga</option>
+                        <option value="gen_laptop.py">💻 Laptop de Caos</option>
+                        <option value="gen_server.py">🖥️ Servidor Rack</option>
+                    </select>
+                    <button id="btn-blender-generate" class="btn blender-btn" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="generarConBlender()">
+                        <span id="blender-btn-icon">⚙️</span>
+                        <span id="blender-btn-text">Generar con Blender</span>
+                    </button>
                 </div>
-                <select id="blender-script-select" class="blender-select" style="pointer-events: auto;">
-                    <option value="generar_contenedor.py">📦 Contenedor Estándar</option>
-                    <option value="gen_ballena.py">🐳 Moby la Ballena</option>
-                    <option value="gen_buque.py">🚢 Buque de Carga</option>
-                    <option value="gen_laptop.py">💻 Laptop de Caos</option>
-                    <option value="gen_server.py">🖥️ Servidor Rack</option>
-                </select>
-                <button id="btn-blender-generate" class="btn blender-btn" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="generarConBlender()">
-                    <span id="blender-btn-icon">⚙️</span>
-                    <span id="blender-btn-text">Generar con Blender</span>
-                </button>
+
+                <!-- Compress Draco -->
+                <div style="border-top: 1px solid var(--color-border-glass); padding-top: 14px;">
+                    <div class="panel-section-title" style="margin-bottom: 8px;">🗜️ Comprimir Modelo</div>
+                    <div class="asset-card-desc" style="margin-bottom: 10px; font-size: 11px;">Aplica compresión Draco sobre la Ballena Azul original para reducir su tamaño significativamente sin perder calidad visual.</div>
+                    <button id="btn-draco-compress" class="btn" style="width: 100%; justify-content: center; gap: 6px; pointer-events: auto; border-color: #a855f7; color: #a855f7; background: rgba(168,85,247,0.05);" onclick="comprimirConDraco()">
+                        <span id="draco-btn-icon">🗜️</span>
+                        <span id="draco-btn-text">Comprimir con Draco</span>
+                    </button>
+                    <div id="draco-result" style="display:none; margin-top: 8px; font-size: 11px; text-align: center; color: #a855f7; font-weight: 600;"></div>
+                </div>
             </div>
+
+            <!-- === PANEL 3: MEDIATECA (GESTOR DE MEDIOS) === -->
+            <div class="sidebar-panel" id="panel-media">
+                <div class="media-header">
+                    <div>
+                        <div class="panel-section-title" style="margin-bottom: 2px;">🗂️ Mediateca</div>
+                        <div class="media-stats" id="media-stats-text">Cargando archivos...</div>
+                    </div>
+                    <button class="btn-refresh" onclick="cargarMediateca()" title="Actualizar lista">↻</button>
+                </div>
+
+                <div class="media-list" id="media-file-list">
+                    <!-- Se llena dinámicamente con /api/list-models -->
+                    <div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">⏳ Cargando mediateca...</div>
+                </div>
+            </div>
+
         </div>
 
         <!-- MAIN VIEWPORT (A-FRAME) -->
@@ -588,7 +829,7 @@
                 </button>
                 <div class="toolbar-divider"></div>
                 <button class="toolbar-btn" id="tool-translate" onclick="setEditMode('translate')" title="Modo Posición (Teclado: W)">
-                    <span class="btn-icon">🚀</span>
+                    <span class="btn-icon">↔️</span>
                     <span class="btn-label">Mover</span>
                 </button>
                 <button class="toolbar-btn" id="tool-rotate" onclick="setEditMode('rotate')" title="Modo Rotación (Teclado: E)">
@@ -598,6 +839,20 @@
                 <button class="toolbar-btn" id="tool-scale" onclick="setEditMode('scale')" title="Modo Escala (Teclado: R)">
                     <span class="btn-icon">📐</span>
                     <span class="btn-label">Escala</span>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="tool-snap" onclick="toggleSnap()" title="Activar/desactivar Snapping (Teclado: S)">
+                    <span class="btn-icon">🧲</span>
+                    <span class="btn-label">Snap</span>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="tool-undo" onclick="ejecutarUndo()" title="Deshacer (Ctrl+Z)" disabled>
+                    <span class="btn-icon">↩️</span>
+                    <span class="btn-label">Deshacer</span>
+                </button>
+                <button class="toolbar-btn" id="tool-redo" onclick="ejecutarRedo()" title="Rehacer (Ctrl+Y)" disabled>
+                    <span class="btn-icon">↪️</span>
+                    <span class="btn-label">Rehacer</span>
                 </button>
                 <div class="toolbar-divider"></div>
                 <button class="toolbar-btn delete-btn" onclick="eliminarEntidadSeleccionada()" title="Eliminar Objeto (Teclado: Supr / Borrar)">
@@ -995,7 +1250,11 @@
 
             // Actualizar Gizmo visual
             actualizarGizmo3D();
+
+            // Registrar en el historial local de Undo/Redo
+            registrarTransformacion(entidadSeleccionada);
         }
+
 
         // Eliminar el objeto seleccionado tanto del lienzo 3D como de la memoria local
         function eliminarEntidadSeleccionada() {
@@ -1242,6 +1501,278 @@
                 console.error("Error al eliminar modelo:", err);
                 mostrarNotificacion("Error crítico al intentar eliminar el archivo del servidor.", "error");
             }
+        }
+
+        // --- MEDIATECA: Cambio de Pestaña del Sidebar ---
+        function cambiarTabSidebar(tab) {
+            document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`panel-${tab}`).classList.add('active');
+            if (tab === 'media') cargarMediateca();
+            if (tab === 'blender') validarServicios();
+        }
+
+        // --- MEDIATECA: Cargar lista de modelos desde el servidor ---
+        async function cargarMediateca() {
+            const list = document.getElementById('media-file-list');
+            const stats = document.getElementById('media-stats-text');
+            list.innerHTML = '<div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">⏳ Sincronizando...</div>';
+            try {
+                const response = await fetch('/api/list-models', { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const modelos = await response.json();
+
+                list.innerHTML = '';
+                if (modelos.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">📭 No hay modelos en el servidor.</div>';
+                    stats.textContent = '0 modelos';
+                    return;
+                }
+
+                const totalBytes = modelos.reduce((acc, m) => acc + (m.sizeBytes || 0), 0);
+                const totalMB = totalBytes >= 1024*1024 ? `${(totalBytes/(1024*1024)).toFixed(2)} MB` : `${(totalBytes/1024).toFixed(1)} KB`;
+                stats.textContent = `${modelos.length} modelos · ${totalMB} total`;
+
+                const iconMap = {
+                    'ballena': '🐳', 'whale': '🐳', 'buque': '🚢', 'laptop': '💻',
+                    'servidor': '🖥️', 'rack': '🖥️', 'contenedor': '📦', 'docker': '📦'
+                };
+
+                modelos.forEach(m => {
+                    const icon = Object.entries(iconMap).find(([k]) => m.name.toLowerCase().includes(k))?.[1] || '📄';
+                    const item = document.createElement('div');
+                    item.className = 'media-item';
+                    item.innerHTML = `
+                        <div class="media-item-icon">${icon}</div>
+                        <div class="media-item-info">
+                            <div class="media-item-name" title="${m.name}">${m.friendlyName || m.name}</div>
+                            <div class="media-item-meta">${m.size} · ${m.name}</div>
+                        </div>
+                        <div class="media-item-actions">
+                            <button class="media-btn add" title="Añadir a escena" onclick="instanciarDesdeMedia('${m.modelId}', '${m.src}', '${m.name.replace(/'/g,'')}')">＋</button>
+                            <button class="media-btn del" title="Eliminar del servidor" onclick="eliminarModeloMediateca('${m.name}', '${m.modelId}', this)">✕</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            } catch(err) {
+                list.innerHTML = `<div style="text-align:center; color: var(--color-error); font-size: 12px; padding: 20px 0;">❌ Error al cargar: ${err.message}</div>`;
+                stats.textContent = 'Error de conexión';
+            }
+        }
+
+        // --- MEDIATECA: Instanciar modelo desde la mediateca en la escena ---
+        async function instanciarDesdeMedia(modelId, src, fileName) {
+            // Verificar si el asset ya está cargado en A-Frame
+            let assetItem = document.getElementById(modelId);
+            if (!assetItem) {
+                const assets = document.querySelector('a-assets');
+                assetItem = document.createElement('a-asset-item');
+                assetItem.setAttribute('id', modelId);
+                assetItem.setAttribute('src', src + '?t=' + Date.now());
+                assets.appendChild(assetItem);
+            }
+            const nombreBase = fileName.replace('.glb','').replace('.gltf','');
+            crearEntidad(modelId, nombreBase);
+            mostrarNotificacion(`✨ ${nombreBase} añadido a la escena`);
+        }
+
+        // --- MEDIATECA: Eliminar modelo del servidor y la mediateca ---
+        async function eliminarModeloMediateca(fileName, modelId, btnEl) {
+            if (!confirm(`¿Eliminar permanentemente "${fileName}" del servidor?\n\nEsta acción no se puede deshacer.`)) return;
+
+            btnEl.disabled = true;
+            btnEl.textContent = '...';
+            mostrarNotificacion(`Eliminando ${fileName}... 🗑️`);
+
+            try {
+                const response = await fetch(`/api/delete-model?name=${encodeURIComponent(fileName)}`, { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // Quitar de A-Frame assets si estaba cargado
+                    const assetItem = document.getElementById(modelId);
+                    if (assetItem) assetItem.parentNode.removeChild(assetItem);
+
+                    // Eliminar la fila de la UI
+                    const row = btnEl.closest('.media-item');
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(-10px)';
+                    row.style.transition = 'all 0.3s ease';
+                    setTimeout(() => { row.remove(); cargarMediateca(); }, 300);
+
+                    mostrarNotificacion(`✅ ${fileName} eliminado correctamente.`, 'success');
+                } else {
+                    mostrarNotificacion(`Error al eliminar: ${data.message || data.error}`, 'error');
+                    btnEl.disabled = false;
+                    btnEl.textContent = '✕';
+                }
+            } catch(err) {
+                mostrarNotificacion(`Error de red: ${err.message}`, 'error');
+                btnEl.disabled = false;
+                btnEl.textContent = '✕';
+            }
+        }
+
+        // --- BLENDER: Validar estado de Blender y Ollama ---
+        async function validarServicios() {
+            const blenderBadge = document.getElementById('blender-status-badge');
+            const ollamaBadge = document.getElementById('ollama-status-badge');
+
+            blenderBadge.className = 'status-badge status-loading';
+            blenderBadge.textContent = '⏳ Verificando...';
+            ollamaBadge.className = 'status-badge status-loading';
+            ollamaBadge.textContent = '⏳ Verificando...';
+
+            // Verificar Ollama haciendo ping a su API local
+            try {
+                const oRes = await fetch('http://localhost:11434/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'qwen', prompt: 'ping', stream: false }),
+                    signal: AbortSignal.timeout(4000)
+                });
+                if (oRes.ok) {
+                    ollamaBadge.className = 'status-badge status-ok';
+                    ollamaBadge.textContent = '✅ En línea (qwen)';
+                } else {
+                    ollamaBadge.className = 'status-badge status-warn';
+                    ollamaBadge.textContent = '⚠️ Respondió con error';
+                }
+            } catch {
+                ollamaBadge.className = 'status-badge status-err';
+                ollamaBadge.textContent = '❌ Fuera de línea';
+            }
+
+            // Verificar Blender intentando generar con un script vacío y capturando el error esperado
+            try {
+                const bRes = await fetch('/api/generate-model?script=gen_server.py', {
+                    method: 'POST',
+                    signal: AbortSignal.timeout(8000)
+                });
+                if (bRes.ok || bRes.status === 500) {
+                    // Si el servidor respondió (aunque falle la generación), Blender está configurado
+                    blenderBadge.className = 'status-badge status-ok';
+                    blenderBadge.textContent = '✅ Disponible';
+                } else {
+                    blenderBadge.className = 'status-badge status-warn';
+                    blenderBadge.textContent = '⚠️ No encontrado';
+                }
+            } catch {
+                blenderBadge.className = 'status-badge status-err';
+                blenderBadge.textContent = '❌ Sin conexión';
+            }
+        }
+
+        // --- BLENDER: Comprimir modelo con Draco ---
+        async function comprimirConDraco() {
+            const btn = document.getElementById('btn-draco-compress');
+            const icon = document.getElementById('draco-btn-icon');
+            const text = document.getElementById('draco-btn-text');
+            const result = document.getElementById('draco-result');
+
+            btn.disabled = true;
+            icon.textContent = '⏳';
+            text.textContent = 'Comprimiendo...';
+            result.style.display = 'none';
+            mostrarNotificacion('Ejecutando compresión Draco con Blender... 🗜️');
+
+            try {
+                const response = await fetch('/api/compress-model', { method: 'POST' });
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    result.style.display = 'block';
+                    result.textContent = `✅ Comprimido con éxito. Nuevo tamaño: ${data.newSize}`;
+                    mostrarNotificacion(`¡Compresión Draco exitosa! Tamaño: ${data.newSize}`, 'success');
+                } else {
+                    mostrarNotificacion(`Error Draco: ${data.error || 'Falla desconocida'}`, 'error');
+                }
+            } catch(err) {
+                mostrarNotificacion(`Error de red: ${err.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                icon.textContent = '🗜️';
+                text.textContent = 'Comprimir con Draco';
+            }
+        }
+
+        // --- TOOLBAR: Snap Toggle ---
+        let isSnapEnabled = false;
+        function toggleSnap() {
+            isSnapEnabled = !isSnapEnabled;
+            const btn = document.getElementById('tool-snap');
+            if (isSnapEnabled) {
+                btn.classList.add('toolbar-snap-active');
+                mostrarNotificacion('🧲 Snapping activado (pasos de 0.5u / 15°)');
+            } else {
+                btn.classList.remove('toolbar-snap-active');
+                mostrarNotificacion('🧲 Snapping desactivado');
+            }
+        }
+
+        // --- TOOLBAR: Historial de Transformaciones (simple stack) ---
+        let historialTransformaciones = [];
+        let historialIndice = -1;
+
+        function registrarTransformacion(objeto) {
+            const estado = {
+                uuid: objeto.uuid,
+                posicion: { ...objeto.posicion },
+                rotacion: { ...objeto.rotacion },
+                escala: objeto.escala
+            };
+            // Si estamos en medio del historial, cortar el futuro
+            if (historialIndice < historialTransformaciones.length - 1) {
+                historialTransformaciones = historialTransformaciones.slice(0, historialIndice + 1);
+            }
+            historialTransformaciones.push(estado);
+            historialIndice = historialTransformaciones.length - 1;
+            actualizarBotonesHistorial();
+        }
+
+        function ejecutarUndo() {
+            if (historialIndice <= 0) return;
+            historialIndice--;
+            const estado = historialTransformaciones[historialIndice];
+            aplicarEstadoTransformacion(estado);
+            actualizarBotonesHistorial();
+            mostrarNotificacion('↩️ Acción deshecha');
+        }
+
+        function ejecutarRedo() {
+            if (historialIndice >= historialTransformaciones.length - 1) return;
+            historialIndice++;
+            const estado = historialTransformaciones[historialIndice];
+            aplicarEstadoTransformacion(estado);
+            actualizarBotonesHistorial();
+            mostrarNotificacion('↪️ Acción rehecha');
+        }
+
+        function aplicarEstadoTransformacion(estado) {
+            const obj = escenaObjetos.find(o => o.uuid === estado.uuid);
+            if (!obj) return;
+            obj.posicion = { ...estado.posicion };
+            obj.rotacion = { ...estado.rotacion };
+            obj.escala = estado.escala;
+
+            const el = document.getElementById(obj.uuid);
+            if (el) {
+                el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
+                el.setAttribute('rotation', `0 ${obj.rotacion.y} 0`);
+                el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
+            }
+            if (entidadSeleccionada && entidadSeleccionada.uuid === obj.uuid) {
+                seleccionarObjeto(obj);
+            }
+        }
+
+        function actualizarBotonesHistorial() {
+            const btnUndo = document.getElementById('tool-undo');
+            const btnRedo = document.getElementById('tool-redo');
+            if (btnUndo) btnUndo.disabled = historialIndice <= 0;
+            if (btnRedo) btnRedo.disabled = historialIndice >= historialTransformaciones.length - 1;
         }
 
         // --- EVOLUCIÓN: GENERADOR PROCEDURAL BLENDER ENGINE ---

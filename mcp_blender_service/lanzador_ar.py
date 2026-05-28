@@ -427,9 +427,122 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 response_body = json.dumps({"error": f"Falla en el motor de generación: {str(e)}"})
                 self.wfile.write(response_body.encode('utf-8'))
+        elif self.path.startswith('/api/compress-model'):
+            try:
+                # Buscar blender
+                blender_path = find_blender()
+                print("[COMPRESSION ENGINE] Ejecutando compresión Draco con Blender...")
+                
+                script_path = os.path.join("scripts", "compress_model.py")
+                cmd = [blender_path, "--background", "--python", script_path]
+                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                print("[COMPRESSION ENGINE] Compresión Draco completada con éxito.")
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                
+                # Obtener el nuevo tamaño de archivo
+                ruta_ballena = os.path.join("output", "blue whale 3d model.glb")
+                size_bytes = os.path.getsize(ruta_ballena)
+                size_str = f"{size_bytes / (1024 * 1024):.2f} MB" if size_bytes >= 1024 * 1024 else f"{size_bytes / 1024:.1f} KB"
+                
+                response_body = json.dumps({
+                    "status": "success",
+                    "message": "Modelo comprimido exitosamente por Blender con Draco.",
+                    "newSize": size_str
+                })
+                self.wfile.write(response_body.encode('utf-8'))
+                
+            except subprocess.CalledProcessError as err:
+                print(f"[COMPRESSION ENGINE ERROR] Error en subprocess: {err.stderr}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps({"error": f"Falla al comprimir con Blender: {err.stderr or err.stdout or str(err)}"})
+                self.wfile.write(response_body.encode('utf-8'))
+            except Exception as e:
+                print(f"[COMPRESSION ENGINE ERROR] Error: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps({"error": f"Falla en el motor de compresión: {str(e)}"})
+                self.wfile.write(response_body.encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
+
+    def do_GET(self):
+        if self.path == '/api/list-models':
+            try:
+                output_dir = "output"
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+                    
+                modelos = []
+                # Escribir una lista de archivos en el directorio output
+                for file_name in os.listdir(output_dir):
+                    if file_name.endswith('.glb') or file_name.endswith('.gltf'):
+                        ruta = os.path.join(output_dir, file_name)
+                        stat_info = os.stat(ruta)
+                        size_bytes = stat_info.st_size
+                        
+                        # Formatear tamaño de archivo amigable
+                        if size_bytes < 1024 * 1024:
+                            size_str = f"{size_bytes / 1024:.1f} KB"
+                        else:
+                            size_str = f"{size_bytes / (1024 * 1024):.2f} MB"
+                            
+                        # Determinar etiqueta amigable del modelo
+                        nombre_amigable = file_name.replace('.glb', '').replace('.gltf', '').replace('_', ' ').replace('-', ' ').title()
+                        if file_name == "blue whale 3d model.glb":
+                            nombre_amigable = "🐳 Ballena Azul (Original)"
+                        elif file_name == "ballena_docker.glb":
+                            nombre_amigable = "🐳 Ballena Docker (Procedural)"
+                        elif file_name == "contenedor_docker.glb":
+                            nombre_amigable = "📦 Contenedor Estándar (Procedural)"
+                        elif file_name == "laptop_caos.glb":
+                            nombre_amigable = "💻 Laptop de Caos (Procedural)"
+                        elif file_name == "servidor_rack.glb":
+                            nombre_amigable = "🖥️ Servidor Rack (Procedural)"
+                        elif file_name == "buque_carga.glb":
+                            nombre_amigable = "🚢 Buque de Carga (Procedural)"
+                            
+                        modelos.append({
+                            "name": file_name,
+                            "friendlyName": nombre_amigable,
+                            "size": size_str,
+                            "sizeBytes": size_bytes,
+                            "modelId": f"modelo-{file_name.replace('.glb', '').replace('.gltf', '').replace(' ', '_')}",
+                            "src": f"output/{file_name}",
+                            "date": os.path.getmtime(ruta)
+                        })
+                
+                # Ordenar por fecha de modificación (más reciente primero)
+                modelos.sort(key=lambda x: x["date"], reverse=True)
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps(modelos)
+                self.wfile.write(response_body.encode('utf-8'))
+                
+            except Exception as e:
+                print(f"[LIST ERROR] Error al enlistar modelos: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps({"error": str(e)})
+                self.wfile.write(response_body.encode('utf-8'))
+            return
+            
+        # Delegar el resto de los GETs estáticos al handler base
+        super().do_GET()
 
     def end_headers(self):
         # Deshabilitar caché y habilitar CORS para pruebas AR/WebXR en celulares
