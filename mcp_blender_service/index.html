@@ -575,13 +575,14 @@
         autoplay 
         playsinline 
         muted 
-        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; opacity: 0; pointer-events: none; transition: opacity 0.5s ease;">
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none; opacity: 0; pointer-events: none; transition: opacity 0.5s ease;">
     </video>
 
     <!-- Escena A-Frame WebXR con soporte de transparencia para la cámara -->
     <a-scene 
         webxr="optionalFeatures: dom-overlay; overlayElement: #hud-container;" 
         renderer="colorManagement: true; antialias: true; alpha: true;"
+        background="transparent: true"
         cursor="rayOrigin: mouse"
         vr-mode-ui="enabled: false"
         gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
@@ -822,8 +823,15 @@
                 const tracks = cameraStream.getTracks();
                 tracks.forEach(track => track.stop());
                 cameraStream = null;
+                
                 videoEl.style.opacity = "0";
                 videoEl.style.pointerEvents = "none";
+                setTimeout(() => {
+                    if (cameraStream === null) {
+                        videoEl.style.display = "none";
+                    }
+                }, 500);
+                
                 skyEl.setAttribute("visible", "true");
                 
                 // Cambiar estado visual del botón
@@ -881,6 +889,8 @@
                     }
                 }
 
+                videoEl.style.display = "block";
+                videoEl.offsetHeight; // Forzar reflow para garantizar animación de transición
                 videoEl.style.opacity = "1";
                 videoEl.style.pointerEvents = "auto";
                 videoEl.srcObject = cameraStream;
