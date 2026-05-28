@@ -1003,7 +1003,11 @@
                 .replace(/\*/g, '')
                 .replace(/__/g, '')
                 .replace(/_/g, '')
-                .replace(/`/g, '');
+                .replace(/`/g, '')
+                .replace(/#/g, '')
+                .replace(/- /g, '• ') // Transformar guiones de lista en viñetas elegantes
+                .replace(/\n\n/g, ' ') // Quitar saltos de línea dobles
+                .replace(/\n/g, ' '); // Hacerlo una lectura fluida en el HUD
         }
 
         // Mecanografía
@@ -1726,8 +1730,9 @@
                 } else if (data.response) {
                     // Moby reacciona con alegría
                     hacerSaltarMoby();
-                    escribirTexto(data.response, 15);
-                    hablar(data.response);
+                    const respuestaLimpia = limpiarMarkdown(data.response);
+                    escribirTexto(respuestaLimpia, 15);
+                    hablar(respuestaLimpia);
                 }
             } catch (err) {
                 console.error("Error en el sonar visual:", err);
