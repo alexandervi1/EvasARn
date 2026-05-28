@@ -899,19 +899,19 @@
                     <span style="color: var(--color-docker);">📦</span> Modelos Base
                 </div>
                 <div class="asset-list">
-                    <div class="asset-card" onclick="crearEntidad('modelo-ballena', 'blue whale 3d model')">
+                    <div class="asset-card" data-filename="blue whale 3d model.glb" onclick="crearEntidad('modelo-ballena', 'blue whale 3d model')">
                         <div class="asset-card-title">🐳 Ballena Azul</div>
                         <div class="asset-card-desc">Modelo Draco de alta fidelidad.</div>
                     </div>
-                    <div class="asset-card" onclick="crearEntidad('modelo-laptop', 'laptop_caos')">
+                    <div class="asset-card" data-filename="laptop_caos.glb" onclick="crearEntidad('modelo-laptop', 'laptop_caos')">
                         <div class="asset-card-title">💻 Laptop de Caos</div>
                         <div class="asset-card-desc">Laptop con dependencias en desarrollo.</div>
                     </div>
-                    <div class="asset-card" onclick="crearEntidad('modelo-rack', 'servidor_rack')">
+                    <div class="asset-card" data-filename="servidor_rack.glb" onclick="crearEntidad('modelo-rack', 'servidor_rack')">
                         <div class="asset-card-title">🖥️ Servidor Rack</div>
                         <div class="asset-card-desc">Infraestructura de producción.</div>
                     </div>
-                    <div class="asset-card" onclick="crearEntidad('modelo-buque', 'buque_carga')">
+                    <div class="asset-card" data-filename="buque_carga.glb" onclick="crearEntidad('modelo-buque', 'buque_carga')">
                         <div class="asset-card-title">🚢 Buque de Carga</div>
                         <div class="asset-card-desc">Carguero industrial de contenedores.</div>
                     </div>
@@ -1937,6 +1937,17 @@
                 const response = await fetch('/api/list-models', { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const modelos = await response.json();
+
+                // Sincronizar visibilidad de las tarjetas de Modelos Base en el panel izquierdo
+                const nombresArchivosPresentes = modelos.map(m => m.name);
+                document.querySelectorAll('#panel-models .asset-card[data-filename]').forEach(card => {
+                    const filename = card.getAttribute('data-filename');
+                    if (nombresArchivosPresentes.includes(filename)) {
+                        card.style.display = 'flex'; // Usamos flex para coincidir con el display original de las cards
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
 
                 list.innerHTML = '';
                 if (modelos.length === 0) {
