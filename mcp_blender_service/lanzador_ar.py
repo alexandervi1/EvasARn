@@ -134,7 +134,7 @@ def query_yolo_and_ollama(base64_image_data):
             method="POST"
         )
         
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=8) as response:
             res_data = json.loads(response.read().decode("utf-8"))
             return res_data.get("response", "¡Ups! No pude procesar los datos de mi radar.")
             
