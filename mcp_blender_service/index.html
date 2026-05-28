@@ -584,11 +584,12 @@
         renderer="colorManagement: true; antialias: true; alpha: true;"
         cursor="rayOrigin: mouse"
         vr-mode-ui="enabled: false"
+        gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;">
         
         <!-- Precarga y Caché de TODOS los Modelos 3D para Metáforas Visuales -->
         <a-assets>
-            <a-asset-item id="modelo-ballena" src="output/ballena_docker.glb"></a-asset-item>
+            <a-asset-item id="modelo-ballena" src="output/blue%20whale%203d%20model.glb"></a-asset-item>
             <a-asset-item id="modelo-laptop" src="output/laptop_caos.glb"></a-asset-item>
             <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
             <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
@@ -646,52 +647,8 @@
         <!-- CÁMARA PRINCIPAL -->
         <a-entity camera position="0 1.6 0" look-controls></a-entity>
 
-        <!-- ENTIDADES 3D REACTIVAS (Metáforas Visuales) -->
-        
-        <!-- 1. La Ballena Docker (Moby - Modelo Defecto: visible="true") -->
-        <a-entity 
-            id="entidad-ballena"
-            gltf-model="#modelo-ballena"
-            position="0 1.1 -3.0"
-            scale="0.65 0.65 0.65"
-            rotation="10 180 0"
-            visible="true"
-            animation__float="property: position; to: 0 1.3 -3.0; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true"
-            animation__rotate="property: rotation; to: 10 540 0; dur: 30000; easing: linear; loop: true">
-        </a-entity>
-
-        <!-- 2. La Laptop de Caos (Escena 1 - visible="false" por defecto) -->
-        <a-entity 
-            id="entidad-laptop"
-            gltf-model="#modelo-laptop"
-            position="0 1.1 -3.0"
-            scale="0 0 0"
-            rotation="0 180 0"
-            visible="false"
-            animation__rotate="property: rotation; to: 0 540 0; dur: 20000; easing: linear; loop: true">
-        </a-entity>
-
-        <!-- 3. El Servidor Rack (Escena 3 - visible="false" por defecto) -->
-        <a-entity 
-            id="entidad-rack"
-            gltf-model="#modelo-rack"
-            position="0 0.8 -3.0"
-            scale="0 0 0"
-            rotation="0 45 0"
-            visible="false"
-            animation__rotate="property: rotation; to: 0 405 0; dur: 25000; easing: linear; loop: true">
-        </a-entity>
-
-        <!-- 4. El Buque de Carga (Escena 2 - visible="false" por defecto) -->
-        <a-entity 
-            id="entidad-buque"
-            gltf-model="#modelo-buque"
-            position="0 1.0 -3.0"
-            scale="0 0 0"
-            rotation="10 45 0"
-            visible="false"
-            animation__rotate="property: rotation; to: 10 405 0; dur: 25000; easing: linear; loop: true">
-        </a-entity>
+        <!-- CONTENEDOR PARA CARGA DINÁMICA DEL ESCENARIO -->
+        <a-entity id="entities-container"></a-entity>
 
     </a-scene>
 
@@ -712,20 +669,20 @@
         const elVoiceToggle = document.getElementById("voice-toggle");
         const elNeonLight = document.getElementById("neon-light");
 
-        // Referencias a las Entidades 3D de A-Frame
+        // Referencias a las Entidades 3D de A-Frame (se asignarán dinámicamente)
         const entities = {
-            defecto: document.getElementById("entidad-ballena"),
-            caos: document.getElementById("entidad-laptop"),
-            servidor: document.getElementById("entidad-rack"),
-            buque: document.getElementById("entidad-buque")
+            defecto: null,
+            caos: null,
+            servidor: null,
+            buque: null
         };
 
         // Escalas por defecto de cada modelo en visualización
         const defaultScales = {
-            defecto: "0.65 0.65 0.65",
-            caos: "4.5 4.5 4.5",
-            servidor: "0.5 0.5 0.5",
-            buque: "0.45 0.45 0.45"
+            defecto: "2.2 2.2 2.2",
+            caos: "1.0 1.0 1.0",
+            servidor: "0.8 0.8 0.8",
+            buque: "0.6 0.6 0.6"
         };
 
         let modeloActivo = "defecto";
@@ -883,22 +840,55 @@
                 return;
             }
 
+            // Validar contexto seguro HTTPS para evitar crashes por navigator.mediaDevices undefined
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error("Contexto no seguro o navegador incompatible con getUserMedia.");
+                escribirTexto("Error: Tu navegador bloquea la cámara porque no estás usando una conexión segura HTTPS. Por favor, asegúrate de ingresar usando HTTPS://ar.alexandervillalva.uk 🐳🔒", 15);
+                hablar("Acceso denegado. Se requiere una conexión segura HTTPS.");
+                return;
+            }
+
             try {
                 escribirTexto("Solicitando acceso a la cámara trasera para Realidad Aumentada... 📸🐳", 15);
                 hablar("Solicitando acceso a la cámara.");
 
-                // Intentamos forzar la cámara trasera (environment facingMode)
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: { ideal: "environment" },
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                });
+                // 1. Intentar con restricciones ideales (cámara trasera HD)
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: { ideal: "environment" },
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        },
+                        audio: false
+                    });
+                } catch (hdErr) {
+                    console.warn("Restricciones HD fallaron, intentando cámara trasera estándar...", hdErr);
+                    // 2. Fallback a cámara trasera estándar
+                    try {
+                        cameraStream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: "environment" },
+                            audio: false
+                        });
+                    } catch (envErr) {
+                        console.warn("Cámara trasera no disponible, intentando cualquier cámara...", envErr);
+                        // 3. Fallback final: cualquier cámara disponible (ej. webcam frontal de laptop)
+                        cameraStream = await navigator.mediaDevices.getUserMedia({
+                            video: true,
+                            audio: false
+                        });
+                    }
+                }
 
-                videoEl.srcObject = cameraStream;
                 videoEl.style.display = "block";
+                videoEl.srcObject = cameraStream;
+                
+                // Forzar reproducción del flujo de video (crítico para iOS Safari)
+                try {
+                    await videoEl.play();
+                } catch (playErr) {
+                    console.error("Error al reproducir el flujo de video:", playErr);
+                }
                 
                 // Ocultar el fondo virtual (sky) para revelar el video pass-through
                 skyEl.setAttribute("visible", "false");
@@ -918,8 +908,13 @@
 
             } catch (err) {
                 console.error("Error al acceder a la cámara:", err);
-                escribirTexto("No pudimos iniciar la cámara trasera. Asegúrate de otorgar permisos de cámara e interactuar desde HTTPS. 🐳🔒", 15);
-                hablar("No pudimos iniciar la cámara.");
+                if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+                    escribirTexto("El acceso a la cámara fue denegado por el navegador. Por favor, haz clic en el candado de la barra de direcciones de tu navegador y permite el uso de la cámara. 🐳🔒", 15);
+                    hablar("El acceso a la cámara fue denegado. Por favor concede permisos.");
+                } else {
+                    escribirTexto(`No pudimos iniciar la cámara: ${err.message || err.name}. Asegúrate de estar en HTTPS y otorgar permisos. 🐳🔒`, 15);
+                    hablar("No pudimos iniciar la cámara.");
+                }
             }
         }
 
@@ -1000,37 +995,61 @@
                 elSpeaker.style.color = "#0284c7";
             }
 
-            // 2. Transición Pop: Reducir y ocultar el modelo anterior
-            entAnterior.removeAttribute("animation__scale");
-            entAnterior.setAttribute("animation__scale", {
-                property: 'scale',
-                to: '0 0 0',
-                dur: 400,
-                easing: 'easeInBack'
-            });
+            // --- SOPORTE LIENZO COMPARTIDO MULTI-DEV ---
+            // Dado que todos los objetos están visibles en el escenario diseñado colaborativamente,
+            // en lugar de ocultar los otros modelos, simplemente los dejamos y destacamos el activo.
+            if (entNueva) {
+                // Disparar click programático para activar su animación de toque correspondiente
+                try {
+                    entNueva.click();
+                } catch (clickErr) {
+                    console.warn("No se pudo disparar click en entidad reactiva:", clickErr);
+                }
 
-            setTimeout(() => {
-                entAnterior.setAttribute("visible", "false");
-                
-                // 3. Transición Pop: Mostrar e inflar el nuevo modelo
-                entNueva.setAttribute("visible", "true");
-                entNueva.removeAttribute("animation__scale");
-                entNueva.setAttribute("animation__scale", {
-                    property: 'scale',
-                    from: '0 0 0',
-                    to: defaultScales[nuevoModelo],
-                    dur: 600,
-                    easing: 'easeOutBack'
-                });
+                // Mover la luz puntual neón directamente debajo de este objeto para destacarlo
+                const pos = entNueva.getAttribute("position");
+                if (pos) {
+                    elNeonLight.setAttribute("position", `${pos.x} ${pos.y - 0.5} ${pos.z}`);
+                }
                 
                 modeloActivo = nuevoModelo;
-            }, 450);
-
-            // 4. Si el modelo no es el por defecto (Moby), programar el retorno automático en 15 segundos
-            if (nuevoModelo !== "defecto") {
+                
+                // Configurar retorno automático a Moby (defecto) a los 10 segundos
                 timeoutRetorno = setTimeout(() => {
                     activarModeloReactivo("defecto");
-                }, 15000);
+                }, 10000);
+                return;
+            }
+
+            // Fallback para transición clásica si las referencias no están instanciadas
+            if (entAnterior && entNueva) {
+                entAnterior.removeAttribute("animation__scale");
+                entAnterior.setAttribute("animation__scale", {
+                    property: 'scale',
+                    to: '0 0 0',
+                    dur: 400,
+                    easing: 'easeInBack'
+                });
+
+                setTimeout(() => {
+                    entAnterior.setAttribute("visible", "false");
+                    entNueva.setAttribute("visible", "true");
+                    entNueva.removeAttribute("animation__scale");
+                    entNueva.setAttribute("animation__scale", {
+                        property: 'scale',
+                        from: '0 0 0',
+                        to: defaultScales[nuevoModelo],
+                        dur: 600,
+                        easing: 'easeOutBack'
+                    });
+                    
+                    modeloActivo = nuevoModelo;
+                    
+                    // Configurar retorno a Moby
+                    timeoutRetorno = setTimeout(() => {
+                        activarModeloReactivo("defecto");
+                    }, 8000);
+                }, 400);
             }
         }
 
@@ -1422,71 +1441,169 @@
         setInterval(actualizarRadarPokemonGo, 100);
 
         // --- REGISTRAR EVENTOS DE TOQUE EN LAS ENTIDADES 3D ---
-        
-        // 1. Toque en Moby (Ballena)
-        entities.defecto.addEventListener('click', function() {
-            hacerSaltarMoby();
-        });
+        function inicializarEventosInteractivos() {
+            // 1. Toque en Moby (Ballena)
+            if (entities.defecto) {
+                entities.defecto.addEventListener('click', function() {
+                    hacerSaltarMoby();
+                });
+            }
 
-        // 2. Toque en Laptop (Caos)
-        entities.caos.addEventListener('click', function() {
-            entities.caos.removeAttribute("animation__jitter");
-            entities.caos.setAttribute("animation__jitter", {
-                property: 'rotation',
-                from: '0 180 -10',
-                to: '0 180 10',
-                dir: 'alternate',
-                dur: 60,
-                easing: 'linear',
-                loop: 6
-            });
-            setTimeout(() => {
-                entities.caos.removeAttribute("animation__jitter");
-                entities.caos.setAttribute("rotation", "0 180 0");
-            }, 400);
+            // 2. Toque en Laptop (Caos)
+            if (entities.caos) {
+                entities.caos.addEventListener('click', function() {
+                    entities.caos.removeAttribute("animation__jitter");
+                    entities.caos.setAttribute("animation__jitter", {
+                        property: 'rotation',
+                        from: '0 180 -10',
+                        to: '0 180 10',
+                        dir: 'alternate',
+                        dur: 60,
+                        easing: 'linear',
+                        loop: 6
+                    });
+                    setTimeout(() => {
+                        entities.caos.removeAttribute("animation__jitter");
+                        entities.caos.setAttribute("rotation", "0 180 0");
+                    }, 400);
+                    
+                    escribirTexto("¡Bzzzt! El caos de compilar sin Docker está rompiendo tu sistema local. ¡Prueba contenedores! 💻💥", 15);
+                    hablar("Cuidado, el caos de compilar sin Docker está rompiendo tu sistema local.");
+                });
+            }
+
+            // 3. Toque en Servidor (Rack)
+            if (entities.servidor) {
+                entities.servidor.addEventListener('click', function() {
+                    const rack = entities.servidor;
+                    rack.removeAttribute("animation__scale_up");
+                    rack.setAttribute("animation__scale_up", {
+                        property: 'scale',
+                        from: defaultScales.servidor,
+                        to: '0.9 0.9 0.9',
+                        dir: 'alternate',
+                        dur: 150,
+                        easing: 'easeInOutQuad',
+                        loop: 2
+                    });
+                    escribirTexto("¡Servidores e infraestructura de producción Docker escalada al 100%! 🖥️⚡", 15);
+                    hablar("Servidores e infraestructura en producción escalada.");
+                });
+            }
+
+            // 4. Toque en Buque (Barco Carguero)
+            if (entities.buque) {
+                entities.buque.addEventListener('click', function() {
+                    const buque = entities.buque;
+                    buque.removeAttribute("animation__sway");
+                    buque.setAttribute("animation__sway", {
+                        property: 'rotation',
+                        from: '10 45 -12',
+                        to: '10 45 12',
+                        dir: 'alternate',
+                        dur: 550,
+                        easing: 'easeInOutQuad',
+                        loop: 2
+                    });
+                    setTimeout(() => {
+                        buque.removeAttribute("animation__sway");
+                        buque.setAttribute("rotation", "10 45 0");
+                    }, 1200);
+                    
+                    escribirTexto("¡El barco carguero zarpa! Tus contenedores Docker viajan estables y portables hacia la nube. 🚢📦", 15);
+                    hablar("El barco carguero viaja portable hacia la nube.");
+                });
+            }
+        }
+
+        // Cargar escenario de forma dinámica desde output/layout.json o escenario panorámico por defecto
+        async function cargarEscenarioDinamico() {
+            const container = document.getElementById("entities-container");
+            if (!container) return;
+            container.innerHTML = ""; // Limpiar cualquier elemento previo
             
-            escribirTexto("¡Bzzzt! El caos de compilar sin Docker está rompiendo tu sistema local. ¡Prueba contenedores! 💻💥", 15);
-            hablar("Cuidado, el caos de compilar sin Docker está rompiendo tu sistema local.");
-        });
+            let datosLienzo = null;
+            try {
+                const response = await fetch('output/layout.json', { cache: 'no-store' });
+                if (response.ok) {
+                    datosLienzo = await response.json();
+                }
+            } catch (err) {
+                console.warn("No se pudo descargar layout.json. Usando escenario por defecto panorámico.", err);
+            }
 
-        // 3. Toque en Servidor (Rack)
-        entities.servidor.addEventListener('click', function() {
-            const rack = entities.servidor;
-            rack.removeAttribute("animation__scale_up");
-            rack.setAttribute("animation__scale_up", {
-                property: 'scale',
-                from: defaultScales.servidor,
-                to: '0.6 0.6 0.6',
-                dir: 'alternate',
-                dur: 150,
-                easing: 'easeInOutQuad',
-                loop: 2
-            });
-            escribirTexto("¡Servidores e infraestructura de producción Docker escalada al 100%! 🖥️⚡", 15);
-            hablar("Servidores e infraestructura en producción escalada.");
-        });
+            // Si no hay datos guardados o está vacío, usar el escenario panorámico por defecto
+            if (!Array.isArray(datosLienzo) || datosLienzo.length === 0) {
+                datosLienzo = [
+                    {
+                        uuid: "entidad-ballena",
+                        modelId: "modelo-ballena",
+                        posicion: { x: 0, y: 1.1, z: -3.0 },
+                        rotacion: { y: 180 },
+                        escala: 2.2
+                    },
+                    {
+                        uuid: "entidad-laptop",
+                        modelId: "modelo-laptop",
+                        posicion: { x: -2.0, y: 1.1, z: -3.5 },
+                        rotacion: { y: 180 },
+                        escala: 1.0
+                    },
+                    {
+                        uuid: "entidad-rack",
+                        modelId: "modelo-rack",
+                        posicion: { x: 2.0, y: 0.8, z: -3.5 },
+                        rotacion: { y: 45 },
+                        escala: 0.8
+                    },
+                    {
+                        uuid: "entidad-buque",
+                        modelId: "modelo-buque",
+                        posicion: { x: 0, y: 1.0, z: -5.5 },
+                        rotacion: { y: 45 },
+                        escala: 0.6
+                    }
+                ];
+            }
 
-        // 4. Toque en Buque (Barco Carguero)
-        entities.buque.addEventListener('click', function() {
-            const buque = entities.buque;
-            buque.removeAttribute("animation__sway");
-            buque.setAttribute("animation__sway", {
-                property: 'rotation',
-                from: '10 45 -12',
-                to: '10 45 12',
-                dir: 'alternate',
-                dur: 550,
-                easing: 'easeInOutQuad',
-                loop: 2
+            // Instanciar físicamente cada objeto en A-Frame
+            datosLienzo.forEach(obj => {
+                const el = document.createElement('a-entity');
+                el.setAttribute('id', obj.uuid);
+                el.setAttribute('gltf-model', `#${obj.modelId}`);
+                el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
+                el.setAttribute('rotation', `0 ${obj.rotacion.y || 0} 0`);
+                el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
+                el.setAttribute('class', 'interactive-entity');
+                el.setAttribute('visible', 'true');
+
+                // Si es Moby (ballena), añadirle animación suave de flotación y rotación suave
+                if (obj.modelId === "modelo-ballena") {
+                    el.setAttribute('animation__float', `property: position; to: ${obj.posicion.x} ${obj.posicion.y + 0.2} ${obj.posicion.z}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);
+                    el.setAttribute('animation__rotate', "property: rotation; to: 0 540 0; dur: 30000; easing: linear; loop: true");
+                }
+                
+                container.appendChild(el);
+
+                // Asignar referencias globales para compatibilidad retrospectiva (primera entidad de cada tipo)
+                if (obj.modelId === "modelo-ballena" && !entities.defecto) {
+                    entities.defecto = el;
+                    defaultScales.defecto = `${obj.escala} ${obj.escala} ${obj.escala}`;
+                } else if (obj.modelId === "modelo-laptop" && !entities.caos) {
+                    entities.caos = el;
+                    defaultScales.caos = `${obj.escala} ${obj.escala} ${obj.escala}`;
+                } else if (obj.modelId === "modelo-rack" && !entities.servidor) {
+                    entities.servidor = el;
+                    defaultScales.servidor = `${obj.escala} ${obj.escala} ${obj.escala}`;
+                } else if (obj.modelId === "modelo-buque" && !entities.buque) {
+                    entities.buque = el;
+                    defaultScales.buque = `${obj.escala} ${obj.escala} ${obj.escala}`;
+                }
             });
-            setTimeout(() => {
-                buque.removeAttribute("animation__sway");
-                buque.setAttribute("rotation", "10 45 0");
-            }, 1200);
-            
-            escribirTexto("¡El barco carguero zarpa! Tus contenedores Docker viajan estables y portables hacia la nube. 🚢📦", 15);
-            hablar("El barco carguero viaja portable hacia la nube.");
-        });
+
+            // Enlazar los eventos de clic interactivos
+            inicializarEventosInteractivos();
+        }
 
         // --- FUNCIÓN DE ESCANEO DE VISIÓN COMPUTACIONAL (GEMINI VISION) ---
         function mostrarEscanerAnimacion(active) {
@@ -1561,6 +1678,11 @@
                 hablar("El sonar perdió la señal.");
             }
         }
+
+        // Iniciar carga del escenario dinámico al cargar la página
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarEscenarioDinamico();
+        });
     </script>
 </body>
 </html>

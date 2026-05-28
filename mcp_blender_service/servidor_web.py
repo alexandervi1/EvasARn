@@ -53,6 +53,13 @@ def run_server():
     # Permitir la reutilización del puerto inmediatamente después de cerrarlo
     socketserver.TCPServer.allow_reuse_address = True
     
+    # Asegurar tipos MIME correctos para modelos 3D y WASM
+    Handler.extensions_map.update({
+        '.glb': 'model/gltf-binary',
+        '.gltf': 'model/gltf+json',
+        '.wasm': 'application/wasm',
+    })
+    
     try:
         with socketserver.TCPServer(("", PORT), Handler) as httpd:
             local_ips = get_local_ips()

@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moby Studio - WebXR Collaborative Level Editor</title>
+    
+    <!-- Librería A-Frame para WebXR y renderizado 3D -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    
+    <!-- Fuentes de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-docker: #00f3ff;
+            --color-docker-blue: #0284c7;
+            --color-success: #22c55e;
+            --color-error: #ef4444;
+            --color-bg-glass: rgba(10, 15, 30, 0.85);
+            --color-border-glass: rgba(255, 255, 255, 0.1);
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #05070f;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            color: #fff;
+        }
+
+        /* HUD CONTENEDOR PRINCIPAL */
+        #hud-editor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            grid-template-rows: 70px 1fr;
+            grid-template-areas: 
+                "header header header"
+                "sidebar main inspector";
+            z-index: 10;
+        }
+
+        /* HEADER SUPERIOR */
+        header {
+            grid-area: header;
+            background: linear-gradient(180deg, rgba(5, 7, 15, 0.95) 0%, rgba(5, 7, 15, 0.6) 100%);
+            border-bottom: 1px solid var(--color-border-glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-whale {
+            font-size: 24px;
+        }
+
+        .logo-title {
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #00f3ff 0%, #0284c7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-badge {
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid var(--color-docker);
+            color: var(--color-docker);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 20px;
+            border: 1px solid var(--color-border-glass);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-save {
+            background: var(--color-docker-blue);
+            border-color: #0284c7;
+        }
+
+        .btn-save:hover {
+            background: #0369a1;
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.5);
+        }
+
+        .btn-view {
+            border-color: var(--color-success);
+            color: var(--color-success);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .btn-view:hover {
+            background: rgba(34, 197, 94, 0.15);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+        }
+
+        /* SIDEBAR DE ASSETS (IZQUIERDA) */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--color-bg-glass);
+            border-right: 1px solid var(--color-border-glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            pointer-events: auto;
+            overflow-y: auto;
+        }
+
+        .panel-section-title {
+            font-weight: 800;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .asset-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .asset-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .asset-card:hover {
+            border-color: var(--color-docker);
+            background: rgba(0, 243, 255, 0.04);
+            transform: scale(1.02);
+        }
+
+        .asset-card-title {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .asset-card-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        /* INSPECTOR DE PROPIEDADES (DERECHA) */
+        .inspector {
+            grid-area: inspector;
+            background: var(--color-bg-glass);
+            border-left: 1px solid var(--color-border-glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            pointer-events: auto;
+            overflow-y: auto;
+        }
+
+        .empty-inspector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: #64748b;
+            gap: 15px;
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            opacity: 0.5;
+        }
+
+        .inspector-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .selected-badge {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--color-docker);
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--color-docker);
+            text-align: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-weight: 600;
+            font-size: 12px;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .control-val {
+            color: var(--color-docker);
+            font-family: monospace;
+        }
+
+        .control-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            outline: none;
+            height: 6px;
+            border-radius: 3px;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .control-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-docker);
+            box-shadow: 0 0 8px var(--color-docker);
+            transition: transform 0.1s ease;
+        }
+
+        .control-input::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--color-error);
+            color: var(--color-error);
+            width: 100%;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+        }
+
+        /* PANEL CENTRAL DE NOTIFICACIONES */
+        #notification-box {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 15, 30, 0.9);
+            border: 1px solid var(--color-docker);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 13px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .notif-success {
+            border-color: var(--color-success) !important;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2) !important;
+            color: var(--color-success);
+        }
+
+        .notif-error {
+            border-color: var(--color-error) !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2) !important;
+            color: var(--color-error);
+        }
+
+        /* INSTRUCCIONES EN EL LIENZO */
+        .viewport-instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 300px;
+            background: rgba(5, 7, 15, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #94a3b8;
+            backdrop-filter: blur(5px);
+            display: flex;
+            gap: 15px;
+        }
+
+        .inst-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .inst-icon {
+            color: var(--color-docker);
+            font-weight: bold;
+        }
+
+        /* UNITY-LIKE TRANSFORM TOOLBAR */
+        #transform-toolbar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-bg-glass);
+            border: 1px solid var(--color-border-glass);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 243, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 6px 12px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            pointer-events: auto;
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toolbar-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 20px;
+            color: #94a3b8;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .toolbar-btn.active {
+            color: var(--color-docker);
+            background: rgba(0, 243, 255, 0.1);
+            border-color: rgba(0, 243, 255, 0.25);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+        }
+
+        .toolbar-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--color-border-glass);
+            margin: 0 4px;
+        }
+
+        .delete-btn:hover {
+            color: var(--color-error);
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* BLENDER PROCEDURAL STUDIO PANEL STYLES */
+        .blender-select {
+            width: 100%;
+            background: rgba(10, 15, 30, 0.85);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 12px;
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: border-color 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .blender-select:focus {
+            border-color: var(--color-docker);
+        }
+
+        .blender-btn {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+            border: 1px solid #ea580c !important;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3) !important;
+        }
+
+        .blender-btn:hover {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+            box-shadow: 0 0 15px rgba(234, 88, 12, 0.5) !important;
+            transform: translateY(-2px);
+        }
+
+        /* INDICADOR ACTIVO DE MODO EN EL INSPECTOR */
+        .mode-indicator-badge {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .mode-indicator-val {
+            color: var(--color-docker);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INTERFAZ HUD DE MOBY STUDIO -->
+    <div id="hud-editor">
+        
+        <!-- HEADER -->
+        <header>
+            <div class="logo-area">
+                <span class="logo-whale">🐳</span>
+                <span class="logo-title">MOBY STUDIO</span>
+                <span class="logo-badge">EDITOR 3D</span>
+            </div>
+            
+            <div class="header-buttons">
+                <a href="index.html" class="btn btn-view">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Vista Final Play
+                </a>
+                <button class="btn btn-save" onclick="guardarDiseno()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Guardar Cambios
+                </button>
+            </div>
+        </header>
+
+        <!-- SIDEBAR DE ASSETS (IZQUIERDA) -->
+        <div class="sidebar">
+            <div>
+                <div class="panel-section-title">
+                    <span style="color: var(--color-docker);">📦</span> Modelos Disponibles
+                </div>
+                <div class="asset-list">
+                    <div class="asset-card" onclick="crearEntidad('modelo-ballena', 'blue whale 3d model')">
+                        <div class="asset-card-title">🐳 Ballena Azul</div>
+                        <div class="asset-card-desc">Tu modelo personalizado Draco de alta fidelidad.</div>
+                    </div>
+                    <div class="asset-card" onclick="crearEntidad('modelo-laptop', 'laptop_caos')">
+                        <div class="asset-card-title">💻 Laptop de Caos</div>
+                        <div class="asset-card-desc">Laptop con dependencias inestables en desarrollo.</div>
+                    </div>
+                    <div class="asset-card" onclick="crearEntidad('modelo-rack', 'servidor_rack')">
+                        <div class="asset-card-title">🖥️ Servidor Rack</div>
+                        <div class="asset-card-desc">Infraestructura escalable de servidores en producción.</div>
+                    </div>
+                    <div class="asset-card" onclick="crearEntidad('modelo-buque', 'buque_carga')">
+                        <div class="asset-card-title">🚢 Buque de Carga</div>
+                        <div class="asset-card-desc">Barco carguero industrial de contenedores.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SECCIÓN EVOLUCIÓN: IMPORTADOR DE MODELOS -->
+            <div style="margin-top: 25px; border-top: 1px solid var(--color-border-glass); padding-top: 20px;">
+                <div class="panel-section-title">
+                    <span style="color: var(--color-docker);">➕</span> Importar Escenario
+                </div>
+                <input type="file" id="model-upload-input" accept=".glb,.gltf" style="display: none;" onchange="subirModelo3D(this.files[0])">
+                <button class="btn btn-save" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="document.getElementById('model-upload-input').click()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Subir Modelo GLB
+                </button>
+                <div class="asset-list" id="imported-assets-list" style="margin-top: 15px;">
+                    <!-- Los modelos subidos aparecerán aquí -->
+                </div>
+            </div>
+
+            <!-- SECCIÓN EVOLUCIÓN: BLENDER PROCEDURAL STUDIO -->
+            <div style="margin-top: 25px; border-top: 1px solid var(--color-border-glass); padding-top: 20px; padding-bottom: 10px;">
+                <div class="panel-section-title">
+                    <span style="color: #ea580c;">🤖</span> Blender Procedural
+                </div>
+                <div class="asset-card-desc" style="margin-bottom: 12px; font-size: 11px;">
+                    Compila modelos 3D procedurales ejecutando Blender de forma directa y silenciosa en el host.
+                </div>
+                <select id="blender-script-select" class="blender-select" style="pointer-events: auto;">
+                    <option value="generar_contenedor.py">📦 Contenedor Estándar</option>
+                    <option value="gen_ballena.py">🐳 Moby la Ballena</option>
+                    <option value="gen_buque.py">🚢 Buque de Carga</option>
+                    <option value="gen_laptop.py">💻 Laptop de Caos</option>
+                    <option value="gen_server.py">🖥️ Servidor Rack</option>
+                </select>
+                <button id="btn-blender-generate" class="btn blender-btn" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto;" onclick="generarConBlender()">
+                    <span id="blender-btn-icon">⚙️</span>
+                    <span id="blender-btn-text">Generar con Blender</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN VIEWPORT (A-FRAME) -->
+        <div style="grid-area: main; position: relative;">
+            <!-- UNITY-LIKE TRANSFORM TOOLBAR -->
+            <div id="transform-toolbar">
+                <button class="toolbar-btn active" id="tool-orbit" onclick="setEditMode('orbit')" title="Navegar / Orbitar Escena (Teclado: Q)">
+                    <span class="btn-icon">🖐️</span>
+                    <span class="btn-label">Órbita</span>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="tool-translate" onclick="setEditMode('translate')" title="Modo Posición (Teclado: W)">
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-label">Mover</span>
+                </button>
+                <button class="toolbar-btn" id="tool-rotate" onclick="setEditMode('rotate')" title="Modo Rotación (Teclado: E)">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-label">Rotar</span>
+                </button>
+                <button class="toolbar-btn" id="tool-scale" onclick="setEditMode('scale')" title="Modo Escala (Teclado: R)">
+                    <span class="btn-icon">📐</span>
+                    <span class="btn-label">Escala</span>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn delete-btn" onclick="eliminarEntidadSeleccionada()" title="Eliminar Objeto (Teclado: Supr / Borrar)">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-label">Eliminar</span>
+                </button>
+            </div>
+
+            <div class="viewport-instructions">
+                <div class="inst-item"><span class="inst-icon">[Q]</span> Órbita</div>
+                <div class="inst-item"><span class="inst-icon">[W]</span> Mover (Z-Depth Scroll)</div>
+                <div class="inst-item"><span class="inst-icon">[E]</span> Rotar (Y-Rot Scroll)</div>
+                <div class="inst-item"><span class="inst-icon">[R]</span> Escalar (Size Scroll)</div>
+                <div class="inst-item"><span class="inst-icon">[Supr]</span> Eliminar</div>
+            </div>
+        </div>
+
+        <!-- INSPECTOR DE PROPIEDADES (DERECHA) -->
+        <div class="inspector" id="inspector-panel">
+            <div class="empty-inspector" id="empty-inspector">
+                <div class="empty-icon">🖱️</div>
+                <p>Selecciona un objeto en la escena 3D para editar sus propiedades de posición, escala y rotación.</p>
+            </div>
+            
+            <div class="inspector-content" id="inspector-content" style="display: none;">
+                <div class="mode-indicator-badge">
+                    <span>Modo de Control:</span>
+                    <span class="mode-indicator-val" id="inspector-mode-val">Órbita</span>
+                </div>
+                <div class="selected-badge" id="selected-entity-badge">Laptop_Caos #1</div>
+                
+                <!-- POSITION X -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Posición X</span>
+                        <span class="control-val" id="val-pos-x">0.00</span>
+                    </div>
+                    <input type="range" class="control-input" id="slide-pos-x" min="-6" max="6" step="0.05" oninput="actualizarTransformacion()">
+                </div>
+
+                <!-- POSITION Y -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Posición Y</span>
+                        <span class="control-val" id="val-pos-y">1.00</span>
+                    </div>
+                    <input type="range" class="control-input" id="slide-pos-y" min="-2" max="5" step="0.05" oninput="actualizarTransformacion()">
+                </div>
+
+                <!-- POSITION Z -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Posición Z (Profundidad)</span>
+                        <span class="control-val" id="val-pos-z">-3.00</span>
+                    </div>
+                    <input type="range" class="control-input" id="slide-pos-z" min="-10" max="-1" step="0.05" oninput="actualizarTransformacion()">
+                </div>
+
+                <!-- ROTATION Y -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Rotación Y (Giro)</span>
+                        <span class="control-val" id="val-rot-y">0°</span>
+                    </div>
+                    <input type="range" class="control-input" id="slide-rot-y" min="0" max="360" step="1" oninput="actualizarTransformacion()">
+                </div>
+
+                <!-- SCALE -->
+                <div class="control-group">
+                    <div class="control-label">
+                        <span>Escala</span>
+                        <span class="control-val" id="val-scale">1.00</span>
+                    </div>
+                    <input type="range" class="control-input" id="slide-scale" min="0.1" max="4.0" step="0.05" oninput="actualizarTransformacion()">
+                </div>
+
+                <button class="btn btn-delete" onclick="eliminarEntidadSeleccionada()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    Eliminar Objeto
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CUADRO DE NOTIFICACIÓN FLOTANTE -->
+    <div id="notification-box">
+        <span>💾</span>
+        <span id="notification-text">Diseño guardado exitosamente.</span>
+    </div>
+
+    <!-- ESCENA 3D DEL EDITOR (A-FRAME) -->
+    <a-scene 
+        renderer="colorManagement: true; antialias: true;"
+        cursor="rayOrigin: mouse"
+        vr-mode-ui="enabled: false"
+        gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
+        
+        <!-- PRECARGA DE ASSETS DE MODELOS 3D -->
+        <a-assets>
+            <a-asset-item id="modelo-ballena" src="output/blue%20whale%203d%20model.glb"></a-asset-item>
+            <a-asset-item id="modelo-laptop" src="output/laptop_caos.glb"></a-asset-item>
+            <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
+            <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Iluminación -->
+        <a-entity light="type: ambient; color: #444444; intensity: 1.8"></a-entity>
+        <a-entity light="type: directional; color: #ffffff; intensity: 1.5" position="-2 5 3"></a-entity>
+
+        <!-- Fondo del Editor (Espacio holográfico oscuro con Grid) -->
+        <a-sky color="#05070e"></a-sky>
+
+        <!-- CUADRÍCULA DE REFERENCIA (GRID 3D) -->
+        <a-entity position="0 0 -4" rotation="-90 0 0">
+            <!-- Círculos concéntricos de referencia -->
+            <a-ring color="#ffffff" radius-inner="0.99" radius-outer="1.01" material="opacity: 0.15; side: double; transparent: true;"></a-ring>
+            <a-ring color="#ffffff" radius-inner="1.99" radius-outer="2.01" material="opacity: 0.1; side: double; transparent: true;"></a-ring>
+            <a-ring color="#ffffff" radius-inner="2.99" radius-outer="3.01" material="opacity: 0.05; side: double; transparent: true;"></a-ring>
+            <a-ring color="#ffffff" radius-inner="3.99" radius-outer="4.01" material="opacity: 0.03; side: double; transparent: true;"></a-ring>
+            <!-- Líneas de coordenadas base -->
+            <a-plane width="0.02" height="10" color="#ef4444" material="opacity: 0.4; transparent: true;"></a-plane>
+            <a-plane width="10" height="0.02" color="#00f3ff" material="opacity: 0.4; transparent: true;"></a-plane>
+        </a-entity>
+
+        <!-- CONTENEDOR DE ENTIDADES EDITADAS (Se cargarán y agregarán dinámicamente aquí) -->
+        <a-entity id="entities-container"></a-entity>
+
+        <!-- GIZMO DE EJES 3D (Se posiciona y orienta dinámicamente en el objeto seleccionado) -->
+        <a-entity id="transform-gizmo" visible="false">
+            <!-- Eje X (Rojo) -->
+            <a-line start="0 0 0" end="1.5 0 0" color="#ef4444" opacity="0.95"></a-line>
+            <!-- Eje Y (Verde) -->
+            <a-line start="0 0 0" end="0 1.5 0" color="#22c55e" opacity="0.95"></a-line>
+            <!-- Eje Z (Azul) -->
+            <a-line start="0 0 0" end="0 0 1.5" color="#00f3ff" opacity="0.95"></a-line>
+        </a-entity>
+
+        <!-- CÁMARA ORBITAL FIJA DEL EDITOR -->
+        <a-entity camera position="0 1.8 1.5" look-controls></a-entity>
+
+    </a-scene>
+
+    <!-- LÓGICA DE PROGRAMACIÓN DEL EDITOR -->
+    <script>
+        // Lista local de entidades en la escena
+        let escenaObjetos = [];
+        let entidadSeleccionada = null;
+        let contadorIds = 0;
+
+        // --- EVOLUCIÓN: CONTROL DE MODOS DE TRANSFORMACIÓN (Q, W, E, R) ---
+        let activeEditMode = 'orbit'; // 'orbit', 'translate', 'rotate', 'scale'
+
+        function setEditMode(mode) {
+            activeEditMode = mode;
+            
+            // Actualizar clases de botones en el Toolbar
+            document.querySelectorAll('#transform-toolbar .toolbar-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const btnMap = {
+                'orbit': 'tool-orbit',
+                'translate': 'tool-translate',
+                'rotate': 'tool-rotate',
+                'scale': 'tool-scale'
+            };
+            
+            const activeBtnId = btnMap[mode];
+            if (activeBtnId) {
+                const btn = document.getElementById(activeBtnId);
+                if (btn) btn.classList.add('active');
+            }
+            
+            // Actualizar inspector si hay algo seleccionado
+            const modeValEl = document.getElementById('inspector-mode-val');
+            if (modeValEl) {
+                modeValEl.innerText = getModeLabel(mode);
+            }
+            
+            // Actualizar Gizmo visual
+            actualizarGizmo3D();
+            
+            mostrarNotificacion(`Modo activo: ${getModeLabel(mode).toUpperCase()}`);
+        }
+
+        function getModeLabel(mode) {
+            switch(mode) {
+                case 'orbit': return 'Órbita';
+                case 'translate': return 'Mover';
+                case 'rotate': return 'Rotar';
+                case 'scale': return 'Escala';
+                default: return mode;
+            }
+        }
+
+        // Actualizar visualización del Gizmo 3D (RGB) en la escena
+        function actualizarGizmo3D() {
+            const gizmo = document.getElementById('transform-gizmo');
+            if (!gizmo) return;
+            
+            if (!entidadSeleccionada || activeEditMode === 'orbit') {
+                gizmo.setAttribute('visible', 'false');
+                return;
+            }
+            
+            // Posicionar el gizmo en las mismas coordenadas del objeto
+            const pos = entidadSeleccionada.posicion;
+            const rot = entidadSeleccionada.rotacion;
+            
+            gizmo.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+            gizmo.setAttribute('rotation', `0 ${rot.y} 0`);
+            gizmo.setAttribute('visible', 'true');
+        }
+
+        // Listener de teclas globales (Q, W, E, R, Delete, Backspace)
+        window.addEventListener('keydown', (evt) => {
+            // Ignorar si el foco está en un campo de texto
+            if (evt.target.tagName === 'INPUT' || evt.target.tagName === 'TEXTAREA' || evt.target.tagName === 'SELECT') {
+                return;
+            }
+            
+            switch(evt.code) {
+                case 'KeyQ':
+                    setEditMode('orbit');
+                    break;
+                case 'KeyW':
+                    setEditMode('translate');
+                    break;
+                case 'KeyE':
+                    setEditMode('rotate');
+                    break;
+                case 'KeyR':
+                    setEditMode('scale');
+                    break;
+                case 'Delete':
+                case 'Backspace':
+                    if (entidadSeleccionada) {
+                        eliminarEntidadSeleccionada();
+                    }
+                    break;
+            }
+        });
+
+        // Registrar componente de A-Frame para poder seleccionar objetos al hacer clic en 3D
+        AFRAME.registerComponent('selectable', {
+            init: function () {
+                const el = this.el;
+                el.addEventListener('click', function (evt) {
+                    // Evitar que el clic lo reciba la escena de fondo
+                    evt.stopPropagation();
+                    
+                    // Encontrar el objeto en nuestro array local
+                    const idObjeto = el.getAttribute('id');
+                    const objeto = escenaObjetos.find(obj => obj.uuid === idObjeto);
+                    
+                    if (objeto) {
+                        seleccionarObjeto(objeto);
+                    }
+                });
+            }
+        });
+
+        // Al cargar la página, descargar el diseño existente en el servidor si existe
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarDisenoDesdeServidor();
+        });
+
+        // Crear una nueva entidad 3D en el lienzo
+        function crearEntidad(modelId, nombreBase) {
+            contadorIds++;
+            const uuid = `objeto-${nombreBase}-${contadorIds}`;
+            
+            // Definir coordenadas iniciales por defecto en el centro de visión
+            const nuevoObjeto = {
+                uuid: uuid,
+                modelId: modelId,
+                nombre: `${nombreBase} #${contadorIds}`,
+                posicion: { x: 0, y: 1.1, z: -3.5 },
+                rotacion: { y: 180 },
+                escala: 0.85
+            };
+
+            // Ajustar escala y rotación por defecto según el tipo de objeto para una mejor presentación inicial
+            if (modelId === 'modelo-ballena') {
+                nuevoObjeto.escala = 1.5;
+            } else if (modelId === 'modelo-laptop') {
+                nuevoObjeto.escala = 1.0;
+            } else if (modelId === 'modelo-rack') {
+                nuevoObjeto.posicion.y = 0.8;
+                nuevoObjeto.escala = 0.8;
+            } else if (modelId === 'modelo-buque') {
+                nuevoObjeto.escala = 0.6;
+            }
+
+            escenaObjetos.push(nuevoObjeto);
+            renderizarEntidad3D(nuevoObjeto);
+            seleccionarObjeto(nuevoObjeto);
+            mostrarNotificacion(`¡Añadido: ${nuevoObjeto.nombre}!`);
+        }
+
+        // Renderizar dinámicamente en A-Frame la entidad del lienzo
+        function renderizarEntidad3D(obj) {
+            const container = document.getElementById('entities-container');
+            
+            // Crear el elemento de A-Frame
+            const el = document.createElement('a-entity');
+            el.setAttribute('id', obj.uuid);
+            el.setAttribute('gltf-model', `#${obj.modelId}`);
+            el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
+            el.setAttribute('rotation', `0 ${obj.rotacion.y} 0`);
+            el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
+            el.setAttribute('class', 'interactive-entity');
+            el.setAttribute('selectable', ''); // Añadir comportamiento seleccionable al clic
+            
+            container.appendChild(el);
+        }
+
+        // Seleccionar un objeto en la escena 3D y cargar sus valores en el Inspector del HUD
+        function seleccionarObjeto(obj) {
+            // Desmarcar selección anterior visualmente
+            if (entidadSeleccionada) {
+                const elViejo = document.getElementById(entidadSeleccionada.uuid);
+                if (elViejo) {
+                    elViejo.removeAttribute('light'); // Quitar efecto neón de selección
+                }
+            }
+
+            entidadSeleccionada = obj;
+            
+            // Resaltar visualmente el nuevo objeto con una luz neón integrada en el modelo
+            const elNuevo = document.getElementById(obj.uuid);
+            if (elNuevo) {
+                // Añadimos una luz neón pequeña al objeto para indicar selección
+                elNuevo.setAttribute('light', 'type: point; color: #00f3ff; intensity: 0.8; distance: 1.5; decay: 1;');
+            }
+
+            // Ocultar pantalla vacía del inspector y mostrar controles
+            document.getElementById('empty-inspector').style.display = 'none';
+            document.getElementById('inspector-content').style.display = 'flex';
+            
+            // Rellenar badge de título y modo de control
+            document.getElementById('selected-entity-badge').innerText = obj.nombre;
+            document.getElementById('inspector-mode-val').innerText = getModeLabel(activeEditMode);
+
+            // Rellenar sliders de transformación
+            document.getElementById('slide-pos-x').value = obj.posicion.x;
+            document.getElementById('slide-pos-y').value = obj.posicion.y;
+            document.getElementById('slide-pos-z').value = obj.posicion.z;
+            document.getElementById('slide-rot-y').value = obj.rotacion.y;
+            document.getElementById('slide-scale').value = obj.escala;
+
+            // Actualizar textos numéricos en el HUD
+            document.getElementById('val-pos-x').innerText = Number(obj.posicion.x).toFixed(2);
+            document.getElementById('val-pos-y').innerText = Number(obj.posicion.y).toFixed(2);
+            document.getElementById('val-pos-z').innerText = Number(obj.posicion.z).toFixed(2);
+            document.getElementById('val-rot-y').innerText = `${obj.rotacion.y}°`;
+            document.getElementById('val-scale').innerText = Number(obj.escala).toFixed(2);
+
+            // Actualizar Gizmo visual
+            actualizarGizmo3D();
+        }
+
+        // Actualizar la posición, escala y rotación del objeto 3D en A-Frame según el movimiento de los Sliders
+        function actualizarTransformacion() {
+            if (!entidadSeleccionada) return;
+
+            // Leer valores de los sliders
+            const px = parseFloat(document.getElementById('slide-pos-x').value);
+            const py = parseFloat(document.getElementById('slide-pos-y').value);
+            const pz = parseFloat(document.getElementById('slide-pos-z').value);
+            const ry = parseInt(document.getElementById('slide-rot-y').value);
+            const s = parseFloat(document.getElementById('slide-scale').value);
+
+            // Actualizar nuestro array local del objeto
+            entidadSeleccionada.posicion = { x: px, y: py, z: pz };
+            entidadSeleccionada.rotacion = { y: ry };
+            entidadSeleccionada.escala = s;
+
+            // Actualizar textos numéricos en el HUD
+            document.getElementById('val-pos-x').innerText = px.toFixed(2);
+            document.getElementById('val-pos-y').innerText = py.toFixed(2);
+            document.getElementById('val-pos-z').innerText = pz.toFixed(2);
+            document.getElementById('val-rot-y').innerText = `${ry}°`;
+            document.getElementById('val-scale').innerText = s.toFixed(2);
+
+            // Reflejar cambios físicamente en el A-Frame Entity
+            const el = document.getElementById(entidadSeleccionada.uuid);
+            if (el) {
+                el.setAttribute('position', `${px} ${py} ${pz}`);
+                el.setAttribute('rotation', `0 ${ry} 0`);
+                el.setAttribute('scale', `${s} ${s} ${s}`);
+            }
+
+            // Actualizar Gizmo visual
+            actualizarGizmo3D();
+        }
+
+        // Eliminar el objeto seleccionado tanto del lienzo 3D como de la memoria local
+        function eliminarEntidadSeleccionada() {
+            if (!entidadSeleccionada) return;
+
+            // Eliminar elemento de A-Frame del DOM
+            const el = document.getElementById(entidadSeleccionada.uuid);
+            if (el) {
+                el.parentNode.removeChild(el);
+            }
+
+            mostrarNotificacion(`🗑️ Eliminado: ${entidadSeleccionada.nombre}`);
+
+            // Eliminar de nuestro array local
+            escenaObjetos = escenaObjetos.filter(obj => obj.uuid !== entidadSeleccionada.uuid);
+            entidadSeleccionada = null;
+
+            // Resetear HUD del inspector
+            document.getElementById('inspector-content').style.display = 'none';
+            document.getElementById('empty-inspector').style.display = 'flex';
+
+            // Ocultar Gizmo visual
+            actualizarGizmo3D();
+        }
+
+        // Guardar y Subir la composición completa a la API del servidor
+        async function guardarDiseno() {
+            try {
+                mostrarNotificacion("Enviando cambios del lienzo al servidor... 📤");
+                
+                const response = await fetch('/api/save-layout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(escenaObjetos)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    mostrarNotificacion("💾 ¡Escenario guardado exitosamente en la red!", "success");
+                } else {
+                    mostrarNotificacion(`Error al guardar: ${data.error || 'Falla de servidor'}`, "error");
+                }
+            } catch (err) {
+                console.error("Error al conectar con la API de guardado:", err);
+                mostrarNotificacion("Error crítico al subir los cambios a la red.", "error");
+            }
+        }
+
+        // Descargar la configuración inicial del diseño guardado en la red
+        async function cargarDisenoDesdeServidor() {
+            try {
+                // Leer el archivo layout.json directamente (servido estáticamente por el lanzador)
+                const response = await fetch('output/layout.json', { cache: 'no-store' });
+                if (!response.ok) {
+                    console.log("No se encontró ningún diseño guardado en la red. Iniciando lienzo vacío.");
+                    return;
+                }
+
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    escenaObjetos = data;
+                    
+                    // Renderizar cada objeto en 3D
+                    escenaObjetos.forEach(obj => {
+                        renderizarEntidad3D(obj);
+                        
+                        // Extraer el número correlativo más alto para evitar conflictos de ID
+                        const partes = obj.uuid.split('-');
+                        const num = parseInt(partes[partes.length - 1]);
+                        if (!isNaN(num) && num > contadorIds) {
+                            contadorIds = num;
+                        }
+                    });
+                    
+                    mostrarNotificacion("✨ Diseño anterior cargado de forma exitosa.", "success");
+                }
+            } catch (err) {
+                console.warn("Lienzo vacío o error en lectura de base de datos:", err);
+            }
+        }
+
+        // Mostrar un cartel de alerta flotante e interactivo en la parte inferior del HUD
+        function mostrarNotificacion(texto, tipo = "") {
+            const notif = document.getElementById('notification-box');
+            const notifTexto = document.getElementById('notification-text');
+            
+            notifTexto.innerText = texto;
+            
+            // Limpiar clases anteriores
+            notif.className = '';
+            
+            // Asignar clase de estilo correspondiente
+            if (tipo === "success") {
+                notif.classList.add('notif-success');
+            } else if (tipo === "error") {
+                notif.classList.add('notif-error');
+            }
+
+            notif.style.display = 'flex';
+            
+            // Ocultar a los 3.5 segundos automáticamente
+            setTimeout(() => {
+                notif.style.display = 'none';
+            }, 3500);
+        }
+
+        // --- EVOLUCIÓN: INTERACCIÓN CON RUEDA DEL MOUSE CONTEXTUAL (Modos Q, W, E, R) ---
+        window.addEventListener('wheel', (evt) => {
+            if (!entidadSeleccionada) return;
+            if (activeEditMode === 'orbit') return; // En modo órbita no alteramos propiedades
+
+            // Solo actuar si el cursor está sobre la escena 3D (canvas) y no sobre los menús HUD
+            if (evt.target.tagName === 'CANVAS' || evt.target.closest('a-scene')) {
+                evt.preventDefault(); // Prevenir scroll de la página
+
+                if (activeEditMode === 'translate') {
+                    // Mover profundidad Z (scroll)
+                    const delta = evt.deltaY < 0 ? 0.25 : -0.25;
+                    let z = parseFloat(document.getElementById('slide-pos-z').value) + delta;
+                    z = Math.max(-10.0, Math.min(-1.0, z));
+                    document.getElementById('slide-pos-z').value = z;
+                } else if (activeEditMode === 'rotate') {
+                    // Rotar eje Y
+                    const delta = evt.deltaY < 0 ? 15 : -15;
+                    let r = parseInt(document.getElementById('slide-rot-y').value) + delta;
+                    if (r < 0) r += 360;
+                    if (r >= 360) r -= 360;
+                    document.getElementById('slide-rot-y').value = r;
+                } else if (activeEditMode === 'scale') {
+                    // Escalar objeto
+                    const factor = evt.deltaY < 0 ? 1.1 : 0.9;
+                    let s = parseFloat(document.getElementById('slide-scale').value) * factor;
+                    s = Math.max(0.1, Math.min(4.0, s));
+                    document.getElementById('slide-scale').value = s;
+                }
+
+                // Aplicar transformaciones al objeto
+                actualizarTransformacion();
+            }
+        }, { passive: false });
+
+        // --- EVOLUCIÓN: IMPORTADOR DE MODELOS 3D (.GLB/.GLTF) ---
+        async function subirModelo3D(file) {
+            if (!file) return;
+            
+            // Validar que sea un archivo GLB o GLTF
+            if (!file.name.endsWith('.glb') && !file.name.endsWith('.gltf')) {
+                mostrarNotificacion("Error: Solo se admiten archivos 3D en formato .glb o .gltf", "error");
+                return;
+            }
+
+            mostrarNotificacion(`Subiendo e importando: ${file.name}... 📤`);
+
+            try {
+                // Hacer petición POST binaria al servidor Python
+                const response = await fetch(`/api/upload-model?name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    body: file
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Falla del servidor HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    // 1. Registrar dinámicamente el nuevo recurso de modelo en el A-Frame <a-assets>
+                    const assets = document.querySelector('a-assets');
+                    const assetItem = document.createElement('a-asset-item');
+                    assetItem.setAttribute('id', data.modelId);
+                    assetItem.setAttribute('src', data.src);
+                    assets.appendChild(assetItem);
+
+                    // 2. Agregar a la lista HUD del Sidebar para poder instanciarlo
+                    const list = document.getElementById('imported-assets-list');
+                    const nombreBase = file.name.replace('.glb', '').replace('.gltf', '');
+                    
+                    const card = document.createElement('div');
+                    card.className = 'asset-card';
+                    card.style.borderColor = 'var(--color-success)';
+                    card.style.background = 'rgba(34, 197, 94, 0.03)';
+                    card.style.position = 'relative';
+                    card.onclick = () => crearEntidad(data.modelId, nombreBase);
+                    card.innerHTML = `
+                        <div style="padding-right: 30px;">
+                            <div class="asset-card-title">📦 ${nombreBase}</div>
+                            <div class="asset-card-desc">Modelo importado con éxito.</div>
+                        </div>
+                        <button class="btn btn-delete" style="position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; margin: 0; font-size: 11px;" onclick="eliminarModeloImportado(event, '${file.name}', this.parentNode, '${data.modelId}')" title="Eliminar modelo de la red">
+                            🗑️
+                        </button>
+                    `;
+                    list.appendChild(card);
+
+                    mostrarNotificacion(`¡Modelo ${file.name} importado y listo para colocar! 🎉`, "success");
+                } else {
+                    mostrarNotificacion(`Error de importación: ${data.error}`, "error");
+                }
+            } catch (err) {
+                console.error("Error al subir modelo:", err);
+                mostrarNotificacion("Error crítico al cargar el archivo en la red.", "error");
+            }
+        }
+
+        // --- EVOLUCIÓN: ELIMINAR MODELOS IMPORTADOS DE LA RED ---
+        async function eliminarModeloImportado(event, fileName, cardElement, modelId) {
+            // Evitar que el clic en el botón de borrar instancie el objeto en la escena
+            event.stopPropagation();
+
+            if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el modelo "${fileName}" del servidor?`)) {
+                return;
+            }
+
+            mostrarNotificacion(`Eliminando modelo: ${fileName}... 🗑️`);
+
+            try {
+                const response = await fetch(`/api/delete-model?name=${encodeURIComponent(fileName)}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Falla al borrar en servidor: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.status === "success") {
+                    // 1. Quitar la tarjeta visual del Sidebar
+                    cardElement.parentNode.removeChild(cardElement);
+
+                    // 2. Quitar el elemento <a-asset-item> de la caché de A-Frame
+                    const assetItem = document.getElementById(modelId);
+                    if (assetItem) {
+                        assetItem.parentNode.removeChild(assetItem);
+                    }
+
+                    mostrarNotificacion(`¡Modelo ${fileName} eliminado de la red!`, "success");
+                } else {
+                    mostrarNotificacion(`Error: ${data.message}`, "error");
+                }
+            } catch (err) {
+                console.error("Error al eliminar modelo:", err);
+                mostrarNotificacion("Error crítico al intentar eliminar el archivo del servidor.", "error");
+            }
+        }
+
+        // --- EVOLUCIÓN: GENERADOR PROCEDURAL BLENDER ENGINE ---
+        async function generarConBlender() {
+            const selectEl = document.getElementById('blender-script-select');
+            const scriptName = selectEl.value;
+            const scriptLabel = selectEl.options[selectEl.selectedIndex].text;
+            
+            const btnEl = document.getElementById('btn-blender-generate');
+            const btnIcon = document.getElementById('blender-btn-icon');
+            const btnText = document.getElementById('blender-btn-text');
+            
+            // Estado de Carga
+            btnEl.disabled = true;
+            btnEl.style.opacity = '0.6';
+            btnIcon.innerText = '⏳';
+            btnText.innerText = 'Compilando en host...';
+            
+            mostrarNotificacion(`Iniciando motor Blender para: ${scriptLabel}... 🚀`);
+            
+            try {
+                const response = await fetch(`/api/generate-model?script=${encodeURIComponent(scriptName)}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Falla de servidor: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    // 1. Registrar dinámicamente el nuevo recurso de modelo en el A-Frame <a-assets> si no existe ya
+                    let assetItem = document.getElementById(data.modelId);
+                    if (!assetItem) {
+                        const assets = document.querySelector('a-assets');
+                        assetItem = document.createElement('a-asset-item');
+                        assetItem.setAttribute('id', data.modelId);
+                        assetItem.setAttribute('src', data.src);
+                        assets.appendChild(assetItem);
+                    } else {
+                        // Forzar refresco del asset
+                        assetItem.setAttribute('src', `${data.src}?t=${Date.now()}`);
+                    }
+
+                    // 2. Agregar a la lista HUD del Sidebar para poder instanciarlo
+                    const list = document.getElementById('imported-assets-list');
+                    const idTarjeta = `card-${data.modelId}`;
+                    
+                    // Si ya existe la tarjeta para este modelo generado, no duplicarla, solo resaltar
+                    let card = document.getElementById(idTarjeta);
+                    if (!card) {
+                        card = document.createElement('div');
+                        card.id = idTarjeta;
+                        card.className = 'asset-card';
+                        card.style.borderColor = '#ea580c';
+                        card.style.background = 'rgba(234, 88, 12, 0.04)';
+                        card.style.position = 'relative';
+                        card.onclick = () => crearEntidad(data.modelId, `Blender_${scriptLabel.split(' ')[1]}`);
+                        card.innerHTML = `
+                            <div style="padding-right: 30px;">
+                                <div class="asset-card-title">🤖 ${scriptLabel.split(' ')[1]}</div>
+                                <div class="asset-card-desc">Compilado por Blender.</div>
+                            </div>
+                            <button class="btn btn-delete" style="position: absolute; top: 12px; right: 12px; width: 28px; height: 28px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; margin: 0; font-size: 11px;" onclick="eliminarModeloImportado(event, '${data.src.replace('output/', '')}', this.parentNode, '${data.modelId}')" title="Eliminar modelo de la red">
+                                🗑️
+                            </button>
+                        `;
+                        list.appendChild(card);
+                    }
+                    
+                    mostrarNotificacion(`¡${scriptLabel} generado con éxito por Blender! 🎉`, "success");
+                } else {
+                    mostrarNotificacion(`Error en motor: ${data.message}`, "error");
+                }
+            } catch (err) {
+                console.error("Error al generar modelo con Blender:", err);
+                mostrarNotificacion(`Falla en Blender: ${err.message}`, "error");
+            } finally {
+                // Restaurar Estado del Botón
+                btnEl.disabled = false;
+                btnEl.style.opacity = '1.0';
+                btnIcon.innerText = '⚙️';
+                btnText.innerText = 'Generar con Blender';
+            }
+        }
+    </script>
+</body>
+</html>
