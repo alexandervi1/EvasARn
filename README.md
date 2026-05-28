@@ -38,7 +38,7 @@ Puedes tocar o dar un toque directamente en la pantalla sobre los hologramas 3D 
 
 ```text
 mcpBlender/
-├── mcp_blender_service/      # Código principal del servicio AR
+├── moby_studio/              # Código principal del servicio AR
 │   ├── output/               # Modelos procedimentales 3D (.glb)
 │   │   ├── ballena_docker.glb  # Moby (con una pirámide de contenedores apilada en su lomo)
 │   │   ├── buque_carga.glb     # Barco carguero industrial
@@ -71,17 +71,17 @@ mcpBlender/
 Si deseas regenerar los archivos 3D `.glb` procedimentales a partir de los scripts matemáticos:
 ```bash
 # Generar la Ballena Docker
-& "C:\Program Files\Blender Foundation\Blender 4.2\blender.exe" --background --python mcp_blender_service/scripts/gen_ballena.py
+& "C:\Program Files\Blender Foundation\Blender 4.2\blender.exe" --background --python moby_studio/scripts/gen_ballena.py
 
 # Generar el Buque de Carga
-& "C:\Program Files\Blender Foundation\Blender 4.2\blender.exe" --background --python mcp_blender_service/scripts/gen_buque.py
+& "C:\Program Files\Blender Foundation\Blender 4.2\blender.exe" --background --python moby_studio/scripts/gen_buque.py
 ```
 *(Nota: Asegúrate de ajustar la ruta del ejecutable de Blender según tu instalación).*
 
 ### 3. Iniciar el Servidor de Desarrollo
 El lanzador de desarrollo detecta tu dirección IP local automáticamente para que puedas escanear el código QR directamente desde tu teléfono móvil:
 ```bash
-cd mcp_blender_service
+cd moby_studio
 python lanzador_ar.py
 ```
 

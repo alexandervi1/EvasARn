@@ -3,7 +3,7 @@ venv/
 .venv/
 env/
 ENV/
-mcp_blender_service/venv/
+moby_studio/venv/
 
 # Python compilation and caches
 __pycache__/
@@ -12,8 +12,8 @@ __pycache__/
 *.pyd
 .pytest_cache/
 .cache/
-mcp_blender_service/__pycache__/
-mcp_blender_service/.pytest_cache/
+moby_studio/__pycache__/
+moby_studio/.pytest_cache/
 
 # Operating system files
 .DS_Store
@@ -42,14 +42,14 @@ secrets.json
 # Tunnels and local configurations
 .antigravitycli/
 *.log
-mcp_blender_service/output/*.log
+moby_studio/output/*.log
 
 # YOLO and ML artifacts
 *.pt
 yolov8_docker_custom.pt
-mcp_blender_service/yolov8_docker_custom.pt
-mcp_blender_service/dataset/
-mcp_blender_service/runs/
-mcp_blender_service/temp_capture.jpg
+moby_studio/vision/yolov8_docker_custom.pt
+moby_studio/vision/yolov8n.pt
+moby_studio/dataset/
+moby_studio/runs/
+moby_studio/temp_capture.jpg
 temp_capture.jpg
-
