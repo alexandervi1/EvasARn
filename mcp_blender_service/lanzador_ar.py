@@ -88,12 +88,14 @@ def query_yolo_and_ollama(base64_image_data):
         return "¡Procesador de visión instalándose! La librería 'ultralytics' (YOLOv8) se está configurando en segundo plano en tu PC. Por favor, espera un minuto e inténtalo de nuevo. 🐳⏳"
 
     if yolo_model is None:
-        if os.path.exists("yolov8_docker_custom.pt"):
-            print("[YOLO LOCAL] Inicializando Modelo Personalizado (yolov8_docker_custom.pt) en memoria...")
-            yolo_model = YOLO("yolov8_docker_custom.pt")
+        custom_path = os.path.join("vision", "yolov8_docker_custom.pt")
+        nano_path = os.path.join("vision", "yolov8n.pt")
+        if os.path.exists(custom_path):
+            print(f"[YOLO LOCAL] Inicializando Modelo Personalizado ({custom_path}) en memoria...")
+            yolo_model = YOLO(custom_path)
         else:
-            print("[YOLO LOCAL] Inicializando YOLOv8 Nano por defecto en memoria...")
-            yolo_model = YOLO("yolov8n.pt")
+            print(f"[YOLO LOCAL] Inicializando YOLOv8 Nano por defecto ({nano_path}) en memoria...")
+            yolo_model = YOLO(nano_path)
         print("[YOLO LOCAL] Modelo YOLOv8 inicializado con éxito.")
 
     # 1. Decodificar la imagen Base64 y guardarla temporalmente
