@@ -427,6 +427,26 @@
             transform: translateY(0);
         }
 
+        /* Animación de Escáner de Radar Holográfico */
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to bottom, rgba(0, 243, 255, 0.8), rgba(0, 243, 255, 0));
+            box-shadow: 0 0 20px #00f3ff, 0 0 40px #0284c7;
+            z-index: 50;
+            pointer-events: none;
+            animation: scan-sweep 2.2s ease-in-out infinite;
+        }
+
+        @keyframes scan-sweep {
+            0% { top: 0%; opacity: 0.3; }
+            50% { top: 100%; opacity: 1; }
+            100% { top: 0%; opacity: 0.3; }
+        }
+
         @keyframes pulse-radar {
             0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
             50% { transform: translateY(-50%) scale(1.05); opacity: 1; box-shadow: 0 0 25px rgba(2, 132, 199, 0.7); }
@@ -449,6 +469,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Animación de Escáner de Radar Holográfico -->
+    <div id="scanner-overlay" class="scanner-overlay" style="display: none;"></div>
 
     <!-- Indicadores de Radar Estilo Pokémon Go (Para orientar al usuario hacia Moby) -->
     <div id="radar-left" class="radar-arrow radar-left" style="display: none;">
@@ -499,12 +522,15 @@
             <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
                 
                 <!-- Acciones Rápidas Estilo Pokémon Go -->
-                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 2px;">
+                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 2px; flex-wrap: wrap;">
                     <button type="button" class="btn-action" onclick="lanzarContenedor()" title="Lanzar un contenedor Docker a Moby">
                         📦 Lanzar Contenedor
                     </button>
                     <button type="button" class="btn-action" onclick="hacerSaltarMoby()" title="Hacer saltar o dar un giro a Moby">
                         🐳 Hacer Truco
+                    </button>
+                    <button type="button" class="btn-action" id="btn-scan" onclick="escanearEntorno()" title="Escanear tu pantalla o Docker Desktop con el Sonar de Moby">
+                        🔍 Escanear Pantalla
                     </button>
                 </div>
 
@@ -1461,6 +1487,80 @@
             escribirTexto("¡El barco carguero zarpa! Tus contenedores Docker viajan estables y portables hacia la nube. 🚢📦", 15);
             hablar("El barco carguero viaja portable hacia la nube.");
         });
+
+        // --- FUNCIÓN DE ESCANEO DE VISIÓN COMPUTACIONAL (GEMINI VISION) ---
+        function mostrarEscanerAnimacion(active) {
+            const scanner = document.getElementById("scanner-overlay");
+            if (active) {
+                scanner.style.display = "block";
+            } else {
+                scanner.style.display = "none";
+            }
+        }
+
+        async function escanearEntorno() {
+            const video = document.getElementById("camera-stream");
+            const btnScan = document.getElementById("btn-scan");
+
+            if (!cameraStream) {
+                escribirTexto("¡Debes activar primero la Cámara RA para usar mi Sonar de Reconocimiento Visual! 🐳📸", 15);
+                hablar("Activa primero la cámara.");
+                return;
+            }
+
+            // Deshabilitar botón durante el procesamiento
+            btnScan.disabled = true;
+            mostrarEscanerAnimacion(true);
+            
+            escribirTexto("Lanzando pulso de sonar holográfico... Analizando tu Docker Desktop u objeto con Gemini 1.5 Flash 🐳📡💭", 20);
+            hablar("Analizando tu pantalla.");
+
+            try {
+                // 1. Capturar fotograma en canvas oculto
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                const ctx = canvas.getContext("2d");
+                
+                // Dibujar el feed de video actual
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Convertir a base64
+                const base64Image = canvas.toDataURL("image/jpeg", 0.85);
+
+                // 2. Enviar fotograma al servidor
+                const response = await fetch("/api/vision", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        image: base64Image
+                    })
+                });
+
+                const data = await response.json();
+                
+                mostrarEscanerAnimacion(false);
+                btnScan.disabled = false;
+
+                if (data.error) {
+                    escribirTexto(data.error, 15);
+                    hablar("Falla de sonar.");
+                } else if (data.response) {
+                    // Moby reacciona con alegría
+                    hacerSaltarMoby();
+                    escribirTexto(data.response, 15);
+                    hablar(data.response);
+                }
+            } catch (err) {
+                console.error("Error en el sonar visual:", err);
+                mostrarEscanerAnimacion(false);
+                btnScan.disabled = false;
+                escribirTexto("¡Bzzzt! El sonar perdió la señal. Asegúrate de configurar 'gemini_key.txt' en la raíz y ejecutar el servidor python. 🐳🔌", 15);
+                hablar("El sonar perdió la señal.");
+            }
+        }
     </script>
 </body>
 </html>
