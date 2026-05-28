@@ -39,6 +39,11 @@
             height: 100vh;
         }
 
+        body.camera-active-body {
+            background-color: transparent !important;
+            background: transparent !important;
+        }
+
         /* Contenedor HUD Flotante */
         #hud-container {
             position: absolute;
@@ -833,10 +838,13 @@
                     }
                 }, 500);
                 
-                // Restaurar fondo del body
+                // Restaurar fondo del body removiendo la clase transparente
+                document.body.classList.remove("camera-active-body");
                 document.body.style.backgroundColor = "#05070f";
                 
+                // Hacer visible el cielo virtual
                 skyEl.setAttribute("visible", "true");
+                skyEl.setAttribute("material", "transparent: false; opacity: 1;");
                 
                 // Cambiar estado visual del botón
                 btnCamara.classList.remove("camera-active");
@@ -921,7 +929,8 @@
                 videoEl.style.pointerEvents = "auto";
                 videoEl.srcObject = cameraStream;
                 
-                // Hacer transparente el fondo del body
+                // Hacer transparente el fondo del body aplicando la clase CSS especial
+                document.body.classList.add("camera-active-body");
                 document.body.style.backgroundColor = "transparent";
                 
                 // Forzar reproducción del flujo de video (crítico para iOS Safari)
@@ -931,8 +940,9 @@
                     console.error("Error al reproducir el flujo de video:", playErr);
                 }
                 
-                // Ocultar el fondo virtual (sky) para revelar el video pass-through
+                // Ocultar el fondo virtual (sky) y hacerlo transparente
                 skyEl.setAttribute("visible", "false");
+                skyEl.setAttribute("material", "transparent: true; opacity: 0;");
                 
                 // Cambiar estado visual del botón
                 btnCamara.classList.add("camera-active");
@@ -1731,6 +1741,23 @@
         // Iniciar carga del escenario dinámico al cargar la página
         window.addEventListener('DOMContentLoaded', () => {
             cargarEscenarioDinamico();
+            
+            // --- EVOLUCIÓN: TRANSPARENCIA WEBGL FORZADA DESDE JAVASCRIPT ---
+            const sceneEl = document.querySelector('a-scene');
+            if (sceneEl) {
+                sceneEl.addEventListener('renderstart', function () {
+                    try {
+                        const renderer = this.renderer;
+                        if (renderer) {
+                            console.log("[Sonar Diagnóstico] Forzando transparencia WebGL en Three.js...");
+                            renderer.setClearColor(0x000000, 0); // Limpieza con opacidad 0 (totalmente transparente)
+                            renderer.alpha = true;
+                        }
+                    } catch (e) {
+                        console.error("[Sonar Diagnóstico Error] No se pudo configurar la transparencia del renderizador:", e);
+                    }
+                });
+            }
         });
     </script>
 </body>
