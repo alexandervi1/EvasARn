@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moby AI Assistant 3D - Docker Conversational AR</title>
+    
+    <!-- Librería A-Frame para WebXR y renderizado 3D -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    
+    <!-- Fuentes de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-docker: #0284c7;
+            --color-docker-glow: rgba(2, 132, 199, 0.4);
+            --color-error: #ef4444;
+            --color-error-glow: rgba(239, 68, 68, 0.4);
+            --color-bg-glass: rgba(10, 15, 30, 0.82);
+            --color-border-glass: rgba(255, 255, 255, 0.08);
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #05070f;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Contenedor HUD Flotante */
+        #hud-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* Cabecera Premium */
+        header {
+            width: 100%;
+            max-width: 580px;
+            margin: 0 auto;
+            background: var(--color-bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-title h1 {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .header-title p {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* Indicador de Estado */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(2, 132, 199, 0.15);
+            border: 1px solid var(--color-docker);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulse 1.8s infinite;
+        }
+
+        .status-text {
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Tarjeta de Chat Estilo Glassmorphism */
+        .chat-panel {
+            width: 100%;
+            max-width: 580px;
+            margin: 0 auto;
+            background: var(--color-bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            pointer-events: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Ventana del Mensaje */
+        .dialogue-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 14px 18px;
+            min-height: 75px;
+            max-height: 180px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .speaker-tag {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--color-docker);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+        }
+
+        .dialogue-text {
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: #f1f5f9;
+            font-weight: 300;
+        }
+
+        /* Formulario de Entrada */
+        .chat-form {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            height: 48px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 0 16px;
+            color: #fff;
+            font-size: 13.5px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--color-docker);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.15);
+        }
+
+        /* Botón de Micrófono (Speech to Text) */
+        .btn-mic {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+
+        .btn-mic:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Estado del Micrófono Grabando (Rojo Neón parpadeante) */
+        .btn-mic.recording {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            border-color: var(--color-error);
+            color: #fff;
+            box-shadow: 0 0 15px var(--color-error-glow);
+            animation: pulse-recording 1.2s infinite;
+        }
+
+        .btn-mic svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Botón de Preguntar */
+        .btn-send {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            border: none;
+            outline: none;
+            border-radius: 14px;
+            padding: 0 18px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px var(--color-docker-glow);
+            transition: all 0.2s ease;
+        }
+
+        .btn-send:hover, .btn-send:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+        }
+
+        .btn-send:disabled {
+            background: #1e293b;
+            color: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-send svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Controles de Voz */
+        .voice-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            color: #64748b;
+            cursor: pointer;
+            align-self: flex-start;
+            pointer-events: auto;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+
+        .voice-control:hover {
+            color: #cbd5e1;
+        }
+
+        .voice-control input {
+            cursor: pointer;
+            accent-color: var(--color-docker);
+        }
+
+        /* Animaciones CSS */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse-recording {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Botón de Cámara RA */
+        .btn-camera {
+            background: rgba(2, 132, 199, 0.15);
+            border: 1px solid var(--color-docker);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .btn-camera:hover {
+            background: rgba(2, 132, 199, 0.3);
+            box-shadow: 0 0 12px var(--color-docker-glow);
+        }
+
+        .btn-camera.camera-active {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+
+        a-scene {
+            background: transparent !important;
+        }
+
+        /* Radar de Orientación Estilo Pokémon Go */
+        .radar-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--color-docker);
+            padding: 10px 16px;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 20;
+            pointer-events: auto;
+            box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+            animation: pulse-radar 1.5s infinite;
+        }
+
+        .radar-left {
+            left: 20px;
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .radar-right {
+            right: 20px;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+            flex-direction: row-reverse;
+        }
+
+        .radar-arrow svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Botones de Acciones Rápidas */
+        .btn-action {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #cbd5e1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .btn-action:hover {
+            background: rgba(2, 132, 199, 0.2);
+            border-color: var(--color-docker);
+            color: #fff;
+            box-shadow: 0 0 10px var(--color-docker-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-action:active {
+            transform: translateY(0);
+        }
+
+        @keyframes pulse-radar {
+            0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+            50% { transform: translateY(-50%) scale(1.05); opacity: 1; box-shadow: 0 0 25px rgba(2, 132, 199, 0.7); }
+            100% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+        }
+
+        /* Responsividad Móvil */
+        @media (max-width: 480px) {
+            #hud-container { padding: 12px; }
+            header { padding: 10px 14px; gap: 6px; }
+            .btn-camera span { display: none; }
+            .chat-panel { padding: 14px; border-radius: 20px; }
+            .dialogue-box { padding: 10px 14px; min-height: 60px; }
+            .chat-form { height: 44px; }
+            .btn-send { padding: 0 12px; }
+            .btn-send span { display: none; }
+            .radar-arrow span { display: none; } /* En celulares ocultar texto para no estorbar la vista */
+            .radar-arrow { padding: 10px; border-radius: 50%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Indicadores de Radar Estilo Pokémon Go (Para orientar al usuario hacia Moby) -->
+    <div id="radar-left" class="radar-arrow radar-left" style="display: none;">
+        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+        <span>🐳 Moby a tu izquierda</span>
+    </div>
+    <div id="radar-right" class="radar-arrow radar-right" style="display: none;">
+        <span>Moby a tu derecha 🐳</span>
+        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </div>
+
+    <!-- HUD / Interfaz del Chat de IA -->
+    <div id="hud-container">
+        <!-- Cabecera Superior -->
+        <header>
+            <div class="header-title">
+                <h1>Moby AI Assistant v2</h1>
+                <p>Mascota Docker interactiva por Voz y Hologramas</p>
+            </div>
+
+            <!-- Botón de Realidad Aumentada Real (Cámara) -->
+            <button type="button" id="btn-camera-toggle" class="btn-camera" onclick="activarCamaraRA()" title="Activar cámara para RA real">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+                <span>Cámara RA</span>
+            </button>
+
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span class="status-text">Docker Only</span>
+            </div>
+        </header>
+
+        <!-- Panel de control de Chat inferior -->
+        <div class="chat-panel">
+            <!-- Ventana de Diálogo -->
+            <div class="dialogue-box">
+                <span class="speaker-tag" id="speaker-label">Moby (Ballena)</span>
+                <p class="dialogue-text" id="dialogue-display">
+                    ¡Hola! Soy Moby. Escribe tu duda o <strong>presiona el micrófono para hablarme en voz alta</strong>.
+                    Mi conocimiento está estrictamente limitado a <strong>Docker y contenedores</strong> 🐳📣.
+                </p>
+            </div>
+
+            <!-- Entrada de Texto y Controles -->
+            <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
+                
+                <!-- Acciones Rápidas Estilo Pokémon Go -->
+                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 2px;">
+                    <button type="button" class="btn-action" onclick="lanzarContenedor()" title="Lanzar un contenedor Docker a Moby">
+                        📦 Lanzar Contenedor
+                    </button>
+                    <button type="button" class="btn-action" onclick="hacerSaltarMoby()" title="Hacer saltar o dar un giro a Moby">
+                        🐳 Hacer Truco
+                    </button>
+                </div>
+
+                <form class="chat-form" id="chat-form" onsubmit="enviarPregunta(event)">
+                    <!-- Botón de Grabación por Voz (STT) -->
+                    <button type="button" class="btn-mic" id="btn-mic" onclick="toggleReconocimientoVoz()" title="Hablar por voz">
+                        <svg viewBox="0 0 24 24" id="mic-icon">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8"/>
+                        </svg>
+                    </button>
+
+                    <!-- Input de Texto -->
+                    <input 
+                        type="text" 
+                        id="chat-input" 
+                        class="chat-input" 
+                        placeholder="Pregúntame sobre imágenes, contenedores, volúmenes..."
+                        autocomplete="off">
+                    
+                    <!-- Botón de Envío -->
+                    <button type="submit" class="btn-send" id="btn-submit">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        <span>Preguntar</span>
+                    </button>
+                </form>
+
+                <!-- Checkbox de Voz (Texto a Voz) -->
+                <label class="voice-control">
+                    <input type="checkbox" id="voice-toggle" checked>
+                    <span>Habilitar respuestas por voz alta (Speech Synthesis) 🐳🔊</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cámara de video en segundo plano para Realidad Aumentada Real -->
+    <video 
+        id="camera-stream" 
+        autoplay 
+        playsinline 
+        muted 
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none;">
+    </video>
+
+    <!-- Escena A-Frame WebXR con soporte de transparencia para la cámara -->
+    <a-scene 
+        webxr="optionalFeatures: dom-overlay; overlayElement: #hud-container;" 
+        renderer="colorManagement: true; antialias: true; alpha: true;"
+        cursor="rayOrigin: mouse"
+        vr-mode-ui="enabled: false"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;">
+        
+        <!-- Precarga y Caché de TODOS los Modelos 3D para Metáforas Visuales -->
+        <a-assets>
+            <a-asset-item id="modelo-ballena" src="output/ballena_docker.glb"></a-asset-item>
+            <a-asset-item id="modelo-laptop" src="output/laptop_caos.glb"></a-asset-item>
+            <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
+            <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
+        </a-assets>
+
+        <!-- Iluminación Optimizada -->
+        <a-entity light="type: ambient; color: #555555; intensity: 1.6"></a-entity>
+        <a-entity light="type: directional; color: #ffffff; intensity: 1.4" position="-1.5 5 3"></a-entity>
+        
+        <!-- Luz Puntual Neón debajo del Holograma -->
+        <a-entity id="neon-light" light="type: point; color: #00f3ff; intensity: 2.5; distance: 4.5; decay: 1.2;" position="0 0.15 -3.0"></a-entity>
+        
+        <!-- Fondo futurista oscuro para previsualización en Escritorio (Desktop) -->
+        <a-sky color="#05070e"></a-sky>
+
+        <!-- PLATAFORMA DE PROYECCIÓN HOLOGRÁFICA (Anillos Concéntricos Rotatorios) -->
+        <a-entity position="0 0.05 -3.0">
+            <!-- Anillo Interior (Celeste) -->
+            <a-ring 
+                color="#00f3ff" 
+                radius-inner="0.65" 
+                radius-outer="0.67" 
+                rotation="-90 0 0" 
+                material="side: double; transparent: true; opacity: 0.8; roughness: 0.1; metalness: 0.9;"
+                animation="property: rotation; to: -90 0 360; dur: 8000; easing: linear; loop: true">
+            </a-ring>
+            <!-- Anillo Medio (Azul Docker - Sentido Opuesto) -->
+            <a-ring 
+                color="#0284c7" 
+                radius-inner="0.88" 
+                radius-outer="0.91" 
+                rotation="-90 0 0" 
+                material="side: double; transparent: true; opacity: 0.6; roughness: 0.1; metalness: 0.9;"
+                animation="property: rotation; to: -90 0 -360; dur: 12000; easing: linear; loop: true">
+            </a-ring>
+            <!-- Anillo Exterior (Verde Neón) -->
+            <a-ring 
+                color="#22c55e" 
+                radius-inner="1.12" 
+                radius-outer="1.14" 
+                rotation="-90 0 0" 
+                material="side: double; transparent: true; opacity: 0.4; roughness: 0.1; metalness: 0.9;"
+                animation="property: rotation; to: -90 0 360; dur: 18000; easing: linear; loop: true">
+            </a-ring>
+        </a-entity>
+
+        <!-- SISTEMA DE PARTÍCULAS / NODOS DE DATOS FLOTANTES -->
+        <a-entity position="0 0 -3.0">
+            <a-sphere color="#00f3ff" radius="0.04" position="-0.9 1.4 0.3" material="transparent: true; opacity: 0.85; emissive: #00f3ff; emissiveIntensity: 2;" animation="property: position; to: -0.9 1.6 0.3; dir: alternate; dur: 3500; easing: easeInOutSine; loop: true"></a-sphere>
+            <a-sphere color="#22c55e" radius="0.035" position="0.95 0.9 -0.4" material="transparent: true; opacity: 0.85; emissive: #22c55e; emissiveIntensity: 2;" animation="property: position; to: 0.95 0.7 -0.4; dir: alternate; dur: 4200; easing: easeInOutSine; loop: true"></a-sphere>
+            <a-sphere color="#0284c7" radius="0.045" position="-0.7 0.6 -0.6" material="transparent: true; opacity: 0.8; emissive: #0284c7; emissiveIntensity: 1.5;" animation="property: position; to: -0.7 0.8 -0.6; dir: alternate; dur: 2800; easing: easeInOutSine; loop: true"></a-sphere>
+            <a-sphere color="#a855f7" radius="0.03" position="0.65 1.5 -0.7" material="transparent: true; opacity: 0.9; emissive: #a855f7; emissiveIntensity: 2;" animation="property: position; to: 0.65 1.3 -0.7; dir: alternate; dur: 3100; easing: easeInOutSine; loop: true"></a-sphere>
+        </a-entity>
+
+        <!-- CÁMARA PRINCIPAL -->
+        <a-entity camera position="0 1.6 0" look-controls></a-entity>
+
+        <!-- ENTIDADES 3D REACTIVAS (Metáforas Visuales) -->
+        
+        <!-- 1. La Ballena Docker (Moby - Modelo Defecto: visible="true") -->
+        <a-entity 
+            id="entidad-ballena"
+            gltf-model="#modelo-ballena"
+            position="0 1.1 -3.0"
+            scale="0.65 0.65 0.65"
+            rotation="10 180 0"
+            visible="true"
+            animation__float="property: position; to: 0 1.3 -3.0; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true"
+            animation__rotate="property: rotation; to: 10 540 0; dur: 30000; easing: linear; loop: true">
+        </a-entity>
+
+        <!-- 2. La Laptop de Caos (Escena 1 - visible="false" por defecto) -->
+        <a-entity 
+            id="entidad-laptop"
+            gltf-model="#modelo-laptop"
+            position="0 1.1 -3.0"
+            scale="0 0 0"
+            rotation="0 180 0"
+            visible="false"
+            animation__rotate="property: rotation; to: 0 540 0; dur: 20000; easing: linear; loop: true">
+        </a-entity>
+
+        <!-- 3. El Servidor Rack (Escena 3 - visible="false" por defecto) -->
+        <a-entity 
+            id="entidad-rack"
+            gltf-model="#modelo-rack"
+            position="0 0.8 -3.0"
+            scale="0 0 0"
+            rotation="0 45 0"
+            visible="false"
+            animation__rotate="property: rotation; to: 0 405 0; dur: 25000; easing: linear; loop: true">
+        </a-entity>
+
+        <!-- 4. El Buque de Carga (Escena 2 - visible="false" por defecto) -->
+        <a-entity 
+            id="entidad-buque"
+            gltf-model="#modelo-buque"
+            position="0 1.0 -3.0"
+            scale="0 0 0"
+            rotation="10 45 0"
+            visible="false"
+            animation__rotate="property: rotation; to: 10 405 0; dur: 25000; easing: linear; loop: true">
+        </a-entity>
+
+    </a-scene>
+
+    <!-- Script de Interactividad, STT, Ollama (Docker Only) y Metáforas Visuales -->
+    <script>
+        // API Local de Ollama
+        const isProd = window.location.hostname.includes("alexandervillalva.uk");
+        const OLLAMA_API_URL = isProd 
+            ? "https://ollama.alexandervillalva.uk/api/generate" 
+            : "http://localhost:11434/api/generate";
+        const OLLAMA_MODEL = "qwen"; // qwen o deepseek
+
+        const elInput = document.getElementById("chat-input");
+        const elDisplay = document.getElementById("dialogue-display");
+        const elSubmitBtn = document.getElementById("btn-submit");
+        const elMicBtn = document.getElementById("btn-mic");
+        const elSpeaker = document.getElementById("speaker-label");
+        const elVoiceToggle = document.getElementById("voice-toggle");
+        const elNeonLight = document.getElementById("neon-light");
+
+        // Referencias a las Entidades 3D de A-Frame
+        const entities = {
+            defecto: document.getElementById("entidad-ballena"),
+            caos: document.getElementById("entidad-laptop"),
+            servidor: document.getElementById("entidad-rack"),
+            buque: document.getElementById("entidad-buque")
+        };
+
+        // Escalas por defecto de cada modelo en visualización
+        const defaultScales = {
+            defecto: "0.65 0.65 0.65",
+            caos: "4.5 4.5 4.5",
+            servidor: "0.5 0.5 0.5",
+            buque: "0.45 0.45 0.45"
+        };
+
+        let modeloActivo = "defecto";
+        let timeoutRetorno = null;
+        let voiceContextUnlocked = false;
+        let recording = false;
+        let recognition = null;
+
+        // Desbloquear audio del navegador
+        function unlockAudioContext() {
+            if (voiceContextUnlocked) return;
+            const silence = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(silence);
+            voiceContextUnlocked = true;
+            console.log("SpeechSynthesis inicializado con éxito.");
+            document.removeEventListener("click", unlockAudioContext);
+            document.removeEventListener("touchstart", unlockAudioContext);
+        }
+        document.addEventListener("click", unlockAudioContext);
+        document.addEventListener("touchstart", unlockAudioContext);
+
+        // Inicializar Reconocimiento de Voz (STT) de alta fidelidad
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRec();
+            recognition.lang = 'es-ES';
+            recognition.interimResults = true; // Transcripción en tiempo real en pantalla
+            recognition.continuous = false;    // Detiene al detectar silencio natural
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                recording = true;
+                elMicBtn.classList.add("recording");
+                elInput.placeholder = "🎤 Escuchando... habla ahora";
+                elInput.value = ""; // Limpiar para nueva entrada
+                escribirTexto("Te estoy escuchando con atención... ¡Háblame sobre Docker! 🐳🎙️", 20);
+                
+                // Moby reacciona físicamente balanceándose más rápido denotando escucha activa
+                if (modeloActivo === "defecto") {
+                    entities.defecto.setAttribute("animation__float", {
+                        property: 'position',
+                        to: '0 1.25 -3.0',
+                        dir: 'alternate',
+                        dur: 800, // Balanceo rápido (latido de atención)
+                        easing: 'easeInOutSine',
+                        loop: true
+                    });
+                }
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                // Inyectar texto provisional mientras habla
+                if (interimTranscript) {
+                    elInput.value = interimTranscript;
+                }
+
+                // Al consolidar el texto final
+                if (finalTranscript) {
+                    elInput.value = finalTranscript;
+                    console.log(`Transcripción final de voz: ${finalTranscript}`);
+                    
+                    recognition.stop();
+                    
+                    // Enviar automáticamente con leve delay para naturalidad
+                    setTimeout(() => {
+                        enviarPregunta(new Event('submit'));
+                    }, 500);
+                }
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Error en Speech Recognition: ", event.error);
+                if (event.error === 'no-speech') {
+                    escribirTexto("No logré escuchar nada. ¡Haz clic en el micrófono e inténtalo de nuevo! 🐳🎙️", 15);
+                } else {
+                    escribirTexto("¡Uy! Ocurrió un inconveniente con el micrófono. Inténtalo de nuevo o escríbelo en la caja. 🐳🔌", 15);
+                }
+                resetMicButton();
+            };
+
+            recognition.onend = function() {
+                resetMicButton();
+                // Restaurar animación de flotación suave de Moby
+                if (modeloActivo === "defecto") {
+                    entities.defecto.setAttribute("animation__float", {
+                        property: 'position',
+                        to: '0 1.3 -3.0',
+                        dir: 'alternate',
+                        dur: 3000,
+                        easing: 'easeInOutSine',
+                        loop: true
+                    });
+                }
+            };
+        } else {
+            elMicBtn.style.display = "none"; // Ocultar si el navegador no lo soporta
+            console.warn("Speech Recognition no soportado en este navegador.");
+        }
+
+        function toggleReconocimientoVoz() {
+            if (!recognition) return;
+            if (recording) {
+                recognition.stop();
+            } else {
+                unlockAudioContext();
+                recognition.start();
+            }
+        }
+
+        function resetMicButton() {
+            recording = false;
+            elMicBtn.classList.remove("recording");
+            elInput.placeholder = "Pregúntame sobre imágenes, contenedores, volúmenes...";
+        }
+
+        // --- GESTIÓN DE CÁMARA PARA REALIDAD AUMENTADA REAL ---
+        let cameraStream = null;
+
+        async function activarCamaraRA() {
+            const videoEl = document.getElementById("camera-stream");
+            const skyEl = document.querySelector("a-sky");
+            const btnCamara = document.getElementById("btn-camera-toggle");
+
+            if (cameraStream) {
+                // Si ya está activa, la apagamos (toggle off)
+                const tracks = cameraStream.getTracks();
+                tracks.forEach(track => track.stop());
+                cameraStream = null;
+                videoEl.style.display = "none";
+                skyEl.setAttribute("visible", "true");
+                
+                // Cambiar estado visual del botón
+                btnCamara.classList.remove("camera-active");
+                btnCamara.innerHTML = `
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    <span>Cámara RA</span>
+                `;
+                
+                escribirTexto("Modo de cámara desactivado. Volvemos al espacio holográfico virtual. 🌌🐳", 15);
+                hablar("Modo de cámara desactivado.");
+                return;
+            }
+
+            try {
+                escribirTexto("Solicitando acceso a la cámara trasera para Realidad Aumentada... 📸🐳", 15);
+                hablar("Solicitando acceso a la cámara.");
+
+                // Intentamos forzar la cámara trasera (environment facingMode)
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: { ideal: "environment" },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                });
+
+                videoEl.srcObject = cameraStream;
+                videoEl.style.display = "block";
+                
+                // Ocultar el fondo virtual (sky) para revelar el video pass-through
+                skyEl.setAttribute("visible", "false");
+                
+                // Cambiar estado visual del botón
+                btnCamara.classList.add("camera-active");
+                btnCamara.innerHTML = `
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/>
+                    </svg>
+                    <span>Cámara RA On</span>
+                `;
+
+                escribirTexto("¡Excelente! Ahora Moby y los hologramas de Docker flotan en tu espacio físico real. 🐳🏠✨", 15);
+                hablar("Acceso concedido. Ahora floto en tu espacio real.");
+
+            } catch (err) {
+                console.error("Error al acceder a la cámara:", err);
+                escribirTexto("No pudimos iniciar la cámara trasera. Asegúrate de otorgar permisos de cámara e interactuar desde HTTPS. 🐳🔒", 15);
+                hablar("No pudimos iniciar la cámara.");
+            }
+        }
+
+        // Función de Síntesis de Voz (TTS)
+        function hablar(texto) {
+            if (!elVoiceToggle.checked) return;
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'es-ES';
+
+            const voices = window.speechSynthesis.getVoices();
+            const vozEsp = voices.find(voice => voice.lang.startsWith('es'));
+            if (vozEsp) utterance.voice = vozEsp;
+
+            utterance.pitch = 1.3;  // Tono alegre y de mascota
+            utterance.rate = 1.12;  // Tempo alegre
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Limpiar formato Markdown (como asteriscos) para evitar texto plano feo y mala síntesis de voz
+        function limpiarMarkdown(texto) {
+            if (!texto) return "";
+            return texto
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .replace(/__/g, '')
+                .replace(/_/g, '')
+                .replace(/`/g, '');
+        }
+
+        // Mecanografía
+        function escribirTexto(texto, velocidad = 15) {
+            elDisplay.innerHTML = "";
+            let i = 0;
+            function escribir() {
+                if (i < texto.length) {
+                    elDisplay.innerHTML += texto.charAt(i);
+                    i++;
+                    setTimeout(escribir, velocidad);
+                }
+            }
+            escribir();
+        }
+
+        // MOTOR DE METÁFORAS VISUALES 3D (Transición Pop Holográfica)
+        function activarModeloReactivo(nuevoModelo) {
+            if (nuevoModelo === modeloActivo) return;
+
+            console.log(`Transición Holográfica: de ${modeloActivo} a ${nuevoModelo}`);
+
+            const entAnterior = entities[modeloActivo];
+            const entNueva = entities[nuevoModelo];
+
+            // Cancelar cualquier temporizador de retorno anterior
+            if (timeoutRetorno) {
+                clearTimeout(timeoutRetorno);
+                timeoutRetorno = null;
+            }
+
+            // 1. Cambiar color de la luz puntual neón de la plataforma para coincidir con la escena
+            if (nuevoModelo === "caos") {
+                elNeonLight.setAttribute("light", "color", "#ef4444"); // Rojo error
+                elSpeaker.innerText = "Laptop de Caos";
+                elSpeaker.style.color = "#ef4444";
+            } else if (nuevoModelo === "buque") {
+                elNeonLight.setAttribute("light", "color", "#00f3ff"); // Celeste carguero
+                elSpeaker.innerText = "Buque de Carga";
+                elSpeaker.style.color = "#00f3ff";
+            } else if (nuevoModelo === "servidor") {
+                elNeonLight.setAttribute("light", "color", "#22c55e"); // Verde producción
+                elSpeaker.innerText = "Servidor Rack";
+                elSpeaker.style.color = "#22c55e";
+            } else {
+                elNeonLight.setAttribute("light", "color", "#00f3ff"); // Celeste Moby
+                elSpeaker.innerText = "Moby (Ballena)";
+                elSpeaker.style.color = "#0284c7";
+            }
+
+            // 2. Transición Pop: Reducir y ocultar el modelo anterior
+            entAnterior.removeAttribute("animation__scale");
+            entAnterior.setAttribute("animation__scale", {
+                property: 'scale',
+                to: '0 0 0',
+                dur: 400,
+                easing: 'easeInBack'
+            });
+
+            setTimeout(() => {
+                entAnterior.setAttribute("visible", "false");
+                
+                // 3. Transición Pop: Mostrar e inflar el nuevo modelo
+                entNueva.setAttribute("visible", "true");
+                entNueva.removeAttribute("animation__scale");
+                entNueva.setAttribute("animation__scale", {
+                    property: 'scale',
+                    from: '0 0 0',
+                    to: defaultScales[nuevoModelo],
+                    dur: 600,
+                    easing: 'easeOutBack'
+                });
+                
+                modeloActivo = nuevoModelo;
+            }, 450);
+
+            // 4. Si el modelo no es el por defecto (Moby), programar el retorno automático en 15 segundos
+            if (nuevoModelo !== "defecto") {
+                timeoutRetorno = setTimeout(() => {
+                    activarModeloReactivo("defecto");
+                }, 15000);
+            }
+        }
+
+        // Animación de alegría 3D para Moby
+        function animarMoby() {
+            if (modeloActivo !== "defecto") return;
+            const elBallena = entities.defecto;
+            elBallena.removeAttribute("animation__rotate");
+            elBallena.setAttribute("animation__spin", {
+                property: 'rotation',
+                from: '10 180 0',
+                to: '10 540 0',
+                dur: 1500,
+                easing: 'easeInOutQuad'
+            });
+
+            setTimeout(() => {
+                elBallena.removeAttribute("animation__spin");
+                elBallena.setAttribute("animation__rotate", {
+                    property: 'rotation',
+                    to: '10 540 0',
+                    dur: 30000,
+                    easing: 'linear',
+                    loop: true
+                });
+            }, 1600);
+        }
+
+        // Filtro híbrido: validador léxico del cliente para mantener el tema 100% sobre Docker
+        function esTematicaDockerValida(texto) {
+            const t = texto.toLowerCase();
+            
+            // Palabras clave requeridas de tecnología/infraestructura
+            const palabrasClave = [
+                "docker", "contenedor", "imagen", "volume", "compose", "kubernetes", "k8s", 
+                "devops", "despliegue", "deploy", "server", "servidor", "caos", "error", 
+                "dependencia", "port", "puerto", "moby", "ballena", "barco", "buque", "carga",
+                "virtual", "hola", "quién eres", "quien eres", "saludo", "presentación", "presentacion",
+                "ayuda", "ayúdame", "duda", "pregunta"
+            ];
+            
+            // Palabras explícitamente excluidas (fuera de foco)
+            const palabrasExcluidas = [
+                "receta", "cocina", "pizza", "comida", "futbol", "fútbol", "deporte", "chiste", 
+                "musica", "música", "canción", "cantante", "película", "cine", "amor", "clima",
+                "tiempo", "juego", "videojuego", "política", "politica", "historia", "geografía",
+                "matemáticas", "química", "física"
+            ];
+            
+            // 1. Si contiene alguna palabra explícitamente excluida, es inválido
+            for (const p of palabrasExcluidas) {
+                if (t.includes(p)) return false;
+            }
+            
+            // 2. Si contiene al menos una palabra clave, es válido
+            for (const c of palabrasClave) {
+                if (t.includes(c)) return true;
+            }
+            
+            // 3. Saludos y frases ultra cortas de cortesía son válidas
+            if (t.length < 15) return true;
+            
+            return false;
+        }
+
+        async function enviarPregunta(event) {
+            if (event) event.preventDefault();
+            
+            const pregunta = elInput.value.trim();
+            if (!pregunta) return;
+
+            // Bloquear controles de UI
+            elInput.disabled = true;
+            elSubmitBtn.disabled = true;
+            elInput.value = "";
+            
+            // --- VALIDAR TEMA STRICTLY DOCKER ---
+            if (!esTematicaDockerValida(pregunta)) {
+                const declinacion = "¡Ups! Como la ballena mascota de Docker, mi cerebro solo tiene espacio para contenedores y barcos de carga. 🐳💙 ¡Pregúntame lo que quieras sobre Docker, imágenes, volúmenes o Kubernetes!";
+                escribirTexto(declinacion, 15);
+                hablar("Ups, como la ballena de Docker, mi cerebro solo tiene espacio para contenedores y barcos.");
+                
+                // Desbloquear controles inmediatamente y salir sin llamar al LLM
+                setTimeout(() => {
+                    elInput.disabled = false;
+                    elSubmitBtn.disabled = false;
+                    elInput.focus();
+                }, 1000);
+                return;
+            }
+
+            escribirTexto("Analizando tu consulta sobre Docker... 🐳💭", 30);
+            hablar("Analizando tu consulta");
+
+            // --- DETECTOR Y ENRUTADOR DE METÁFORAS VISUALES ---
+            const queryLower = pregunta.toLowerCase();
+            let temaDetectado = "defecto";
+
+            if (queryLower.includes("caos") || queryLower.includes("error") || queryLower.includes("problema") || queryLower.includes("laptop") || queryLower.includes("inconsistencia") || queryLower.includes("mi máquina")) {
+                temaDetectado = "caos";
+            } else if (queryLower.includes("barco") || queryLower.includes("buque") || queryLower.includes("transporte") || queryLower.includes("carga") || queryLower.includes("marítimo") || queryLower.includes("carguero") || queryLower.includes("navegar")) {
+                temaDetectado = "buque";
+            } else if (queryLower.includes("servidor") || queryLower.includes("rack") || queryLower.includes("producción") || queryLower.includes("despliegue") || queryLower.includes("cloud") || queryLower.includes("nube")) {
+                temaDetectado = "servidor";
+            }
+
+            // Cambiar de modelo 3D según el tema de la pregunta
+            activarModeloReactivo(temaDetectado);
+            if (temaDetectado === "defecto") {
+                animarMoby();
+            }
+
+            // --- RESTRICCIÓN OBLIGATORIA DEL TEMA: SOLO DOCKER ---
+            const promptMoby = `Eres Moby, la ballena mascota oficial de Docker. Responde de forma muy breve (máximo 2 oraciones, de manera simplificada y alegre).
+            IMPORTANTE: Tu conocimiento está estrictamente limitado a Docker, contenedores, virtualización, imágenes, volúmenes y DevOps.
+            Si la siguiente pregunta de usuario NO está relacionada directamente con Docker, contenedores o infraestructura, debes declinar responder de forma extremadamente simpática y amigable. Debes decir que, como mascota de Docker, tu cerebro solo tiene contenedores y barcos, e invitar al usuario a preguntarte sobre Docker.
+            Pregunta del usuario: ${pregunta}`;
+
+            try {
+                const response = await fetch(OLLAMA_API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: OLLAMA_MODEL,
+                        prompt: promptMoby,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en API de Ollama: ${response.status}`);
+                }
+
+                const data = await response.json();
+                let respuestaMoby = data.response || "¡Lo siento! No pude procesar tu respuesta en este momento.";
+                
+                // Limpiar la respuesta de posibles formatos Markdown (**negrita**, *cursiva*, etc.)
+                respuestaMoby = limpiarMarkdown(respuestaMoby);
+                
+                // Mostrar respuesta y hablarla en voz alta
+                escribirTexto(respuestaMoby, 15);
+                hablar(respuestaMoby);
+
+            } catch (error) {
+                console.error(error);
+                const msgError = "¡Oh no! Parece que tengo problemas para conectarme a mi motor local de Inteligencia Artificial (Ollama). Por favor, asegúrate de tener Ollama activo en el puerto 11434 con CORS habilitado. 🐳🔌";
+                escribirTexto(msgError, 15);
+                hablar("Oh no, tengo un error de conexión.");
+            } finally {
+                // Desbloquear controles de UI
+                elInput.disabled = false;
+                elSubmitBtn.disabled = false;
+                elInput.focus();
+            }
+        }
+
+        // --- LOGICA DE TRUCOS Y GAMIFICACIÓN (POKÉMON GO STYLE) ---
+        
+        // Hacer saltar a Moby con animación de alegría
+        function hacerSaltarMoby() {
+            if (modeloActivo !== "defecto") {
+                escribirTexto("¡Espera a que Moby esté activo en pantalla para pedirle trucos! 🐳✨", 15);
+                return;
+            }
+            const elBallena = entities.defecto;
+            
+            // Detener flotación temporalmente
+            elBallena.removeAttribute("animation__float");
+            
+            // Animación de salto de alegría
+            elBallena.setAttribute("animation__jump", {
+                property: 'position',
+                from: '0 1.1 -3.0',
+                to: '0 1.8 -3.0',
+                dir: 'alternate',
+                dur: 350,
+                easing: 'easeOutQuad',
+                loop: 2
+            });
+
+            // Rotación lateral juguetona
+            elBallena.setAttribute("animation__wiggle", {
+                property: 'rotation',
+                from: '10 180 -15',
+                to: '10 180 15',
+                dir: 'alternate',
+                dur: 150,
+                easing: 'easeInOutQuad',
+                loop: 5
+            });
+
+            escribirTexto("¡Wiii! ¡Mira cómo nado y salto feliz en tu entorno Docker! 🐳💙🚀", 15);
+            hablar("Wiii, mira cómo nado y salto feliz.");
+
+            setTimeout(() => {
+                elBallena.removeAttribute("animation__jump");
+                elBallena.removeAttribute("animation__wiggle");
+                
+                elBallena.setAttribute("rotation", "10 180 0");
+                elBallena.setAttribute("position", "0 1.1 -3.0");
+                
+                // Restaurar flotación suave
+                elBallena.setAttribute("animation__float", {
+                    property: 'position',
+                    to: '0 1.3 -3.0',
+                    dir: 'alternate',
+                    dur: 3000,
+                    easing: 'easeInOutSine',
+                    loop: true
+                });
+            }, 900);
+        }
+
+        // Lanzar contenedor (Pokéball Throw)
+        let containerCount = 0;
+        const containerColors = ["#00f3ff", "#22c55e", "#a855f7", "#eab308", "#ef4444"];
+        const dockerTips = [
+            "¡Servidor Nginx desplegado! El balanceador de carga y proxy inverso está listo para tu tráfico web. 🐳🌐",
+            "¡Base de datos PostgreSQL inicializada! Los datos persistirán de manera segura en el volumen montado. 🐳📊",
+            "¡Contenedor de Redis activo! Memoria caché optimizada y lista para acelerar tus consultas SQL. 🐳⚡",
+            "¡Backend de Node.js en línea! Tu API rest está escuchando peticiones en el puerto 3000 del contenedor. 🐳🚀",
+            "¡Microservicio Python Flask desplegado! Conectado con éxito para procesar tareas asíncronas. 🐳🧠",
+            "¡Contenedor Alpine cargado! Imagen ligera de 5MB configurada para máxima velocidad y seguridad. 🐳🛡️"
+        ];
+
+        function lanzarContenedor() {
+            if (modeloActivo !== "defecto") {
+                escribirTexto("¡Espera a que Moby esté en pantalla para lanzarle contenedores! 🐳📦", 15);
+                return;
+            }
+
+            const scene = document.querySelector("a-scene");
+            const color = containerColors[containerCount % containerColors.length];
+            containerCount++;
+
+            // Crear una caja 3D (a-box) simulando un contenedor industrial
+            const box = document.createElement("a-box");
+            box.setAttribute("color", color);
+            box.setAttribute("width", "0.22");
+            box.setAttribute("height", "0.14");
+            box.setAttribute("depth", "0.14");
+            box.setAttribute("material", "roughness: 0.2; metalness: 0.8; emissive: " + color + "; emissiveIntensity: 0.6;");
+            
+            // Posicionar justo en frente del usuario/cámara
+            box.setAttribute("position", "0 0.8 -1.0");
+
+            scene.appendChild(box);
+
+            // Animar el vuelo hacia la ballena Moby (Z = -3.0)
+            box.setAttribute("animation__fly", {
+                property: 'position',
+                from: '0 0.8 -1.0',
+                to: '0 1.1 -3.0',
+                dur: 700,
+                easing: 'easeOutBack'
+            });
+
+            // Rotación acrobática en el aire
+            box.setAttribute("animation__spin", {
+                property: 'rotation',
+                from: '0 0 0',
+                to: '360 360 180',
+                dur: 700,
+                easing: 'linear'
+            });
+
+            // Impacto físico
+            setTimeout(() => {
+                scene.removeChild(box);
+
+                // Crear un anillo expansivo neón de colisión
+                const ring = document.createElement("a-ring");
+                ring.setAttribute("color", color);
+                ring.setAttribute("radius-inner", "0.01");
+                ring.setAttribute("radius-outer", "0.02");
+                ring.setAttribute("position", "0 1.1 -2.9");
+                ring.setAttribute("rotation", "-90 0 0");
+                ring.setAttribute("material", "side: double; transparent: true; opacity: 0.95;");
+                ring.setAttribute("animation__expand", {
+                    property: 'radius-outer',
+                    to: '1.4',
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+                ring.setAttribute("animation__fade", {
+                    property: 'material.opacity',
+                    to: '0',
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+                scene.appendChild(ring);
+
+                setTimeout(() => scene.removeChild(ring), 550);
+
+                // Hacer girar y saltar a Moby
+                hacerSaltarMobyConImpacto(color);
+
+            }, 700);
+        }
+
+        function hacerSaltarMobyConImpacto(color) {
+            const elBallena = entities.defecto;
+            
+            elBallena.removeAttribute("animation__float");
+            
+            // Salto largo
+            elBallena.setAttribute("animation__jump", {
+                property: 'position',
+                from: '0 1.1 -3.0',
+                to: '0 2.0 -3.0',
+                dir: 'alternate',
+                dur: 350,
+                easing: 'easeOutQuad',
+                loop: 2
+            });
+
+            // Giro 360 delfín
+            elBallena.setAttribute("animation__spin", {
+                property: 'rotation',
+                from: '10 180 0',
+                to: '10 540 0',
+                dur: 700,
+                easing: 'easeInOutQuad'
+            });
+
+            // Iluminar la plataforma del color del contenedor
+            elNeonLight.setAttribute("light", "color", color);
+
+            // Obtener tip de Docker aleatorio
+            const tip = dockerTips[Math.floor(Math.random() * dockerTips.length)];
+            escribirTexto(tip, 15);
+            hablar(tip);
+
+            setTimeout(() => {
+                elBallena.removeAttribute("animation__jump");
+                elBallena.removeAttribute("animation__spin");
+                
+                elBallena.setAttribute("rotation", "10 180 0");
+                elBallena.setAttribute("position", "0 1.1 -3.0");
+                
+                // Restaurar color celeste original
+                elNeonLight.setAttribute("light", "color", "#00f3ff");
+
+                // Volver a flotar
+                elBallena.setAttribute("animation__float", {
+                    property: 'position',
+                    to: '0 1.3 -3.0',
+                    dir: 'alternate',
+                    dur: 3000,
+                    easing: 'easeInOutSine',
+                    loop: true
+                });
+            }, 800);
+        }
+
+        // --- RADAR DE ORIENTACIÓN COMPASS DE POKÉMON GO ---
+        function actualizarRadarPokemonGo() {
+            const camara = document.querySelector('[camera]');
+            if (!camara) return;
+
+            const rotation = camara.getAttribute('rotation');
+            if (!rotation) return;
+
+            // Normalizar Y (Yaw) a un rango entre 0 y 360
+            const yaw = ((rotation.y % 360) + 360) % 360; 
+            const elLeft = document.getElementById("radar-left");
+            const elRight = document.getElementById("radar-right");
+
+            // Si mira muy a la derecha, Moby está a la izquierda
+            if (yaw > 40 && yaw <= 180) {
+                elLeft.style.display = "flex";
+                elRight.style.display = "none";
+            } 
+            // Si mira muy a la izquierda, Moby está a la derecha
+            else if (yaw > 180 && yaw < 320) {
+                elLeft.style.display = "none";
+                elRight.style.display = "flex";
+            } 
+            // En pantalla
+            else {
+                elLeft.style.display = "none";
+                elRight.style.display = "none";
+            }
+        }
+        
+        // Iniciar detector de radar cada 100ms
+        setInterval(actualizarRadarPokemonGo, 100);
+
+        // --- REGISTRAR EVENTOS DE TOQUE EN LAS ENTIDADES 3D ---
+        
+        // 1. Toque en Moby (Ballena)
+        entities.defecto.addEventListener('click', function() {
+            hacerSaltarMoby();
+        });
+
+        // 2. Toque en Laptop (Caos)
+        entities.caos.addEventListener('click', function() {
+            entities.caos.removeAttribute("animation__jitter");
+            entities.caos.setAttribute("animation__jitter", {
+                property: 'rotation',
+                from: '0 180 -10',
+                to: '0 180 10',
+                dir: 'alternate',
+                dur: 60,
+                easing: 'linear',
+                loop: 6
+            });
+            setTimeout(() => {
+                entities.caos.removeAttribute("animation__jitter");
+                entities.caos.setAttribute("rotation", "0 180 0");
+            }, 400);
+            
+            escribirTexto("¡Bzzzt! El caos de compilar sin Docker está rompiendo tu sistema local. ¡Prueba contenedores! 💻💥", 15);
+            hablar("Cuidado, el caos de compilar sin Docker está rompiendo tu sistema local.");
+        });
+
+        // 3. Toque en Servidor (Rack)
+        entities.servidor.addEventListener('click', function() {
+            const rack = entities.servidor;
+            rack.removeAttribute("animation__scale_up");
+            rack.setAttribute("animation__scale_up", {
+                property: 'scale',
+                from: defaultScales.servidor,
+                to: '0.6 0.6 0.6',
+                dir: 'alternate',
+                dur: 150,
+                easing: 'easeInOutQuad',
+                loop: 2
+            });
+            escribirTexto("¡Servidores e infraestructura de producción Docker escalada al 100%! 🖥️⚡", 15);
+            hablar("Servidores e infraestructura en producción escalada.");
+        });
+
+        // 4. Toque en Buque (Barco Carguero)
+        entities.buque.addEventListener('click', function() {
+            const buque = entities.buque;
+            buque.removeAttribute("animation__sway");
+            buque.setAttribute("animation__sway", {
+                property: 'rotation',
+                from: '10 45 -12',
+                to: '10 45 12',
+                dir: 'alternate',
+                dur: 550,
+                easing: 'easeInOutQuad',
+                loop: 2
+            });
+            setTimeout(() => {
+                buque.removeAttribute("animation__sway");
+                buque.setAttribute("rotation", "10 45 0");
+            }, 1200);
+            
+            escribirTexto("¡El barco carguero zarpa! Tus contenedores Docker viajan estables y portables hacia la nube. 🚢📦", 15);
+            hablar("El barco carguero viaja portable hacia la nube.");
+        });
+    </script>
+</body>
+</html>
