@@ -9,6 +9,7 @@ import qrcode
 import json
 import urllib.request
 import urllib.error
+import base64
 
 # Forzar codificación UTF-8 en flujos estándar de consola para Windows
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -69,6 +70,11 @@ def query_yolo_and_ollama(base64_image_data):
     # 1. Decodificar la imagen Base64 y guardarla temporalmente
     if "," in base64_image_data:
         base64_image_data = base64_image_data.split(",")[1]
+    
+    # Asegurar que tenga el relleno (padding) correcto para evitar binascii.Error
+    missing_padding = len(base64_image_data) % 4
+    if missing_padding:
+        base64_image_data += '=' * (4 - missing_padding)
     
     img_data = base64.b64decode(base64_image_data)
     temp_path = "temp_capture.jpg"
