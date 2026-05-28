@@ -43,3 +43,13 @@ secrets.json
 .antigravitycli/
 *.log
 mcp_blender_service/output/*.log
+
+# YOLO and ML artifacts
+*.pt
+yolov8_docker_custom.pt
+mcp_blender_service/yolov8_docker_custom.pt
+mcp_blender_service/dataset/
+mcp_blender_service/runs/
+mcp_blender_service/temp_capture.jpg
+temp_capture.jpg
+

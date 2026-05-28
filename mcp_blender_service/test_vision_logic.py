@@ -9,26 +9,33 @@ import lanzador_ar
 import base64
 from io import BytesIO
 
-# Generar una imagen real de 100x100 usando PIL (Pillow se instala con ultralytics)
-try:
-    from PIL import Image
-    img = Image.new('RGB', (100, 100), color='red')
-    buffered = BytesIO()
-    img.save(buffered, format="JPEG")
-    dummy_base64 = "data:image/jpeg;base64," + base64.b64encode(buffered.getvalue()).decode()
-    print("[OK] Imagen de prueba JPEG 100x100 generada dinámicamente.")
-except Exception as e:
-    print(f"[Aviso] No se pudo usar PIL: {str(e)}. Usando fallback base64...")
-    dummy_base64 = (
-        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////"
-        "////////////////////////////////////////////////////////////////////wgALCAAB"
-        "AAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="
-    )
+# Cargar y codificar la imagen real de medios/image.png
+ruta_imagen = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "medios", "image.png"))
 
-print("Iniciando prueba local de la lógica YOLOv8 + Ollama...")
+if os.path.exists(ruta_imagen):
+    print(f"[OK] Cargando imagen real de prueba: {ruta_imagen}")
+    with open(ruta_imagen, "rb") as image_file:
+        dummy_base64 = "data:image/png;base64," + base64.b64encode(image_file.read()).decode('utf-8')
+else:
+    print(f"[Aviso] No se encontró {ruta_imagen}. Usando fallback en blanco...")
+    try:
+        from PIL import Image
+        img = Image.new('RGB', (100, 100), color='red')
+        buffered = BytesIO()
+        img.save(buffered, format="JPEG")
+        dummy_base64 = "data:image/jpeg;base64," + base64.b64encode(buffered.getvalue()).decode()
+    except Exception as e:
+        dummy_base64 = (
+            "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////"
+            "////////////////////////////////////////////////////////////////////wgALCAAB"
+            "AAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA="
+        )
+
+print("Iniciando prueba local de la lógica YOLOv8 + Ollama sobre tu imagen real...")
 print("-" * 80)
 try:
     resultado = lanzador_ar.query_yolo_and_ollama(dummy_base64)
+
     print("=" * 80)
     print("RESULTADO DE MOBY:")
     print(resultado)
