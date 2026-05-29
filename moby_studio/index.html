@@ -1989,11 +1989,11 @@
                 ];
             }
 
-            // Instanciar físicamente cada objeto en su respectivo contenedor de anclaje A-Frame
+            // Instanciar físicamente cada objeto en su respectivo contenedor de anclaje A-Frame (Soporte dinámico 3D/Imagen/Video)
             datosLienzo.forEach(obj => {
-                const el = document.createElement('a-entity');
-                el.setAttribute('id', obj.uuid);
-                el.setAttribute('gltf-model', `#${obj.modelId}`);
+                let el;
+                const mediaType = obj.mediaType || '3d';
+                const mediaUrl = obj.mediaUrl || '';
                 
                 // Si el objeto está asociado a un marcador físico, su posición local se ajusta relativa al marcador
                 const anchor = obj.arAnchor || 'base';
@@ -2004,14 +2004,80 @@
                 
                 if (anchor === 'marcador_a') {
                     targetContainer = document.getElementById("anchor-marcador_a");
-                    // Posicionamiento relativo centrado sobre el marcador físico
-                    posX = 0; posY = 0.2; posZ = 0;
+                    posX = 0; posY = 0.2; posZ = 0.1;
                 } else if (anchor === 'marcador_b') {
                     targetContainer = document.getElementById("anchor-marcador_b");
-                    posX = 0; posY = 0.2; posZ = 0;
+                    posX = 0; posY = 0.2; posZ = 0.1;
                 } else if (anchor === 'marcador_c') {
                     targetContainer = document.getElementById("anchor-marcador_c");
-                    posX = 0; posY = 0.2; posZ = 0;
+                    posX = 0; posY = 0.2; posZ = 0.1;
+                }
+                
+                if (mediaType === 'video' && mediaUrl) {
+                    // 1. Crear el elemento <video> invisible en el HTML
+                    const videoId = `video-resource-${obj.uuid}`;
+                    let videoEl = document.getElementById(videoId);
+                    if (!videoEl) {
+                        videoEl = document.createElement('video');
+                        videoEl.setAttribute('id', videoId);
+                        videoEl.setAttribute('src', mediaUrl);
+                        videoEl.setAttribute('playsinline', '');
+                        videoEl.setAttribute('webkit-playsinline', '');
+                        videoEl.setAttribute('loop', 'true');
+                        videoEl.setAttribute('muted', 'true');
+                        videoEl.setAttribute('crossorigin', 'anonymous');
+                        videoEl.style.display = 'none';
+                        document.body.appendChild(videoEl);
+                    }
+                    
+                    // 2. Crear plano interactivo para proyectar la textura de video
+                    el = document.createElement('a-video');
+                    el.setAttribute('id', obj.uuid);
+                    el.setAttribute('src', `#${videoId}`);
+                    el.setAttribute('width', '1.6');
+                    el.setAttribute('height', '0.9');
+                    
+                    // 3. Enlazar eventos de Visión Real (targetFound/targetLost) y simulador clic de escritorio
+                    if (targetContainer) {
+                        targetContainer.addEventListener('targetFound', () => {
+                            console.log(`🎯 targetFound: Reproduciendo video ${videoId}`);
+                            videoEl.play().catch(e => console.warn(e));
+                        });
+                        targetContainer.addEventListener('targetLost', () => {
+                            console.log(`❌ targetLost: Pausando video ${videoId}`);
+                            videoEl.pause();
+                        });
+                        
+                        // Permitir click en el marcador virtual para simular play/pause en Computadoras
+                        targetContainer.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (videoEl.paused) {
+                                videoEl.play().catch(e => console.warn(e));
+                                mostrarNotificacion("▶️ Video en Reproducción");
+                            } else {
+                                videoEl.pause();
+                                mostrarNotificacion("⏸️ Video en Pausa");
+                            }
+                        });
+                    }
+                } else if (mediaType === 'image' && mediaUrl) {
+                    // Crear un plano de imagen estática
+                    el = document.createElement('a-image');
+                    el.setAttribute('id', obj.uuid);
+                    el.setAttribute('src', mediaUrl);
+                    el.setAttribute('width', '1.0');
+                    el.setAttribute('height', '1.0');
+                } else {
+                    // Contenido por defecto: Modelo 3D GLB
+                    el = document.createElement('a-entity');
+                    el.setAttribute('id', obj.uuid);
+                    el.setAttribute('gltf-model', mediaUrl || `#${obj.modelId}`);
+                    
+                    // Si es Moby (ballena) por defecto en base, añadirle animación suave de flotación
+                    if (obj.modelId === "modelo-ballena" && anchor === 'base') {
+                        el.setAttribute('animation__float', `property: position; to: ${posX} ${posY + 0.15} ${posZ}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);
+                        el.setAttribute('animation__rotate', "property: rotation; to: 0 540 0; dur: 30000; easing: linear; loop: true");
+                    }
                 }
                 
                 el.setAttribute('position', `${posX} ${posY} ${posZ}`);
@@ -2019,12 +2085,6 @@
                 el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
                 el.setAttribute('class', 'interactive-entity');
                 el.setAttribute('visible', 'true');
-
-                // Si es Moby (ballena), añadirle animación suave de flotación
-                if (obj.modelId === "modelo-ballena") {
-                    el.setAttribute('animation__float', `property: position; to: ${posX} ${posY + 0.15} ${posZ}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);
-                    el.setAttribute('animation__rotate', "property: rotation; to: 0 540 0; dur: 30000; easing: linear; loop: true");
-                }
                 
                 if (targetContainer) {
                     targetContainer.appendChild(el);

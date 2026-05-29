@@ -312,6 +312,49 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 response_body = json.dumps({"error": f"Falla al subir modelo: {str(e)}"})
                 self.wfile.write(response_body.encode('utf-8'))
+        elif self.path.startswith('/api/upload-media'):
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            file_name = params.get('name', ['uploaded_file.bin'])[0]
+            
+            # Sanitizar nombre del archivo
+            file_name = os.path.basename(file_name)
+                
+            content_length = int(self.headers['Content-Length'])
+            
+            try:
+                # Leer bytes binarios de la petición POST
+                file_data = self.rfile.read(content_length)
+                
+                output_dir = "output"
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+                    
+                ruta_archivo = os.path.join(output_dir, file_name)
+                with open(ruta_archivo, "wb") as f:
+                    f.write(file_data)
+                    
+                print(f"[UPLOAD-MEDIA] Archivo multimedia guardado en: {os.path.abspath(ruta_archivo)}")
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps({
+                    "status": "success", 
+                    "message": "Archivo multimedia subido exitosamente.", 
+                    "src": f"output/{file_name}"
+                })
+                self.wfile.write(response_body.encode('utf-8'))
+                
+            except Exception as e:
+                print(f"[UPLOAD-MEDIA ERROR] Error al subir archivo: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps({"error": f"Falla al subir archivo: {str(e)}"})
+                self.wfile.write(response_body.encode('utf-8'))
         elif self.path.startswith('/api/delete-model'):
             query = urllib.parse.urlparse(self.path).query
             params = urllib.parse.parse_qs(query)

@@ -890,6 +890,128 @@
             width: 100%;
             height: 100%;
         }
+
+        /* MENÚ CONTEXTUAL 3D (RAYCASTER GLASSMORPHIC) */
+        .context-menu-3d {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 243, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 8px 0;
+            z-index: 10000;
+            min-width: 190px;
+            display: none;
+            pointer-events: auto;
+        }
+
+        .context-menu-item {
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #cbd5e1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        .context-menu-item:hover {
+            background: rgba(0, 243, 255, 0.15);
+            color: #00f3ff;
+            padding-left: 20px;
+        }
+
+        .context-menu-item.delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        /* MODAL DE CONFIGURACIÓN AR TRIGGERS */
+        .ar-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 7, 15, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+        }
+
+        .ar-modal {
+            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.9) 100%);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 243, 255, 0.1);
+            width: 90%;
+            max-width: 470px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .ar-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--color-border-glass);
+            padding-bottom: 15px;
+        }
+
+        .ar-modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ar-modal-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 20px;
+            transition: color 0.2s ease;
+        }
+
+        .ar-modal-close:hover {
+            color: #ef4444;
+        }
+
+        .ar-modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .ar-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--color-border-glass);
+            padding-top: 15px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -1190,6 +1312,86 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     Eliminar Objeto
                 </button>
+            </div>
+        </div>
+
+        <!-- MENÚ CONTEXTUAL 3D FLOTANTE (ESTILO GLASSMORPHISM) -->
+        <div id="context-menu-3d" class="context-menu-3d">
+            <div class="context-menu-item" id="ctx-btn-trigger">
+                🎯 Configurar Disparador AR
+            </div>
+            <div class="context-menu-item delete" id="ctx-btn-delete">
+                🗑️ Eliminar Objeto
+            </div>
+            <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 4px 0;"></div>
+            <div class="context-menu-item" onclick="cerrarMenuContextual()">
+                ❌ Cancelar
+            </div>
+        </div>
+
+        <!-- MODAL DE CONFIGURACIÓN DISPARADOR AR (MINDAR / AR.JS TARGETS) -->
+        <div id="ar-trigger-modal-overlay" class="ar-modal-overlay" onclick="cerrarModalAR(event)">
+            <div class="ar-modal" onclick="event.stopPropagation()">
+                <div class="ar-modal-header">
+                    <div class="ar-modal-title">
+                        <span>🎯</span> Configurar Disparador AR
+                    </div>
+                    <button type="button" class="ar-modal-close" onclick="cerrarModalAR()">&times;</button>
+                </div>
+                <div class="ar-modal-body">
+                    <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin: 0 0 5px 0;">
+                        Asigna un marcador físico o código QR a este objeto 3D. El contenido seleccionado se reproducirá de forma dinámica cuando la cámara detecte el marcador en modo AR real.
+                    </p>
+                    
+                    <!-- Entrada de Imagen de Marcador (Target) -->
+                    <div class="control-group" style="padding: 0;">
+                        <div class="control-label" style="margin-bottom: 6px;">
+                            <span>Disparador / Marcador de Imagen (Target)</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" class="control-input" id="ar-marker-image" placeholder="Ruta al QR o imagen de target..." style="flex: 1; pointer-events: auto;">
+                            <button type="button" class="btn" style="padding: 8px 12px; font-size: 11px; margin: 0;" onclick="document.getElementById('upload-marker-input').click()">
+                                📁 Subir
+                            </button>
+                            <input type="file" id="upload-marker-input" accept="image/*" style="display: none;" onchange="subirImagenMarcador(this.files[0])">
+                        </div>
+                    </div>
+                    
+                    <!-- Tipo de Contenido a Desplegar -->
+                    <div class="control-group" style="padding: 0;">
+                        <div class="control-label" style="margin-bottom: 6px;">
+                            <span>Tipo de Contenido Multimedia</span>
+                        </div>
+                        <select class="control-input" id="ar-media-type" onchange="toggleInputsMediaAR()" style="background: rgba(10, 15, 30, 0.95); border: 1px solid var(--color-border-glass); border-radius: 8px; padding: 10px; color: #cbd5e1; font-weight: 600; cursor: pointer; font-size: 12px; outline: none; transition: border-color 0.3s ease; pointer-events: auto;">
+                            <option value="3d">📦 Modelo 3D (.glb)</option>
+                            <option value="image">🖼️ Imagen Estática (.png / .jpg)</option>
+                            <option value="video">🎥 Video Inmersivo (.mp4)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- URL / Archivo del Contenido a Desplegar -->
+                    <div class="control-group" id="ar-content-url-group" style="padding: 0;">
+                        <div class="control-label" style="margin-bottom: 6px;">
+                            <span id="ar-content-url-label">Archivo / URL del Recurso</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" class="control-input" id="ar-media-url" placeholder="Ruta del video, imagen o GLB..." style="flex: 1; pointer-events: auto;">
+                            <button type="button" class="btn" id="btn-upload-content" style="padding: 8px 12px; font-size: 11px; margin: 0;" onclick="document.getElementById('upload-content-input').click()">
+                                📁 Subir
+                            </button>
+                            <input type="file" id="upload-content-input" accept="*/*" style="display: none;" onchange="subirArchivoContenidoAR(this.files[0])">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ar-modal-footer">
+                    <button type="button" class="btn" style="background: transparent; border-color: rgba(255,255,255,0.1); margin: 0;" onclick="cerrarModalAR()">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-save" style="margin: 0; background: var(--color-docker-blue);" onclick="guardarConfiguracionAR()">
+                        Guardar Cambios
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1783,6 +1985,204 @@
             }
             
             cameraAnimationId = requestAnimationFrame(step);
+        }
+
+        // --- EVOLUCIÓN: SISTEMA DE RAYCASTING PARA CLICK DERECHO Y MENÚ CONTEXTUAL ---
+        let objetoEnConfiguracionAR = null;
+
+        window.addEventListener('contextmenu', function (evt) {
+            // Interceptar click derecho sobre el canvas 3D
+            if (evt.target.tagName !== 'CANVAS' && !evt.target.closest('a-scene')) {
+                return;
+            }
+            evt.preventDefault(); // Prevenir menú nativo del navegador
+
+            const cameraEl = document.querySelector('[camera]');
+            if (!cameraEl) return;
+            const camera = cameraEl.getObject3D('camera');
+            if (!camera) return;
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            // Normalizar coordenadas del mouse en el viewport
+            mouse.x = (evt.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(evt.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            // Obtener objetos interactivos del contenedor
+            const container = document.getElementById('entities-container');
+            if (!container) return;
+            
+            const intersects = raycaster.intersectObjects(container.object3D.children, true);
+
+            if (intersects.length > 0) {
+                // Encontrar entidad raíz en entities-container
+                let obj3D = intersects[0].object3D;
+                while (obj3D.parent && obj3D.parent !== container.object3D) {
+                    obj3D = obj3D.parent;
+                }
+
+                if (obj3D.el) {
+                    const uuid = obj3D.el.getAttribute('id');
+                    const objeto = escenaObjetos.find(o => o.uuid === uuid);
+                    if (objeto) {
+                        mostrarMenuFlotante(evt.clientX, evt.clientY, objeto);
+                    }
+                }
+            } else {
+                cerrarMenuContextual();
+            }
+        });
+
+        // Ocultar menú contextual al hacer clic izquierdo en cualquier lado
+        window.addEventListener('click', function () {
+            cerrarMenuContextual();
+        });
+
+        function mostrarMenuFlotante(x, y, objeto) {
+            const menu = document.getElementById('context-menu-3d');
+            if (!menu) return;
+
+            menu.style.display = 'block';
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+
+            // Configurar botones del menú
+            const btnTrigger = document.getElementById('ctx-btn-trigger');
+            const btnDelete = document.getElementById('ctx-btn-delete');
+
+            btnTrigger.onclick = function (e) {
+                e.stopPropagation();
+                cerrarMenuContextual();
+                abrirModalAR(objeto);
+            };
+
+            btnDelete.onclick = function (e) {
+                e.stopPropagation();
+                cerrarMenuContextual();
+                seleccionarObjeto(objeto);
+                eliminarEntidadSeleccionada();
+            };
+        }
+
+        function cerrarMenuContextual() {
+            const menu = document.getElementById('context-menu-3d');
+            if (menu) menu.style.display = 'none';
+        }
+
+        // --- EVOLUCIÓN: PANEL DE CONFIGURACIÓN AR TRIGGERS Y CARGA MULTIMEDIA ---
+        function abrirModalAR(objeto) {
+            objetoEnConfiguracionAR = objeto;
+            
+            document.getElementById('ar-marker-image').value = objeto.markerImage || '';
+            document.getElementById('ar-media-type').value = objeto.mediaType || '3d';
+            document.getElementById('ar-media-url').value = objeto.mediaUrl || '';
+
+            toggleInputsMediaAR();
+
+            // Mostrar el modal
+            document.getElementById('ar-trigger-modal-overlay').style.display = 'flex';
+        }
+
+        function cerrarModalAR(evt) {
+            if (!evt || evt.target === document.getElementById('ar-trigger-modal-overlay') || evt.target.classList.contains('ar-modal-close')) {
+                document.getElementById('ar-trigger-modal-overlay').style.display = 'none';
+                objetoEnConfiguracionAR = null;
+            }
+        }
+
+        function toggleInputsMediaAR() {
+            const mediaType = document.getElementById('ar-media-type').value;
+            const contentGroup = document.getElementById('ar-content-url-group');
+            const contentLabel = document.getElementById('ar-content-url-label');
+            const contentInput = document.getElementById('ar-media-url');
+            const fileInput = document.getElementById('upload-content-input');
+
+            if (mediaType === '3d') {
+                contentLabel.innerText = "Modelo GLB a desplegar (.glb)";
+                contentInput.placeholder = "Selecciona o sube un modelo 3D...";
+                fileInput.accept = ".glb,.gltf";
+            } else if (mediaType === 'image') {
+                contentLabel.innerText = "Imagen estática a desplegar (.png, .jpg)";
+                contentInput.placeholder = "Selecciona o sube una imagen estática...";
+                fileInput.accept = "image/*";
+            } else if (mediaType === 'video') {
+                contentLabel.innerText = "Video inmersivo a desplegar (.mp4)";
+                contentInput.placeholder = "Selecciona o sube un video MP4...";
+                fileInput.accept = "video/*";
+            }
+        }
+
+        // Subir imagen del Marcador Físico (Target)
+        async function subirImagenMarcador(file) {
+            if (!file) return;
+            mostrarNotificacion("Subiendo imagen de marcador...");
+
+            try {
+                const response = await fetch(`/api/upload-media?name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/octet-stream' },
+                    body: file
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById('ar-marker-image').value = data.src;
+                    mostrarNotificacion("¡Marcador subido con éxito!");
+                } else {
+                    mostrarNotificacion("Error al subir el marcador.", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarNotificacion("Error de conexión al subir marcador.", "error");
+            }
+        }
+
+        // Subir archivo del Recurso AR (GLB, Imagen o Video)
+        async function subirArchivoContenidoAR(file) {
+            if (!file) return;
+            mostrarNotificacion("Subiendo recurso multimedia...");
+
+            try {
+                const response = await fetch(`/api/upload-media?name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/octet-stream' },
+                    body: file
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById('ar-media-url').value = data.src;
+                    mostrarNotificacion("¡Recurso multimedia subido con éxito!");
+                } else {
+                    mostrarNotificacion("Error al subir el recurso.", "error");
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarNotificacion("Error de conexión al subir recurso.", "error");
+            }
+        }
+
+        // Guardar configuración AR en el objeto de escena local
+        function guardarConfiguracionAR() {
+            if (!objetoEnConfiguracionAR) return;
+
+            const markerImage = document.getElementById('ar-marker-image').value.trim();
+            const mediaType = document.getElementById('ar-media-type').value;
+            const mediaUrl = document.getElementById('ar-media-url').value.trim();
+
+            objetoEnConfiguracionAR.markerImage = markerImage || null;
+            objetoEnConfiguracionAR.mediaType = mediaType;
+            objetoEnConfiguracionAR.mediaUrl = mediaUrl || null;
+
+            // Registrar en el historial de deshacer/rehacer (Undo/Redo)
+            registrarTransformacion(objetoEnConfiguracionAR);
+
+            mostrarNotificacion(`¡Disparador AR configurado para ${objetoEnConfiguracionAR.nombre}!`);
+            document.getElementById('ar-trigger-modal-overlay').style.display = 'none';
+            objetoEnConfiguracionAR = null;
         }
 
         // Registrar componente de A-Frame para poder seleccionar objetos al hacer clic en 3D
