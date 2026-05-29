@@ -40,6 +40,13 @@
 *   **Autoplay Reactivo en WebAR:** Controladores automáticos que reproducen el video (`play()`) al detectar el marcador con la cámara (`targetFound`) y lo pausan instantáneamente (`pause()`) al perder el marcador de vista (`targetLost`).
 *   **Simulador de Escritorio (Desktop debug):** Permite hacer click en computadoras sobre el marcador flotante para simular la detección del target en pantalla y depurar la reproducción rápidamente sin dispositivos móviles.
 
+### 🎯 4. Sistema Dinámico Ilimitado de Marcadores AR y Targets Personalizados
+*   **Creación e Instanciación Dinámica:** Sustituimos el sistema antiguo de 3 marcadores fijos (`marcador_a`, `marcador_b`, `marcador_c`) por una arquitectura de **Marcadores AR ilimitados** creados por el desarrollador. Se añade una tarjeta interactiva en el menú de assets para instanciar y posicionar marcadores planos directamente en la mesa 3D.
+*   **Target Uploader Integrado:** Al hacer clic derecho o usar el inspector, abre un modal Glassmorphic para subir archivos de targets personalizados (imágenes físicas o códigos QR) a través de la API `/api/upload-media`, actualizando la textura del plano 3D en el editor al instante.
+*   **Asociación Dinámica de Anclajes (Inspector):** Al seleccionar un objeto 3D, el inspector barre todos los marcadores creados en la escena para repoblar dinámicamente el desplegable **"Anclaje Físico AR (Target)"**, permitiendo asociar cualquier objeto a cualquier marcador de forma 100% interactiva.
+*   **Reproducción Dinámica en index.html:** El cliente WebXR lee el archivo `layout.json` y genera de forma dinámica canales y contenedores de rastreo A-Frame para cada marcador personalizado, agrupando físicamente a las entidades hijas en la posición exacta del target. 
+*   **Compatibilidad Retrospectiva y Simulador de Canales:** Auto-mapea e instancia virtualmente marcadores equivalentes para diseños antiguos que referencian los identificadores fijos. En ordenadores de escritorio, permite cliquear sobre las interfaces espaciales flotantes de cada marcador para simular el reconocimiento físico de cámara (`targetFound`/`targetLost`) y testear la reproducción de video y animación de contenedores en tiempo real.
+
 ---
 
 ## 📂 Arquitectura Organizada del Repositorio
