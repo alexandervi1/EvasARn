@@ -19,23 +19,26 @@
 
 ## ✨ Características de Calidad Premium
 
-### 🖥️ 1. Lienzo 3D y Gizmos de Transformación (Estilo Unity)
-*   **Controles de Transformación:** Edición directa en tiempo real de posición, escala y rotación de objetos en la escena 3D a través de controles interactivos fluidos.
-*   **HUD de Inspector Inteligente:** Visualización y edición numérica precisa de coordenadas.
+### 🕹️ 1. Lienzo 3D y Gizmos de Transformación (Estilo Blender/Unity)
+*   **Gizmos Interactivos Directos (Viewport Drag):** Sustituimos las líneas de coordenadas base por **3 flechas cilíndricas tridimensionales estilizadas con puntas cónicas** (Rojo: X, Verde: Y, Azul: Z) renderizadas sobre la geometría (`depthTest: false`) para que nunca queden ocultas.
+*   **Arrastre Preciso (Three.js Math):** Al hacer clic y arrastrar un eje, se calcula la proyección 3D del arrastre en 2D según la orientación de la cámara (`camera.quaternion`) mapeando la sensibilidad proporcionalmente a la distancia cámara-objeto. Bloquea temporalmente los controles orbitales de cámara (`look-controls`) durante el arrastre.
 *   **Barra de Herramientas Flotante:** Acceso rápido a herramientas de navegación, imán de snapping (pasos de 0.5 unidades / 15°), borrado rápido de entidades y un robusto historial de transformaciones con **Deshacer (Undo - `Ctrl+Z`) y Rehacer (Redo - `Ctrl+Y`)**.
+*   **Estrella de Orientación del Viewport (Compass Widget):** Widget circular Glassmorphic en la esquina superior derecha que renderiza dinámicamente un canvas 2D con ordenamiento por profundidad de atrás hacia adelante (Depth Sorting) de las 6 orientaciones cartesianas. Ofrece **vista ortográfica rápida** (Top, Front, Side, etc.) con transiciones de suavizado (easing cubic-out).
 
-### 🗂️ 2. Mediateca Dinámica y Auto-Sincronización
-*   **Gestor de Medios en Tiempo Real:** Muestra el peso de almacenamiento real en disco de cada modelo `.glb` alojado en el servidor.
-*   **Sincronización Reactiva Inteligente (Modelos Base):** Si eliminas un modelo base (como el buque de carga o la ballena) desde la mediateca para liberar espacio en disco, la tarjeta de acceso directo en el panel de **"Modelos Base"** se ocultará dinámicamente en tiempo real en la UI, previniendo errores de carga y 404s.
-*   **Compresión Draco Integrada:** Invoca en segundo plano a Blender para comprimir tus modelos mediante el algoritmo de Google Draco, reduciendo drásticamente el tamaño del archivo para cargas WebXR ultra rápidas en celulares.
+### 📱 2. Refactorización Spatial UI/UX (index.html - Cliente WebXR)
+*   **HUD Colapsable:** Botón interactivo chevron (`.btn-collapse`) que desliza mediante hardware GPU (`translateY`) el panel completo ocultando bloques pesados para liberar espacio de cámara física en celulares, dejando visible únicamente un micro-panel con el botón del micrófono.
+*   **Máquina de Estados de Inferencia (AI):** Función reactiva `setInferenceState(state)` para fases de inferencia (`idle`, `capturing`, `yolo_vision`, `ollama_reasoning`, `speaking`). Integra pulsos glow en el micrófono y una cortina de luz láser holográfica móvil (`#scanner-laser`) que simula el análisis visual del entorno.
+*   **Interfaces Flotantes (A-Frame Billboard):** Componente `billboard-ui` de A-Frame que reorienta dinámicamente planos en cada frame para que siempre miren al usuario. Permite click interactivo para **lanzar contenedores virtuales con rotación acrobática** directa a marcadores WebXR físicos.
+*   **Iluminación PBR y Sombras Físicas:** Inyección de luces direccionales con proyección fidedigna de sombras (`castShadow: true`) y ambientales suaves para un sombreado realista sobre texturas físicas y metálicas.
 
-### 🍕 3. Integración Directa con Poly Pizza (API Key Devs)
-*   Busca y descarga al instante miles de modelos low-poly gratuitos directamente desde la interfaz del editor.
-*   **Llave de Desarrollador Personalizada:** Cualquier desarrollador puede ingresar su propia API Key de Poly Pizza directamente desde la UI. Se guarda de forma 100% segura y privada en el navegador (`localStorage`) con validación visual instantánea de estado.
-
-### 📸 4. Radar Brújula y Visión AR por IA Local (YOLOv8 + Ollama)
-*   **Radar Brújula 360°:** Si el celular se desvía y los hologramas salen de pantalla, un giroscopio inteligente te muestra indicadores visuales neón en los bordes de la pantalla guiándote hacia el objeto.
-*   **Visión Local Inteligente:** Envía fotogramas de la cámara trasera al backend para ejecutar inferencias locales rápidas con **YOLOv8**. Los objetos detectados se envían a **Ollama (Qwen)** para formular una analogía didáctica de cómo esos objetos físicos se relacionan con Docker (ej. la laptop representa portabilidad, una taza es persistencia de datos).
+### 📸 3. Sistema de Image Tracking y Disparadores Multimedia
+*   **Menú Contextual 3D via Raycaster:** Al hacer click derecho (`contextmenu`) en el lienzo, proyectamos un `THREE.Raycaster` para ubicar el objeto raíz y desplegar un menú Glassmorphic flotante con opciones contextuales.
+*   **Modal de Configuración de targets (`#ar-trigger-modal`):** Panel interactivo con selectores para configurar disparadores fidedignos asociando imágenes físicas a tres tipos de contenidos AR:
+    *   `3d`: Modelos tridimensionales GLTF (`<a-entity gltf-model="...">`).
+    *   `image`: Planos de imagen plana (`<a-image>`).
+    *   `video`: Planos `<a-video>` alimentados dinámicamente por tags `<video>` HTML invisibles con restricciones móviles (`playsinline loop muted`).
+*   **Autoplay Reactivo en WebAR:** Controladores automáticos que reproducen el video (`play()`) al detectar el marcador con la cámara (`targetFound`) y lo pausan instantáneamente (`pause()`) al perder el marcador de vista (`targetLost`).
+*   **Simulador de Escritorio (Desktop debug):** Permite hacer click en computadoras sobre el marcador flotante para simular la detección del target en pantalla y depurar la reproducción rápidamente sin dispositivos móviles.
 
 ---
 
@@ -50,7 +53,7 @@ mcpBlender/ (Raíz del Repositorio)
 │   └── WhatsApp Image...   # Captura complementaria
 ├── moby_studio/            # Carpeta Core de la Aplicación
 │   ├── _archive/           # Backups históricos de código (server.py anterior y JS redundantes)
-│   ├── output/             # Directorio activo de guardado (layout.json y modelos GLB)
+│   ├── output/             # Directorio activo de guardado (layout.json y modelos GLB/multimedia)
 │   ├── scripts/            # Scripts generadores procedurales de Blender
 │   │   ├── gen_ballena.py
 │   │   ├── gen_buque.py
@@ -62,9 +65,9 @@ mcpBlender/ (Raíz del Repositorio)
 │   │   ├── yolov8_docker_custom.pt
 │   │   └── yolov8n.pt
 │   ├── venv/               # Entorno Virtual Python con dependencias locales
-│   ├── editor.html         # Lienzo e interfaz premium de edición 3D
-│   ├── index.html          # Vista de presentación y Realidad Aumentada (Play AR)
-│   └── lanzador_ar.py      # Servidor HTTP unificado y Backend API REST
+│   ├── editor.html         # Lienzo e interfaz premium de edición 3D (Gizmos, menus, modal)
+│   ├── index.html          # Vista de presentación y Realidad Aumentada (Play AR, Image tracking)
+│   └── lanzador_ar.py      # Servidor HTTP unificado y Backend API REST (Soporte upload-media)
 ├── .gitignore              # Reglas de exclusión para no subir venv/ ni pesos pesados .pt
 └── README.md               # El documento que estás leyendo
 ```
@@ -108,27 +111,13 @@ El backend de `lanzador_ar.py` expone los siguientes endpoints REST listos para 
 | Endpoint | Método | Entrada | Salida | Descripción |
 |---|---|---|---|---|
 | `/api/list-models` | `GET` | Ninguna | `JSON Array` | Lista todos los modelos `.glb` en `output/` con tamaño real en disco y fecha de edición. |
-| `/api/save-layout` | `POST` | `JSON Object` | `JSON Status` | Guarda la escena 3D actual (nombres, posiciones, rotaciones y escalas) en `output/layout.json`. |
+| `/api/save-layout` | `POST` | `JSON Object` | `JSON Status` | Guarda la escena 3D actual (nombres, posiciones, rotaciones, escalas, disparadores) en `output/layout.json`. |
 | `/api/upload-model` | `POST` | `Binary glb` | `JSON Object` | Sube un archivo `.glb`/`.gltf` externo y lo registra en la mediateca. |
+| `/api/upload-media` | `POST` | `Binary file` | `JSON Object` | Carga genérica de archivos multimedia (MP4, PNG, JPG) y los almacena de forma segura en `output/` para targets. |
 | `/api/delete-model` | `POST` | Query `?name=file.glb` | `JSON Status` | Elimina permanentemente el modelo físico de la carpeta `output/` del servidor. |
 | `/api/generate-model`| `POST` | Query `?script=name.py`| `JSON Object` | Ejecuta a Blender en modo silencioso (`headless`) para compilar un modelo procedural. |
 | `/api/compress-model`| `POST` | Ninguna | `JSON Status` | Comprime el modelo base actual mediante Blender usando el compresor Draco. |
 | `/api/vision` | `POST` | `JSON {image: base64}` | `JSON {response: str}` | Realiza inferencia local YOLOv8 del frame de la cámara y genera analogía Docker vía Ollama. |
-
----
-
-## 📝 Guía para Colaboradores (Crear Nuevos Generadores Blender)
-
-Agregar tus propios scripts de generación 3D procedural en Blender es muy sencillo:
-
-1.  Crea un archivo Python (ejemplo: `gen_cohete.py`) que use el módulo `bpy` de Blender para modelar, asignar materiales y exportar a la carpeta `output/`.
-2.  Guárdalo dentro de la carpeta `moby_studio/scripts/`.
-3.  En `moby_studio/editor.html`, añade el botón en la interfaz llamando a la API:
-    ```javascript
-    // Ejemplo de llamada desde el frontend
-    fetch('/api/generate-model?script=gen_cohete.py', { method: 'POST' });
-    ```
-4.  ¡Listo! Blender compilará tu objeto procedural y la mediateca dinámica se refrescará con el nuevo archivo de inmediato.
 
 ---
 
