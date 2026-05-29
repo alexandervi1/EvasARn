@@ -218,6 +218,424 @@
             line-height: 1.3;
         }
 
+        .quick-ar-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .quick-ar-card {
+            border: 1px solid rgba(0, 243, 255, 0.22);
+            background: rgba(0, 243, 255, 0.045);
+            border-radius: 10px;
+            padding: 11px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+
+        .quick-ar-card:hover {
+            border-color: var(--color-docker);
+            background: rgba(0, 243, 255, 0.09);
+            transform: translateY(-1px);
+        }
+
+        .quick-ar-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(2, 132, 199, 0.18);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .quick-ar-copy {
+            min-width: 0;
+        }
+
+        .quick-ar-title {
+            color: #f8fafc;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .quick-ar-desc {
+            color: #94a3b8;
+            font-size: 10px;
+            line-height: 1.35;
+            margin-top: 2px;
+        }
+
+        .scene-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .scene-stat {
+            border: 1px solid var(--color-border-glass);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.025);
+            padding: 9px 8px;
+            text-align: center;
+        }
+
+        .scene-stat-value {
+            color: var(--color-docker);
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .scene-stat-label {
+            color: #64748b;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .outliner-search {
+            width: 100%;
+            background: rgba(10, 15, 30, 0.95);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 10px;
+            color: #e2e8f0;
+            padding: 10px 12px;
+            font-size: 12px;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        .outliner-search:focus {
+            border-color: rgba(0, 243, 255, 0.45);
+            box-shadow: 0 0 0 2px rgba(0, 243, 255, 0.08);
+        }
+
+        .outliner-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .outliner-group {
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.015);
+            overflow: hidden;
+        }
+
+        .outliner-group-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 10px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            background: rgba(255,255,255,0.025);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .outliner-item {
+            display: grid;
+            grid-template-columns: 22px minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+            padding: 9px 10px;
+            border-top: 1px solid rgba(255,255,255,0.035);
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .outliner-item:first-of-type {
+            border-top: none;
+        }
+
+        .outliner-item:hover {
+            background: rgba(0, 243, 255, 0.045);
+        }
+
+        .outliner-item.active {
+            background: rgba(0, 243, 255, 0.09);
+            box-shadow: inset 2px 0 0 var(--color-docker);
+        }
+
+        .outliner-item.hidden {
+            opacity: 0.48;
+        }
+
+        .outliner-name {
+            min-width: 0;
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .outliner-meta {
+            color: #64748b;
+            font-size: 10px;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .outliner-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .outliner-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.035);
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .outliner-btn:hover {
+            border-color: var(--color-docker);
+            color: var(--color-docker);
+            background: rgba(0,243,255,0.08);
+        }
+
+        .outliner-empty {
+            border: 1px dashed rgba(255,255,255,0.12);
+            border-radius: 10px;
+            color: #64748b;
+            font-size: 12px;
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .save-state-badge {
+            border: 1px solid rgba(34, 197, 94, 0.28);
+            background: rgba(34, 197, 94, 0.08);
+            color: #86efac;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 5px 9px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .save-state-badge.dirty {
+            border-color: rgba(234, 179, 8, 0.32);
+            background: rgba(234, 179, 8, 0.09);
+            color: #fde68a;
+        }
+
+        .autosave-chip {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(15, 23, 42, 0.55);
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 5px 9px;
+            border-radius: 999px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .autosave-chip.active {
+            display: inline-flex;
+        }
+
+        .draft-recovery-banner {
+            position: absolute;
+            top: 82px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(680px, calc(100vw - 40px));
+            border: 1px solid rgba(0, 243, 255, 0.26);
+            background: rgba(10, 15, 30, 0.94);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35), 0 0 24px rgba(0, 243, 255, 0.12);
+            border-radius: 14px;
+            padding: 14px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            pointer-events: auto;
+            z-index: 120;
+            backdrop-filter: blur(14px);
+        }
+
+        .draft-recovery-banner.active {
+            display: flex;
+        }
+
+        .draft-title {
+            color: #e2e8f0;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 3px;
+        }
+
+        .draft-detail {
+            color: #94a3b8;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .draft-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .draft-actions .btn {
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .publish-score {
+            border: 1px solid rgba(0, 243, 255, 0.18);
+            background: rgba(0, 243, 255, 0.04);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .publish-score-value {
+            color: var(--color-docker);
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .publish-score-label {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .publish-check-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .publish-check {
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.025);
+            border-radius: 10px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 24px minmax(0, 1fr);
+            gap: 9px;
+        }
+
+        .publish-check.ok {
+            border-color: rgba(34, 197, 94, 0.24);
+            background: rgba(34, 197, 94, 0.055);
+        }
+
+        .publish-check.warn {
+            border-color: rgba(234, 179, 8, 0.24);
+            background: rgba(234, 179, 8, 0.055);
+        }
+
+        .publish-check.error {
+            border-color: rgba(239, 68, 68, 0.28);
+            background: rgba(239, 68, 68, 0.055);
+        }
+
+        .publish-check-icon {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .publish-check-title {
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .publish-check-detail {
+            color: #94a3b8;
+            font-size: 10.5px;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        .publish-export-box {
+            border: 1px solid rgba(0, 243, 255, 0.16);
+            background: rgba(0, 243, 255, 0.035);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            margin-bottom: 12px;
+        }
+
+        .publish-export-title {
+            color: #e2e8f0;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .publish-export-detail {
+            color: #94a3b8;
+            font-size: 10.5px;
+            line-height: 1.4;
+        }
+
+        .publish-export-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .publish-export-link {
+            color: var(--color-docker);
+            font-size: 10.5px;
+            font-weight: 800;
+            text-decoration: none;
+            display: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .inspector {
             grid-area: inspector;
             background: var(--color-bg-glass);
@@ -314,6 +732,54 @@
 
         .control-input::-webkit-slider-thumb:hover {
             transform: scale(1.25);
+        }
+
+        .numeric-row {
+            display: grid;
+            grid-template-columns: 1fr 86px 28px;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .numeric-input {
+            width: 100%;
+            min-height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border-glass);
+            background: rgba(10, 15, 30, 0.95);
+            color: #e2e8f0;
+            padding: 7px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: monospace;
+            outline: none;
+            pointer-events: auto;
+        }
+
+        .numeric-input:focus {
+            border-color: rgba(0, 243, 255, 0.55);
+            box-shadow: 0 0 0 2px rgba(0, 243, 255, 0.08);
+        }
+
+        .axis-reset-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.035);
+            color: #94a3b8;
+            cursor: pointer;
+            pointer-events: auto;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .axis-reset-btn:hover {
+            border-color: var(--color-docker);
+            color: var(--color-docker);
+            background: rgba(0,243,255,0.08);
         }
 
         .btn-delete {
@@ -554,6 +1020,48 @@
             gap: 8px;
         }
 
+        .media-toolbar {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .media-search {
+            width: 100%;
+            background: rgba(10, 15, 30, 0.95);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 9px;
+            color: #e2e8f0;
+            padding: 9px 10px;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .media-filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .media-filter {
+            border: 1px solid var(--color-border-glass);
+            background: rgba(255,255,255,0.025);
+            color: #94a3b8;
+            border-radius: 999px;
+            padding: 6px 9px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .media-filter.active {
+            border-color: rgba(0, 243, 255, 0.45);
+            background: rgba(0, 243, 255, 0.08);
+            color: var(--color-docker);
+        }
+
         .media-item {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--color-border-glass);
@@ -565,6 +1073,11 @@
             transition: border-color 0.2s;
         }
 
+        .media-item.in-use {
+            border-color: rgba(34, 197, 94, 0.22);
+            background: rgba(34, 197, 94, 0.035);
+        }
+
         .media-item:hover {
             border-color: rgba(0, 243, 255, 0.3);
         }
@@ -572,8 +1085,23 @@
         .media-item-icon {
             font-size: 20px;
             flex-shrink: 0;
-            width: 28px;
+            width: 42px;
+            height: 42px;
             text-align: center;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(5, 7, 15, 0.42);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .media-item-icon img,
+        .media-item-icon video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .media-item-info {
@@ -594,6 +1122,30 @@
             font-size: 10px;
             color: #64748b;
             margin-top: 2px;
+        }
+
+        .media-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 5px;
+        }
+
+        .media-badge {
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(148, 163, 184, 0.08);
+            color: #94a3b8;
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .media-badge.used {
+            border-color: rgba(34, 197, 94, 0.28);
+            background: rgba(34, 197, 94, 0.09);
+            color: #86efac;
         }
 
         .media-item-actions {
@@ -619,6 +1171,7 @@
 
         .media-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; color: #fff; }
         .media-btn.add:hover { border-color: var(--color-docker); color: var(--color-docker); background: rgba(0,243,255,0.08); }
+        .media-btn.assign:hover { border-color: #a78bfa; color: #c4b5fd; background: rgba(167,139,250,0.08); }
         .media-btn.del:hover { border-color: var(--color-error); color: var(--color-error); background: rgba(239,68,68,0.08); }
 
         /* === ESTADO DE VALIDACIÓN — Status Badges (usados en index.html) === */
@@ -874,7 +1427,7 @@
         /* ESTRELLA DE NAVEGACIÓN COMPASS STYLE BLENDER/UNITY */
         #viewport-navigation-star {
             position: absolute;
-            top: 90px;
+            top: 125px;
             right: calc(var(--inspector-width, 320px) + 20px);
             width: 100px;
             height: 100px;
@@ -965,16 +1518,16 @@
         .ar-modal {
             background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.9) 100%);
             border: 1px solid var(--color-border-glass);
-            border-radius: 20px;
+            border-radius: 16px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 243, 255, 0.1);
-            width: 90%;
-            max-width: 470px;
-            padding: 25px;
+            width: min(92vw, 860px);
+            max-height: min(88vh, 760px);
+            padding: 0;
             display: flex;
             flex-direction: column;
-            gap: 20px;
             position: relative;
             animation: modalFadeIn 0.3s ease-out;
+            overflow: hidden;
         }
 
         @keyframes modalFadeIn {
@@ -987,7 +1540,8 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--color-border-glass);
-            padding-bottom: 15px;
+            padding: 18px 20px;
+            background: rgba(2, 132, 199, 0.08);
         }
 
         .ar-modal-title {
@@ -997,6 +1551,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .ar-modal-subtitle {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-top: 3px;
+            font-weight: 500;
         }
 
         .ar-modal-close {
@@ -1013,9 +1574,189 @@
         }
 
         .ar-modal-body {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 250px;
+            gap: 16px;
+            padding: 18px 20px;
+            overflow-y: auto;
+        }
+
+        .ar-config-main {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .ar-section-card {
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.025);
+            border-radius: 12px;
+            padding: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ar-section-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .ar-section-title {
+            color: #f8fafc;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .ar-section-desc {
+            color: #64748b;
+            font-size: 10.5px;
+            line-height: 1.4;
+            margin-top: 3px;
+        }
+
+        .ar-step-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid rgba(0, 243, 255, 0.24);
+            color: var(--color-docker);
+            font-weight: 800;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .ar-field-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .ar-field-row .control-input {
+            min-height: 38px;
+        }
+
+        .ar-mini-btn {
+            min-width: 74px;
+            justify-content: center;
+            padding: 8px 12px;
+            font-size: 11px;
+            margin: 0;
+            border-radius: 10px;
+        }
+
+        .ar-modal select.control-input,
+        .ar-modal input.control-input {
+            height: auto;
+            min-height: 38px;
+            border: 1px solid var(--color-border-glass);
+            background: rgba(10, 15, 30, 0.95);
+            border-radius: 9px;
+            padding: 10px;
+            color: #cbd5e1;
+            font-weight: 600;
+            font-size: 12px;
+            outline: none;
+            pointer-events: auto;
+        }
+
+        .ar-modal select.control-input:focus,
+        .ar-modal input.control-input:focus {
+            border-color: rgba(0, 243, 255, 0.55);
+            box-shadow: 0 0 0 2px rgba(0, 243, 255, 0.08);
+        }
+
+        .ar-summary-panel {
+            border: 1px solid rgba(0, 243, 255, 0.14);
+            background: rgba(2, 132, 199, 0.055);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            align-self: start;
+        }
+
+        .ar-preview-box {
+            aspect-ratio: 1 / 1;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(5,7,15,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #64748b;
+            font-size: 32px;
+        }
+
+        .ar-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .ar-summary-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .ar-summary-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            color: #94a3b8;
+            font-size: 10.5px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 8px;
+        }
+
+        .ar-summary-value {
+            color: #e2e8f0;
+            text-align: right;
+            max-width: 132px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ar-status-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 22px;
+            border-radius: 999px;
+            padding: 3px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            color: #94a3b8;
+            background: rgba(148, 163, 184, 0.08);
+        }
+
+        .ar-status-chip.ready {
+            color: #86efac;
+            border-color: rgba(34, 197, 94, 0.35);
+            background: rgba(34, 197, 94, 0.09);
+        }
+
+        .ar-status-chip.warn {
+            color: #fde68a;
+            border-color: rgba(234, 179, 8, 0.35);
+            background: rgba(234, 179, 8, 0.09);
         }
 
         .ar-modal-footer {
@@ -1023,6 +1764,68 @@
             justify-content: flex-end;
             gap: 12px;
             border-top: 1px solid var(--color-border-glass);
+            padding: 14px 20px;
+            background: rgba(5, 7, 15, 0.42);
+        }
+
+        .ar-recognition-note {
+            border: 1px solid rgba(34, 197, 94, 0.22);
+            background: rgba(34, 197, 94, 0.07);
+            color: #cbd5e1;
+            font-size: 10.5px;
+            line-height: 1.45;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+
+        .inspector-action-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .btn-secondary-action {
+            width: 100%;
+            justify-content: center;
+            margin-top: 0;
+            border-color: rgba(0, 243, 255, 0.22);
+            background: rgba(0, 243, 255, 0.06);
+            color: #dffcff;
+        }
+
+        .btn-secondary-action:hover {
+            border-color: var(--color-docker);
+            background: rgba(0, 243, 255, 0.12);
+        }
+
+        @media (max-width: 760px) {
+            .ar-modal {
+                width: 94vw;
+                max-height: 90vh;
+            }
+
+            .ar-modal-body {
+                grid-template-columns: 1fr;
+                padding: 14px;
+            }
+
+            .ar-summary-panel {
+                position: static;
+                order: -1;
+            }
+
+            .ar-preview-box {
+                aspect-ratio: 16 / 9;
+            }
+
+            .ar-field-row {
+                flex-direction: column;
+            }
+
+            .ar-mini-btn {
+                width: 100%;
+            }
+        }
         /* === RESPONSIVE UTILITIES AND TOGGLE BUTTONS === */
         .floating-toggle-btn {
             position: absolute;
@@ -1134,7 +1937,7 @@
             }
             #viewport-navigation-star {
                 right: 20px;
-                top: 80px;
+                top: 110px;
                 width: 70px;
                 height: 70px;
             }
@@ -1172,9 +1975,18 @@
                 <span class="logo-whale">🐳</span>
                 <span class="logo-title">MOBY STUDIO</span>
                 <span class="logo-badge">EDITOR 3D</span>
+                <span class="save-state-badge" id="save-state-badge">Guardado</span>
+                <span class="autosave-chip" id="autosave-chip">Autosave listo</span>
             </div>
             
             <div class="header-buttons">
+                <select id="project-select" class="control-input" style="width: 150px; min-height: 34px; padding: 7px 9px;" onchange="cambiarProyectoActivo(this.value)">
+                    <option value="default">default</option>
+                </select>
+                <input id="project-name-input" class="control-input" style="width: 130px; min-height: 34px; padding: 7px 9px;" placeholder="nuevo proyecto">
+                <button class="btn btn-view" onclick="crearProyectoDesdeInput()">Crear</button>
+                <input id="collab-user-name" class="control-input" style="width: 120px; min-height: 34px; padding: 7px 9px;" placeholder="tu nombre" onchange="actualizarUsuarioColaboracion(this.value)">
+                <span class="autosave-chip active" id="presence-chip">Solo tú</span>
                 <a href="index.html" class="btn btn-view">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     Vista Final Play
@@ -1183,8 +1995,22 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     Guardar Cambios
                 </button>
+                <button class="btn btn-view" onclick="cambiarTabSidebar('publish'); validarPublicacion()">
+                    Publicar
+                </button>
             </div>
         </header>
+
+        <div class="draft-recovery-banner" id="draft-recovery-banner">
+            <div>
+                <div class="draft-title">Hay un borrador local sin publicar</div>
+                <div class="draft-detail" id="draft-recovery-detail">Puedes restaurarlo para continuar o descartarlo si prefieres el layout guardado.</div>
+            </div>
+            <div class="draft-actions">
+                <button class="btn btn-view" onclick="restaurarBorradorLocal()">Restaurar</button>
+                <button class="btn" onclick="descartarBorradorLocal()">Descartar</button>
+            </div>
+        </div>
 
         <!-- BUTTONS TO COLLAPSE/EXPAND SIDEBARS -->
         <button id="btn-toggle-sidebar" class="floating-toggle-btn" onclick="toggleSidebar()" title="Ocultar/Mostrar Barra Lateral">
@@ -1199,13 +2025,121 @@
 
             <!-- TABS HEADER -->
             <div class="sidebar-tabs">
+                <button class="sidebar-tab" id="tab-scene" onclick="cambiarTabSidebar('scene')">☰ Escena</button>
+                <button class="sidebar-tab" id="tab-publish" onclick="cambiarTabSidebar('publish')">✓ Publicar</button>
                 <button class="sidebar-tab active" id="tab-models" onclick="cambiarTabSidebar('models')">📦 Modelos</button>
                 <button class="sidebar-tab" id="tab-buscar" onclick="cambiarTabSidebar('buscar')">🔍 Buscar</button>
                 <button class="sidebar-tab" id="tab-media" onclick="cambiarTabSidebar('media')">🗂️ Medios</button>
             </div>
 
+            <!-- === PANEL PUBLICAR: VALIDACIÓN DE ESCENA === -->
+            <div class="sidebar-panel" id="panel-publish">
+                <div class="media-header">
+                    <div>
+                        <div class="panel-section-title" style="margin-bottom: 2px;">✓ Publicar</div>
+                        <div class="media-stats" id="publish-summary">Validacion de escena</div>
+                    </div>
+                    <button class="btn-refresh" onclick="validarPublicacion()" title="Revalidar">↻</button>
+                </div>
+
+                <div class="publish-score">
+                    <div>
+                        <div class="publish-score-value" id="publish-score-value">0%</div>
+                        <div class="publish-score-label" id="publish-score-label">No validado</div>
+                    </div>
+                    <button class="btn btn-save" style="margin:0; padding: 8px 12px;" onclick="guardarDiseno()">Guardar</button>
+                </div>
+
+                <div class="publish-export-box">
+                    <div class="publish-export-title">Exportar experiencia</div>
+                    <div class="publish-export-detail" id="publish-export-detail">Genera un ZIP con el visor, layout y assets usados.</div>
+                    <div class="publish-export-actions">
+                        <button class="btn btn-save" id="btn-export-experience" style="margin:0; justify-content:center;" onclick="exportarExperiencia()">Exportar ZIP</button>
+                        <a class="publish-export-link" id="publish-export-link" href="#" download>Descargar paquete</a>
+                    </div>
+                </div>
+
+                <div class="publish-check-list" id="publish-check-list">
+                    <div class="outliner-empty">Ejecuta la validacion para revisar la escena.</div>
+                </div>
+            </div>
+
+            <!-- === PANEL 0: OUTLINER DE ESCENA === -->
+            <div class="sidebar-panel" id="panel-scene">
+                <div class="media-header">
+                    <div>
+                        <div class="panel-section-title" style="margin-bottom: 2px;">☰ Escena</div>
+                        <div class="media-stats" id="outliner-summary">0 objetos</div>
+                    </div>
+                    <button class="btn-refresh" onclick="renderOutliner()" title="Actualizar escena">↻</button>
+                </div>
+
+                <div class="scene-stats">
+                    <div class="scene-stat">
+                        <div class="scene-stat-value" id="scene-stat-total">0</div>
+                        <div class="scene-stat-label">Objetos</div>
+                    </div>
+                    <div class="scene-stat">
+                        <div class="scene-stat-value" id="scene-stat-markers">0</div>
+                        <div class="scene-stat-label">Targets</div>
+                    </div>
+                    <div class="scene-stat">
+                        <div class="scene-stat-value" id="scene-stat-anchored">0</div>
+                        <div class="scene-stat-label">Anclados</div>
+                    </div>
+                </div>
+
+                <input id="outliner-search" class="outliner-search" type="text" placeholder="Buscar por nombre, tipo o target..." oninput="renderOutliner()">
+                <div class="outliner-list" id="outliner-list">
+                    <div class="outliner-empty">No hay objetos en la escena.</div>
+                </div>
+            </div>
+
             <!-- === PANEL 1: MODELOS INTEGRADOS === -->
             <div class="sidebar-panel active" id="panel-models">
+                <div class="api-key-section" style="margin-bottom: 16px; border-color: rgba(0, 243, 255, 0.18); background: rgba(0, 243, 255, 0.025);">
+                    <div class="panel-section-title" style="margin-bottom: 8px;">
+                        <span style="color: var(--color-docker);">🎯</span> Crear Experiencia AR
+                    </div>
+                    <div class="quick-ar-grid">
+                        <div class="quick-ar-card" onclick="crearExperienciaARRapida(null, 'Panel de Imagen AR', 'image')">
+                            <div class="quick-ar-icon">🖼️</div>
+                            <div class="quick-ar-copy">
+                                <div class="quick-ar-title">Marcador + Imagen</div>
+                                <div class="quick-ar-desc">Prepara un panel explicativo flotante y abre la carga del archivo.</div>
+                            </div>
+                        </div>
+                        <div class="quick-ar-card" onclick="crearExperienciaARRapida(null, 'Reproductor AR', 'video')">
+                            <div class="quick-ar-icon">▶</div>
+                            <div class="quick-ar-copy">
+                                <div class="quick-ar-title">Marcador + Video</div>
+                                <div class="quick-ar-desc">Crea un reproductor en el aire asociado al marcador físico.</div>
+                            </div>
+                        </div>
+                        <div class="quick-ar-card" onclick="crearPlantillaOIRA('oira1')">
+                            <div class="quick-ar-icon">🎙</div>
+                            <div class="quick-ar-copy">
+                                <div class="quick-ar-title">OIRA1 Voz + Docker</div>
+                                <div class="quick-ar-desc">Disparador para consultas por voz y respuesta Docker en RA.</div>
+                            </div>
+                        </div>
+                        <div class="quick-ar-card" onclick="crearPlantillaOIRA('oira2')">
+                            <div class="quick-ar-icon">▦</div>
+                            <div class="quick-ar-copy">
+                                <div class="quick-ar-title">OIRA2 Interfaz Docker</div>
+                                <div class="quick-ar-desc">Target con botones/objetos 3D explicativos de Docker Desktop.</div>
+                            </div>
+                        </div>
+                        <div class="quick-ar-card" onclick="crearPlantillaOIRA('oira3')">
+                            <div class="quick-ar-icon">⇄</div>
+                            <div class="quick-ar-copy">
+                                <div class="quick-ar-title">OIRA3 Pipeline 3D</div>
+                                <div class="quick-ar-desc">Secuencia de objetos para explicar flujo, ventajas y uso de Docker.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- SECCIÓN ESCENARIO AJUSTABLE (MESA) -->
                 <div class="api-key-section" style="margin-bottom: 16px; border-bottom: 1px solid var(--color-border-glass); padding-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
                     <div class="panel-section-title" style="margin-bottom: 2px;">
@@ -1238,28 +2172,16 @@
                 </div>
 
                 <div class="panel-section-title" style="margin-bottom: 4px;">
-                    <span style="color: var(--color-docker);">📦</span> Modelos Base
+                    <span style="color: var(--color-docker);">🎯</span> Marcadores y assets
                 </div>
                 <div class="asset-list">
-                    <div class="asset-card" data-filename="blue whale 3d model.glb" onclick="crearEntidad('modelo-ballena', 'blue whale 3d model')">
-                        <div class="asset-card-title">🐳 Ballena Azul</div>
-                        <div class="asset-card-desc">Modelo Draco de alta fidelidad.</div>
-                    </div>
-                    <div class="asset-card" data-filename="laptop_caos.glb" onclick="crearEntidad('modelo-laptop', 'laptop_caos')">
-                        <div class="asset-card-title">💻 Laptop de Caos</div>
-                        <div class="asset-card-desc">Laptop con dependencias en desarrollo.</div>
-                    </div>
-                    <div class="asset-card" data-filename="servidor_rack.glb" onclick="crearEntidad('modelo-rack', 'servidor_rack')">
-                        <div class="asset-card-title">🖥️ Servidor Rack</div>
-                        <div class="asset-card-desc">Infraestructura de producción.</div>
-                    </div>
-                    <div class="asset-card" data-filename="buque_carga.glb" onclick="crearEntidad('modelo-buque', 'buque_carga')">
-                        <div class="asset-card-title">🚢 Buque de Carga</div>
-                        <div class="asset-card-desc">Carguero industrial de contenedores.</div>
-                    </div>
                     <div class="asset-card" style="border: 1px dashed var(--color-docker); background: rgba(0, 243, 255, 0.03);" onclick="crearMarcadorAR()">
                         <div class="asset-card-title" style="color: var(--color-docker);">🎯 Añadir Marcador AR</div>
                         <div class="asset-card-desc">Crea un anclaje físico con imagen/QR editable.</div>
+                    </div>
+                    <div class="asset-card" onclick="cambiarTabSidebar('media')">
+                        <div class="asset-card-title">🗂️ Abrir Mediateca</div>
+                        <div class="asset-card-desc">Agrega tus propios modelos, imagenes, videos o targets .mind.</div>
                     </div>
                 </div>
 
@@ -1284,8 +2206,23 @@
                     <button class="btn-refresh" onclick="cargarMediateca()" title="Actualizar lista">↻</button>
                 </div>
 
+                <div class="media-toolbar">
+                    <input id="media-search-input" class="media-search" type="text" placeholder="Buscar asset..." oninput="renderMediateca()">
+                    <button class="btn btn-save" style="padding: 8px 10px; border-radius: 9px; margin: 0;" onclick="document.getElementById('asset-upload-input').click()">Subir</button>
+                    <input type="file" id="asset-upload-input" accept=".glb,.gltf,image/*,video/*,.mind" style="display:none;" onchange="subirAssetMediateca(this.files[0])">
+                </div>
+
+                <div class="media-filter-row">
+                    <button class="media-filter active" data-filter="all" onclick="setMediaFilter('all')">Todo</button>
+                    <button class="media-filter" data-filter="model" onclick="setMediaFilter('model')">3D</button>
+                    <button class="media-filter" data-filter="image" onclick="setMediaFilter('image')">Imagen</button>
+                    <button class="media-filter" data-filter="video" onclick="setMediaFilter('video')">Video</button>
+                    <button class="media-filter" data-filter="target" onclick="setMediaFilter('target')">Targets</button>
+                    <button class="media-filter" data-filter="unused" onclick="setMediaFilter('unused')">Sin uso</button>
+                </div>
+
                 <div class="media-list" id="media-file-list">
-                    <!-- Se llena dinámicamente con /api/list-models -->
+                    <!-- Se llena dinámicamente con /api/list-assets -->
                     <div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">⏳ Cargando mediateca...</div>
                 </div>
             </div>
@@ -1423,7 +2360,11 @@
                         <span>Posición X</span>
                         <span class="control-val" id="val-pos-x">0.00</span>
                     </div>
-                    <input type="range" class="control-input" id="slide-pos-x" min="-6" max="6" step="0.05" oninput="actualizarTransformacion()">
+                    <div class="numeric-row">
+                        <input type="range" class="control-input" id="slide-pos-x" min="-6" max="6" step="0.05" oninput="actualizarTransformacion()">
+                        <input type="number" class="numeric-input" id="num-pos-x" step="0.05" min="-6" max="6" oninput="actualizarTransformacionDesdeNumericos()">
+                        <button class="axis-reset-btn" onclick="resetTransformAxis('pos-x')" title="Reset X">0</button>
+                    </div>
                 </div>
 
                 <!-- POSITION Y -->
@@ -1432,7 +2373,11 @@
                         <span>Posición Y</span>
                         <span class="control-val" id="val-pos-y">1.00</span>
                     </div>
-                    <input type="range" class="control-input" id="slide-pos-y" min="-2" max="5" step="0.05" oninput="actualizarTransformacion()">
+                    <div class="numeric-row">
+                        <input type="range" class="control-input" id="slide-pos-y" min="-2" max="5" step="0.05" oninput="actualizarTransformacion()">
+                        <input type="number" class="numeric-input" id="num-pos-y" step="0.05" min="-2" max="5" oninput="actualizarTransformacionDesdeNumericos()">
+                        <button class="axis-reset-btn" onclick="resetTransformAxis('pos-y')" title="Reset Y">0</button>
+                    </div>
                 </div>
 
                 <!-- POSITION Z -->
@@ -1441,7 +2386,11 @@
                         <span>Posición Z (Profundidad)</span>
                         <span class="control-val" id="val-pos-z">-3.00</span>
                     </div>
-                    <input type="range" class="control-input" id="slide-pos-z" min="-10" max="-1" step="0.05" oninput="actualizarTransformacion()">
+                    <div class="numeric-row">
+                        <input type="range" class="control-input" id="slide-pos-z" min="-10" max="-1" step="0.05" oninput="actualizarTransformacion()">
+                        <input type="number" class="numeric-input" id="num-pos-z" step="0.05" min="-10" max="-1" oninput="actualizarTransformacionDesdeNumericos()">
+                        <button class="axis-reset-btn" onclick="resetTransformAxis('pos-z')" title="Reset Z">0</button>
+                    </div>
                 </div>
 
                 <!-- ROTATION Y -->
@@ -1450,7 +2399,11 @@
                         <span>Rotación Y (Giro)</span>
                         <span class="control-val" id="val-rot-y">0°</span>
                     </div>
-                    <input type="range" class="control-input" id="slide-rot-y" min="0" max="360" step="1" oninput="actualizarTransformacion()">
+                    <div class="numeric-row">
+                        <input type="range" class="control-input" id="slide-rot-y" min="0" max="360" step="1" oninput="actualizarTransformacion()">
+                        <input type="number" class="numeric-input" id="num-rot-y" step="1" min="0" max="360" oninput="actualizarTransformacionDesdeNumericos()">
+                        <button class="axis-reset-btn" onclick="resetTransformAxis('rot-y')" title="Reset rotación">0</button>
+                    </div>
                 </div>
 
                 <!-- SCALE -->
@@ -1459,7 +2412,11 @@
                         <span>Escala</span>
                         <span class="control-val" id="val-scale">1.00</span>
                     </div>
-                    <input type="range" class="control-input" id="slide-scale" min="0.1" max="4.0" step="0.05" oninput="actualizarTransformacion()">
+                    <div class="numeric-row">
+                        <input type="range" class="control-input" id="slide-scale" min="0.1" max="4.0" step="0.05" oninput="actualizarTransformacion()">
+                        <input type="number" class="numeric-input" id="num-scale" step="0.05" min="0.1" max="4" oninput="actualizarTransformacionDesdeNumericos()">
+                        <button class="axis-reset-btn" onclick="resetTransformAxis('scale')" title="Reset escala">1</button>
+                    </div>
                 </div>
 
                 <!-- ANCLAJE FÍSICO AR (TARGET) -->
@@ -1480,6 +2437,17 @@
                     <button class="btn btn-save" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto; margin-top: 5px; background: var(--color-docker-blue);" onclick="abrirModalAR(entidadSeleccionada)">
                         🎯 Configurar Imagen/QR
                     </button>
+                </div>
+
+                <div class="control-group" id="group-content-config" style="margin-bottom: 8px; display: none;">
+                    <div class="control-label">
+                        <span>Contenido AR Flotante</span>
+                    </div>
+                    <div class="inspector-action-row">
+                        <button class="btn btn-secondary-action" onclick="abrirModalAR(entidadSeleccionada)">
+                            ▶ Configurar 3D / Imagen / Video
+                        </button>
+                    </div>
                 </div>
 
                 <button class="btn btn-delete" onclick="eliminarEntidadSeleccionada()">
@@ -1507,55 +2475,142 @@
         <div id="ar-trigger-modal-overlay" class="ar-modal-overlay" onclick="cerrarModalAR(event)">
             <div class="ar-modal" onclick="event.stopPropagation()">
                 <div class="ar-modal-header">
-                    <div class="ar-modal-title">
-                        <span>🎯</span> Configurar Disparador AR
+                    <div>
+                        <div class="ar-modal-title">
+                            <span>🎯</span> Configurar Disparador AR
+                        </div>
+                        <div class="ar-modal-subtitle" id="ar-modal-subtitle">Define cómo se detecta y qué contenido aparece.</div>
                     </div>
                     <button type="button" class="ar-modal-close" onclick="cerrarModalAR()">&times;</button>
                 </div>
                 <div class="ar-modal-body">
-                    <p style="font-size: 11px; color: #94a3b8; line-height: 1.5; margin: 0 0 5px 0;">
-                        Asigna un marcador físico o código QR a este objeto 3D. El contenido seleccionado se reproducirá de forma dinámica cuando la cámara detecte el marcador en modo AR real.
-                    </p>
-                    
-                    <!-- Entrada de Imagen de Marcador (Target) -->
-                    <div class="control-group" style="padding: 0;">
-                        <div class="control-label" style="margin-bottom: 6px;">
-                            <span>Disparador / Marcador de Imagen (Target)</span>
+                    <div class="ar-config-main">
+                        <div class="ar-section-card" id="ar-section-target">
+                            <div class="ar-section-head">
+                                <div>
+                                    <div class="ar-section-title">Target físico</div>
+                                    <div class="ar-section-desc">Imagen o QR que el usuario apunta con la cámara.</div>
+                                </div>
+                                <div class="ar-step-badge">1</div>
+                            </div>
+                            <div class="control-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span>Imagen del target</span>
+                                </div>
+                                <div class="ar-field-row">
+                                    <input type="text" class="control-input" id="ar-marker-image" placeholder="Ruta al QR o imagen de target..." style="flex: 1;">
+                                    <button type="button" class="btn ar-mini-btn" onclick="document.getElementById('upload-marker-input').click()">Subir</button>
+                                    <input type="file" id="upload-marker-input" accept="image/*" style="display: none;" onchange="subirImagenMarcador(this.files[0])">
+                                </div>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" class="control-input" id="ar-marker-image" placeholder="Ruta al QR o imagen de target..." style="flex: 1; pointer-events: auto;">
-                            <button type="button" class="btn" style="padding: 8px 12px; font-size: 11px; margin: 0;" onclick="document.getElementById('upload-marker-input').click()">
-                                📁 Subir
-                            </button>
-                            <input type="file" id="upload-marker-input" accept="image/*" style="display: none;" onchange="subirImagenMarcador(this.files[0])">
+
+                        <div class="ar-section-card" id="ar-section-tracking">
+                            <div class="ar-section-head">
+                                <div>
+                                    <div class="ar-section-title">Reconocimiento</div>
+                                    <div class="ar-section-desc">Elige QR para móviles modernos o MindAR para imagen entrenada.</div>
+                                </div>
+                                <div class="ar-step-badge">2</div>
+                            </div>
+                            <div class="control-group" id="ar-tracking-mode-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span>Modo de tracking</span>
+                                </div>
+                                <select class="control-input" id="ar-tracking-mode" onchange="toggleTrackingInputsAR()">
+                                    <option value="qr">QR / BarcodeDetector</option>
+                                    <option value="image">Imagen / MindAR (.mind)</option>
+                                </select>
+                            </div>
+                            <div class="control-group" id="ar-recognition-key-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span>Clave QR</span>
+                                </div>
+                                <div class="ar-field-row">
+                                    <input type="text" class="control-input" id="ar-recognition-key" placeholder="Texto que tendrá el QR..." style="flex: 1;">
+                                    <button type="button" class="btn ar-mini-btn" onclick="generarQRParaMarcador()">Generar QR</button>
+                                </div>
+                                <div class="ar-recognition-note">
+                                    Si el QR contiene esta clave, el visor activa el marcador y muestra su contenido.
+                                </div>
+                            </div>
+                            <div class="control-group" id="ar-mind-target-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span>Target MindAR</span>
+                                </div>
+                                <div class="ar-field-row">
+                                    <input type="text" class="control-input" id="ar-mind-target-url" placeholder="output/target.mind" style="flex: 1;">
+                                    <button type="button" class="btn ar-mini-btn" onclick="document.getElementById('upload-mind-target-input').click()">Subir</button>
+                                    <input type="file" id="upload-mind-target-input" accept=".mind" style="display: none;" onchange="subirMindTarget(this.files[0])">
+                                </div>
+                                <input type="number" class="control-input" id="ar-mind-target-index" min="0" step="1" value="0" placeholder="Indice target">
+                            </div>
+                        </div>
+
+                        <div class="ar-section-card" id="ar-section-content">
+                            <div class="ar-section-head">
+                                <div>
+                                    <div class="ar-section-title">Contenido flotante</div>
+                                    <div class="ar-section-desc">Modelo, imagen o video que aparece al detectar el target.</div>
+                                </div>
+                                <div class="ar-step-badge">3</div>
+                            </div>
+                            <div class="control-group" id="ar-content-anchor-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span>Disparador asociado</span>
+                                </div>
+                                <select class="control-input" id="ar-content-anchor" onchange="cargarMarcadorAsociadoEnModal(); actualizarResumenModalAR()">
+                                    <option value="base">Mesa / sin disparador</option>
+                                </select>
+                            </div>
+                            <div class="control-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span>Tipo de contenido</span>
+                                </div>
+                                <select class="control-input" id="ar-media-type" onchange="toggleInputsMediaAR()">
+                                    <option value="3d">Modelo 3D (.glb)</option>
+                                    <option value="image">Imagen estática (.png / .jpg)</option>
+                                    <option value="video">Video inmersivo (.mp4)</option>
+                                    <option value="oira-node">Nodo OIRA generado</option>
+                                </select>
+                            </div>
+                            <div class="control-group" id="ar-content-url-group" style="padding: 0;">
+                                <div class="control-label" style="margin-bottom: 6px;">
+                                    <span id="ar-content-url-label">Archivo / URL del recurso</span>
+                                </div>
+                                <div class="ar-field-row">
+                                    <input type="text" class="control-input" id="ar-media-url" placeholder="Ruta del video, imagen o GLB..." style="flex: 1;">
+                                    <button type="button" class="btn ar-mini-btn" id="btn-upload-content" onclick="document.getElementById('upload-content-input').click()">Subir archivo</button>
+                                    <input type="file" id="upload-content-input" accept="*/*" style="display: none;" onchange="subirArchivoContenidoAR(this.files[0])">
+                                </div>
+                                <div class="ar-recognition-note" id="ar-content-source-note">
+                                    Puedes pegar un link directo o subir un archivo local.
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Tipo de Contenido a Desplegar -->
-                    <div class="control-group" style="padding: 0;">
-                        <div class="control-label" style="margin-bottom: 6px;">
-                            <span>Tipo de Contenido Multimedia</span>
+
+                    <aside class="ar-summary-panel">
+                        <div class="ar-summary-title">Resumen AR</div>
+                        <div class="ar-preview-box" id="ar-target-preview">🎯</div>
+                        <div class="ar-status-chip" id="ar-config-status">Sin configurar</div>
+                        <div class="ar-summary-line">
+                            <span>Objeto</span>
+                            <span class="ar-summary-value" id="ar-summary-object">-</span>
                         </div>
-                        <select class="control-input" id="ar-media-type" onchange="toggleInputsMediaAR()" style="background: rgba(10, 15, 30, 0.95); border: 1px solid var(--color-border-glass); border-radius: 8px; padding: 10px; color: #cbd5e1; font-weight: 600; cursor: pointer; font-size: 12px; outline: none; transition: border-color 0.3s ease; pointer-events: auto;">
-                            <option value="3d">📦 Modelo 3D (.glb)</option>
-                            <option value="image">🖼️ Imagen Estática (.png / .jpg)</option>
-                            <option value="video">🎥 Video Inmersivo (.mp4)</option>
-                        </select>
-                    </div>
-                    
-                    <!-- URL / Archivo del Contenido a Desplegar -->
-                    <div class="control-group" id="ar-content-url-group" style="padding: 0;">
-                        <div class="control-label" style="margin-bottom: 6px;">
-                            <span id="ar-content-url-label">Archivo / URL del Recurso</span>
+                        <div class="ar-summary-line">
+                            <span>Tracking</span>
+                            <span class="ar-summary-value" id="ar-summary-tracking">-</span>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" class="control-input" id="ar-media-url" placeholder="Ruta del video, imagen o GLB..." style="flex: 1; pointer-events: auto;">
-                            <button type="button" class="btn" id="btn-upload-content" style="padding: 8px 12px; font-size: 11px; margin: 0;" onclick="document.getElementById('upload-content-input').click()">
-                                📁 Subir
-                            </button>
-                            <input type="file" id="upload-content-input" accept="*/*" style="display: none;" onchange="subirArchivoContenidoAR(this.files[0])">
+                        <div class="ar-summary-line">
+                            <span>Target</span>
+                            <span class="ar-summary-value" id="ar-summary-target">-</span>
                         </div>
-                    </div>
+                        <div class="ar-summary-line">
+                            <span>Contenido</span>
+                            <span class="ar-summary-value" id="ar-summary-content">-</span>
+                        </div>
+                    </aside>
                 </div>
                 
                 <div class="ar-modal-footer">
@@ -1672,6 +2727,26 @@
         let escenaObjetos = [];
         let entidadSeleccionada = null;
         let contadorIds = 0;
+        let hayCambiosSinGuardar = false;
+        let proyectoActivo = localStorage.getItem('moby_studio_active_project_v1') || 'default';
+        let proyectoVersion = 0;
+        const AUTOSAVE_KEY_BASE = 'moby_studio_editor_draft_v1';
+        let AUTOSAVE_KEY = `${AUTOSAVE_KEY_BASE}_${proyectoActivo}`;
+        const AUTOSAVE_PUBLISHED_KEY = 'moby_studio_editor_last_published_v1';
+        const COLLAB_COLORS = ['#22d3ee', '#a78bfa', '#34d399', '#f59e0b', '#fb7185', '#60a5fa'];
+        let usuarioColaboracion = null;
+        let collabState = { users: [], locks: {} };
+        let collabTimer = null;
+        let sincronizandoRemoto = false;
+        let avisoCambioRemotoPendiente = false;
+        let autosaveTimer = null;
+        let ultimoBorradorLocal = null;
+        const HISTORIAL_LIMITE = 50;
+        let historialEstados = [];
+        let historialIndice = -1;
+        let historialSuspendido = false;
+        let historialSincronizado = true;
+        let ultimaAccionHistorial = { label: '', at: 0 };
 
         // --- EVOLUCIÓN: CONTROL DE MODOS DE TRANSFORMACIÓN (Q, W, E, R) ---
         let activeEditMode = 'orbit'; // 'orbit', 'translate', 'rotate', 'scale'
@@ -1744,6 +2819,15 @@
             if (evt.target.tagName === 'INPUT' || evt.target.tagName === 'TEXTAREA' || evt.target.tagName === 'SELECT') {
                 return;
             }
+
+            const isUndo = (evt.ctrlKey || evt.metaKey) && !evt.shiftKey && evt.code === 'KeyZ';
+            const isRedo = ((evt.ctrlKey || evt.metaKey) && (evt.code === 'KeyY' || (evt.shiftKey && evt.code === 'KeyZ')));
+            if (isUndo || isRedo) {
+                evt.preventDefault();
+                if (isUndo) ejecutarUndo();
+                if (isRedo) ejecutarRedo();
+                return;
+            }
             
             switch(evt.code) {
                 case 'KeyQ':
@@ -1808,6 +2892,7 @@
                 el.addEventListener('mousedown', (evt) => {
                     if (!entidadSeleccionada) return;
                     evt.stopPropagation(); // Evitar seleccionar la escena o desmarcar
+                    registrarEstadoHistorial('Mover objeto');
                     
                     isDragging = true;
                     // Obtener posición del mouse
@@ -1896,10 +2981,7 @@
                         visualCone.removeAttribute('material', 'emissiveIntensity');
                     }
                     
-                    // Registrar el cambio final en Undo/Redo
-                    if (entidadSeleccionada) {
-                        registrarTransformacion(entidadSeleccionada);
-                    }
+                    marcarCambiosSinGuardar();
                 };
                 
                 window.addEventListener('mousemove', onMouseMove);
@@ -2248,6 +3330,7 @@
 
         // --- EVOLUCIÓN: PANEL DE CONFIGURACIÓN AR TRIGGERS Y CARGA MULTIMEDIA ---
         function abrirModalAR(objeto) {
+            if (!puedoEditarObjeto(objeto)) return;
             objetoEnConfiguracionAR = objeto;
             
             // Adaptar dinámicamente el título del modal
@@ -2259,29 +3342,56 @@
                     titleSpan.innerHTML = '<span>🎯</span> Configurar Disparador AR';
                 }
             }
+            const subtitle = document.getElementById('ar-modal-subtitle');
+            if (subtitle) {
+                subtitle.innerText = objeto.isMarker
+                    ? "Define el target que activara contenido en camara."
+                    : "Define el contenido que aparecera cuando se detecte su target.";
+            }
 
             // Rellenar valores de los campos
             document.getElementById('ar-marker-image').value = objeto.markerImage || '';
             document.getElementById('ar-media-type').value = objeto.mediaType || '3d';
             document.getElementById('ar-media-url').value = objeto.mediaUrl || '';
+            const recognitionKeyInput = document.getElementById('ar-recognition-key');
+            if (recognitionKeyInput) recognitionKeyInput.value = objeto.recognitionKey || objeto.uuid || '';
+            document.getElementById('ar-tracking-mode').value = objeto.trackingMode || 'qr';
+            document.getElementById('ar-mind-target-url').value = objeto.mindTargetUrl || '';
+            document.getElementById('ar-mind-target-index').value = Number.isFinite(Number(objeto.mindTargetIndex)) ? Number(objeto.mindTargetIndex) : 0;
 
             // Mostrar/Ocultar campos según sea un marcador o un modelo a asociar
             const markerImageInput = document.getElementById('ar-marker-image');
             const markerImageGroup = markerImageInput ? markerImageInput.closest('.control-group') : null;
+            const recognitionKeyGroup = document.getElementById('ar-recognition-key-group');
+            const trackingModeGroup = document.getElementById('ar-tracking-mode-group');
+            const mindTargetGroup = document.getElementById('ar-mind-target-group');
             const mediaTypeGroup = document.getElementById('ar-media-type').closest('.control-group');
             const contentUrlGroup = document.getElementById('ar-content-url-group');
+            const contentAnchorGroup = document.getElementById('ar-content-anchor-group');
+            actualizarSelectorAnclajeModalAR(objeto);
+            if (!objeto.isMarker) cargarMarcadorAsociadoEnModal();
 
             if (objeto.isMarker) {
                 if (markerImageGroup) markerImageGroup.style.display = 'block';
+                if (recognitionKeyGroup) recognitionKeyGroup.style.display = 'block';
+                if (trackingModeGroup) trackingModeGroup.style.display = 'block';
+                if (mindTargetGroup) mindTargetGroup.style.display = 'block';
                 if (mediaTypeGroup) mediaTypeGroup.style.display = 'none';
                 if (contentUrlGroup) contentUrlGroup.style.display = 'none';
+                if (contentAnchorGroup) contentAnchorGroup.style.display = 'none';
+                toggleTrackingInputsAR();
             } else {
-                if (markerImageGroup) markerImageGroup.style.display = 'none';
+                if (markerImageGroup) markerImageGroup.style.display = 'block';
+                if (recognitionKeyGroup) recognitionKeyGroup.style.display = 'block';
+                if (trackingModeGroup) trackingModeGroup.style.display = 'block';
                 if (mediaTypeGroup) mediaTypeGroup.style.display = 'block';
+                if (contentAnchorGroup) contentAnchorGroup.style.display = 'block';
                 if (contentUrlGroup) contentUrlGroup.style.display = 'block';
+                toggleTrackingInputsAR();
                 toggleInputsMediaAR();
             }
 
+            actualizarResumenModalAR();
             // Mostrar el modal
             document.getElementById('ar-trigger-modal-overlay').style.display = 'flex';
         }
@@ -2293,25 +3403,186 @@
             }
         }
 
+        function actualizarSelectorAnclajeModalAR(objeto) {
+            const select = document.getElementById('ar-content-anchor');
+            if (!select) return;
+
+            const current = objeto?.arAnchor || 'base';
+            select.innerHTML = '<option value="base">Mesa / sin disparador</option>';
+            escenaObjetos
+                .filter(item => item.isMarker)
+                .forEach(marker => {
+                    const option = document.createElement('option');
+                    option.value = marker.uuid;
+                    option.innerText = `Target: ${marker.nombre || marker.uuid}`;
+                    select.appendChild(option);
+                });
+
+            select.value = [...select.options].some(option => option.value === current) ? current : 'base';
+        }
+
+        function obtenerMarcadorConfigurableModal() {
+            if (!objetoEnConfiguracionAR) return null;
+            if (objetoEnConfiguracionAR.isMarker) return objetoEnConfiguracionAR;
+            const anchor = document.getElementById('ar-content-anchor')?.value || objetoEnConfiguracionAR.arAnchor || 'base';
+            return escenaObjetos.find(obj => obj.isMarker && obj.uuid === anchor) || null;
+        }
+
+        function cargarMarcadorAsociadoEnModal() {
+            const marker = obtenerMarcadorConfigurableModal();
+            document.getElementById('ar-marker-image').value = marker?.markerImage || '';
+            document.getElementById('ar-recognition-key').value = marker?.recognitionKey || marker?.uuid || '';
+            document.getElementById('ar-tracking-mode').value = marker?.trackingMode || 'qr';
+            document.getElementById('ar-mind-target-url').value = marker?.mindTargetUrl || '';
+            document.getElementById('ar-mind-target-index').value = Number.isFinite(Number(marker?.mindTargetIndex)) ? Number(marker.mindTargetIndex) : 0;
+            toggleTrackingInputsAR();
+        }
+
+        function actualizarVisualMarcador(marker) {
+            if (!marker) return;
+            const el = document.getElementById(marker.uuid);
+            const plane = el?.querySelector('a-plane');
+            if (plane) {
+                plane.setAttribute('material', `src: ${marker.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+            }
+        }
+
         function toggleInputsMediaAR() {
             const mediaType = document.getElementById('ar-media-type').value;
             const contentGroup = document.getElementById('ar-content-url-group');
             const contentLabel = document.getElementById('ar-content-url-label');
             const contentInput = document.getElementById('ar-media-url');
             const fileInput = document.getElementById('upload-content-input');
+            const sourceNote = document.getElementById('ar-content-source-note');
+            const uploadBtn = document.getElementById('btn-upload-content');
 
             if (mediaType === '3d') {
-                contentLabel.innerText = "Modelo GLB a desplegar (.glb)";
-                contentInput.placeholder = "Selecciona o sube un modelo 3D...";
+                contentLabel.innerText = "Modelo 3D a proyectar";
+                contentInput.placeholder = "Pega una URL directa .glb/.gltf o sube un archivo...";
                 fileInput.accept = ".glb,.gltf";
+                if (sourceNote) sourceNote.innerText = "Usa un link directo a .glb/.gltf o sube un modelo desde tu equipo.";
             } else if (mediaType === 'image') {
-                contentLabel.innerText = "Imagen estática a desplegar (.png, .jpg)";
-                contentInput.placeholder = "Selecciona o sube un imagen estática...";
+                contentLabel.innerText = "Imagen a proyectar";
+                contentInput.placeholder = "Pega una URL directa .png/.jpg/.webp o sube una imagen...";
                 fileInput.accept = "image/*";
+                if (sourceNote) sourceNote.innerText = "Puedes pegar un link publico directo a la imagen o subir un archivo local.";
             } else if (mediaType === 'video') {
-                contentLabel.innerText = "Video inmersivo a desplegar (.mp4)";
-                contentInput.placeholder = "Selecciona o sube un video MP4...";
+                contentLabel.innerText = "Video a proyectar";
+                contentInput.placeholder = "Pega una URL directa .mp4/.webm o sube un video...";
                 fileInput.accept = "video/*";
+                if (sourceNote) sourceNote.innerText = "Usa un link directo al archivo de video, no una pagina tipo YouTube, o sube un MP4/WebM local.";
+            } else if (mediaType === 'oira-node') {
+                contentLabel.innerText = "Nodo generado por OIRA";
+                contentInput.placeholder = "No requiere archivo externo";
+                fileInput.accept = "";
+                if (sourceNote) sourceNote.innerText = "Este contenido se genera dentro de la experiencia y no necesita archivo.";
+            }
+            if (uploadBtn) uploadBtn.innerText = "Subir archivo";
+            if (contentGroup) contentGroup.style.display = mediaType === 'oira-node' ? 'none' : 'block';
+            actualizarResumenModalAR();
+        }
+
+        function toggleTrackingInputsAR() {
+            const mode = document.getElementById('ar-tracking-mode').value;
+            const recognitionGroup = document.getElementById('ar-recognition-key-group');
+            const mindGroup = document.getElementById('ar-mind-target-group');
+            if (recognitionGroup) recognitionGroup.style.display = mode === 'qr' ? 'flex' : 'none';
+            if (mindGroup) mindGroup.style.display = mode === 'image' ? 'flex' : 'none';
+            actualizarResumenModalAR();
+        }
+
+        function nombreCortoRuta(value) {
+            if (!value) return "-";
+            return String(value).split('/').pop() || value;
+        }
+
+        function actualizarResumenModalAR() {
+            if (!objetoEnConfiguracionAR) return;
+            const markerImage = document.getElementById('ar-marker-image')?.value.trim() || objetoEnConfiguracionAR.markerImage || '';
+            const trackingMode = document.getElementById('ar-tracking-mode')?.value || objetoEnConfiguracionAR.trackingMode || 'qr';
+            const recognitionKey = document.getElementById('ar-recognition-key')?.value.trim() || objetoEnConfiguracionAR.recognitionKey || objetoEnConfiguracionAR.uuid || '';
+            const mindTargetUrl = document.getElementById('ar-mind-target-url')?.value.trim() || objetoEnConfiguracionAR.mindTargetUrl || '';
+            const mediaType = document.getElementById('ar-media-type')?.value || objetoEnConfiguracionAR.mediaType || '3d';
+            const mediaUrl = document.getElementById('ar-media-url')?.value.trim() || objetoEnConfiguracionAR.mediaUrl || '';
+            const selectedAnchor = document.getElementById('ar-content-anchor')?.value || objetoEnConfiguracionAR.arAnchor || 'base';
+            const selectedMarker = escenaObjetos.find(obj => obj.uuid === selectedAnchor);
+            const markerName = objetoEnConfiguracionAR.isMarker ? objetoEnConfiguracionAR.nombre : selectedMarker?.nombre;
+
+            const objectEl = document.getElementById('ar-summary-object');
+            const trackingEl = document.getElementById('ar-summary-tracking');
+            const targetEl = document.getElementById('ar-summary-target');
+            const contentEl = document.getElementById('ar-summary-content');
+            const statusEl = document.getElementById('ar-config-status');
+            const previewEl = document.getElementById('ar-target-preview');
+
+            if (objectEl) objectEl.innerText = objetoEnConfiguracionAR.nombre || objetoEnConfiguracionAR.uuid || "-";
+            if (trackingEl) trackingEl.innerText = selectedMarker || objetoEnConfiguracionAR.isMarker
+                ? (trackingMode === 'image' ? 'MindAR imagen' : 'QR')
+                : 'Sin disparador';
+            if (targetEl) {
+                if (!objetoEnConfiguracionAR.isMarker && !selectedMarker) {
+                    targetEl.innerText = 'Mesa / sin target';
+                } else {
+                    const targetValue = trackingMode === 'image' ? nombreCortoRuta(mindTargetUrl) : (recognitionKey || "-");
+                    targetEl.innerText = `${markerName || 'Target'} · ${targetValue}`;
+                }
+            }
+            if (contentEl) contentEl.innerText = objetoEnConfiguracionAR.isMarker ? "Target solamente" : `${mediaType}${mediaUrl ? ` · ${nombreCortoRuta(mediaUrl)}` : ''}`;
+
+            if (previewEl) {
+                previewEl.innerHTML = '';
+                if (markerImage) {
+                    const img = document.createElement('img');
+                    img.src = markerImage;
+                    img.alt = 'Preview target';
+                    img.onerror = () => { previewEl.innerHTML = '<span>🎯</span>'; };
+                    previewEl.appendChild(img);
+                } else {
+                    previewEl.innerHTML = '<span>🎯</span>';
+                }
+            }
+
+            const hasTarget = objetoEnConfiguracionAR.isMarker
+                ? (trackingMode === 'image' ? Boolean(mindTargetUrl) : Boolean(recognitionKey))
+                : Boolean(selectedMarker) && (trackingMode === 'image' ? Boolean(mindTargetUrl) : Boolean(recognitionKey));
+            const hasContent = objetoEnConfiguracionAR.isMarker || mediaType === '3d' || mediaType === 'oira-node' || Boolean(mediaUrl);
+            if (statusEl) {
+                statusEl.className = 'ar-status-chip';
+                if (hasTarget && hasContent) {
+                    statusEl.classList.add('ready');
+                    statusEl.innerText = 'Listo para guardar';
+                } else {
+                    statusEl.classList.add('warn');
+                    statusEl.innerText = hasTarget ? 'Falta contenido' : 'Falta target';
+                }
+            }
+        }
+
+        async function generarQRParaMarcador() {
+            const marker = obtenerMarcadorConfigurableModal();
+            if (!marker) {
+                mostrarNotificacion("Selecciona un disparador asociado antes de generar el QR.", "error");
+                return;
+            }
+            const keyInput = document.getElementById('ar-recognition-key');
+            const key = (keyInput.value || marker.uuid).trim();
+            keyInput.value = key;
+            mostrarNotificacion("Generando QR del marcador...");
+            try {
+                const safeName = `${marker.uuid}.png`;
+                const response = await fetch(`/api/generate-qr?text=${encodeURIComponent(key)}&name=${encodeURIComponent(safeName)}`, { method: 'POST' });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+                document.getElementById('ar-marker-image').value = data.src;
+                marker.markerImage = data.src;
+                marker.recognitionKey = key;
+                marker.trackingMode = 'qr';
+                document.getElementById('ar-tracking-mode').value = 'qr';
+                actualizarVisualMarcador(marker);
+                actualizarResumenModalAR();
+                mostrarNotificacion("QR generado y asignado al marcador.", "success");
+            } catch (err) {
+                mostrarNotificacion(`Error generando QR: ${err.message}`, "error");
             }
         }
 
@@ -2330,6 +3601,12 @@
                 const data = await response.json();
                 if (data.status === 'success') {
                     document.getElementById('ar-marker-image').value = data.src;
+                    const marker = obtenerMarcadorConfigurableModal();
+                    if (marker) {
+                        marker.markerImage = data.src;
+                        actualizarVisualMarcador(marker);
+                    }
+                    actualizarResumenModalAR();
                     mostrarNotificacion("¡Marcador subido con éxito!");
                 } else {
                     mostrarNotificacion("Error al subir el marcador.", "error");
@@ -2355,6 +3632,7 @@
                 const data = await response.json();
                 if (data.status === 'success') {
                     document.getElementById('ar-media-url').value = data.src;
+                    actualizarResumenModalAR();
                     mostrarNotificacion("¡Recurso multimedia subido con éxito!");
                 } else {
                     mostrarNotificacion("Error al subir el recurso.", "error");
@@ -2365,38 +3643,88 @@
             }
         }
 
+        async function subirMindTarget(file) {
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith('.mind')) {
+                mostrarNotificacion("El target debe ser un archivo .mind generado para MindAR.", "error");
+                return;
+            }
+            mostrarNotificacion("Subiendo target MindAR...");
+
+            try {
+                const response = await fetch(`/api/upload-media?name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/octet-stream' },
+                    body: file
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    document.getElementById('ar-mind-target-url').value = data.src;
+                    actualizarResumenModalAR();
+                    mostrarNotificacion("Target MindAR subido con éxito.", "success");
+                } else {
+                    mostrarNotificacion("Error al subir target MindAR.", "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error de conexión al subir target.", "error");
+            }
+        }
+
         // Guardar configuración AR en el objeto de escena local
         function guardarConfiguracionAR() {
             if (!objetoEnConfiguracionAR) return;
+            registrarEstadoHistorial('Configurar AR');
 
             const markerImage = document.getElementById('ar-marker-image').value.trim();
+            const recognitionKey = document.getElementById('ar-recognition-key').value.trim();
+            const trackingMode = document.getElementById('ar-tracking-mode').value;
+            const mindTargetUrl = document.getElementById('ar-mind-target-url').value.trim();
+            const mindTargetIndex = parseInt(document.getElementById('ar-mind-target-index').value, 10) || 0;
             const mediaType = document.getElementById('ar-media-type').value;
             const mediaUrl = document.getElementById('ar-media-url').value.trim();
+            const contentAnchor = document.getElementById('ar-content-anchor')?.value || 'base';
+            const markerConfigurable = objetoEnConfiguracionAR.isMarker
+                ? objetoEnConfiguracionAR
+                : escenaObjetos.find(obj => obj.isMarker && obj.uuid === contentAnchor);
 
-            objetoEnConfiguracionAR.markerImage = markerImage || null;
+            if (markerConfigurable) {
+                markerConfigurable.markerImage = markerImage || null;
+                markerConfigurable.recognitionKey = recognitionKey || markerConfigurable.uuid;
+                markerConfigurable.trackingMode = trackingMode;
+                markerConfigurable.mindTargetUrl = mindTargetUrl || null;
+                markerConfigurable.mindTargetIndex = mindTargetIndex;
+                actualizarVisualMarcador(markerConfigurable);
+            }
             
             if (!objetoEnConfiguracionAR.isMarker) {
                 objetoEnConfiguracionAR.mediaType = mediaType;
                 objetoEnConfiguracionAR.mediaUrl = mediaUrl || null;
-            } else {
-                // Si es un marcador, actualizar su textura física en A-Frame inmediatamente
+                objetoEnConfiguracionAR.arAnchor = contentAnchor;
                 const el = document.getElementById(objetoEnConfiguracionAR.uuid);
-                if (el) {
-                    const plane = el.querySelector('a-plane');
-                    if (plane) {
-                        plane.setAttribute('material', `src: ${objetoEnConfiguracionAR.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                if (el && (mediaType === 'image' || mediaType === 'video' || mediaType === 'oira-node')) {
+                    const parent = el.parentNode;
+                    if (parent) {
+                        parent.removeChild(el);
+                        renderizarEntidad3D(objetoEnConfiguracionAR);
+                        seleccionarObjeto(objetoEnConfiguracionAR);
                     }
                 }
+            } else {
                 actualizarOpcionesAnclaje(); // Refrescar los selects para que muestren la nueva imagen
             }
-
-            // Registrar en el historial de deshacer/rehacer (Undo/Redo)
-            registrarTransformacion(objetoEnConfiguracionAR);
 
             mostrarNotificacion(`¡Configuración guardada para ${objetoEnConfiguracionAR.nombre}!`, "success");
             document.getElementById('ar-trigger-modal-overlay').style.display = 'none';
             objetoEnConfiguracionAR = null;
+            marcarCambiosSinGuardar();
         }
+
+        ['ar-marker-image', 'ar-recognition-key', 'ar-mind-target-url', 'ar-mind-target-index', 'ar-media-url', 'ar-content-anchor'].forEach(id => {
+            window.addEventListener('DOMContentLoaded', () => {
+                const input = document.getElementById(id);
+                if (input) input.addEventListener('input', actualizarResumenModalAR);
+            });
+        });
 
         // Registrar componente de A-Frame para poder seleccionar objetos al hacer clic en 3D
         AFRAME.registerComponent('selectable', {
@@ -2462,7 +3790,8 @@
 
         // Al cargar la página, descargar el diseño existente en el servidor si existe
         window.addEventListener('DOMContentLoaded', () => {
-            cargarDisenoDesdeServidor();
+            initColaboracion();
+            cargarProyectosYCargarActual();
             initNavigationStar();
             
             // Si la pantalla es pequeña (Móvil / Tablet), colapsar paneles por defecto para optimizar espacio del Viewport 3D
@@ -2474,6 +3803,7 @@
 
         // Crear una nueva entidad 3D en el lienzo
         function crearEntidad(modelId, nombreBase, glbUrl = null) {
+            if (!historialSuspendido) registrarEstadoHistorial('Crear objeto');
             contadorIds++;
             const uuid = `objeto-${nombreBase.replace(/\s+/g,'-').toLowerCase()}-${contadorIds}`;
             
@@ -2504,11 +3834,52 @@
             escenaObjetos.push(nuevoObjeto);
             renderizarEntidad3D(nuevoObjeto);
             seleccionarObjeto(nuevoObjeto);
+            renderOutliner();
+            marcarCambiosSinGuardar();
             mostrarNotificacion(`¡Añadido: ${nuevoObjeto.nombre}!`);
+        }
+
+        function crearContenidoAR(nombreBase, mediaType, arAnchor, modelId = null, mediaUrl = null) {
+            if (!historialSuspendido) registrarEstadoHistorial('Crear contenido AR');
+            contadorIds++;
+            const uuid = `objeto-${nombreBase.replace(/\s+/g,'-').toLowerCase()}-${contadorIds}`;
+            const nuevoObjeto = {
+                uuid: uuid,
+                modelId: modelId,
+                nombre: `${nombreBase} #${contadorIds}`,
+                posicion: { x: 0, y: 1.1, z: -3.5 },
+                rotacion: { y: mediaType === '3d' ? 180 : 0 },
+                escala: mediaType === 'video' ? 1.15 : 1.0,
+                glbUrl: null,
+                arAnchor: arAnchor || 'base',
+                mediaType: mediaType,
+                mediaUrl: mediaUrl
+            };
+
+            if (mediaType === '3d') {
+                nuevoObjeto.modelId = modelId || 'modelo-ballena';
+                nuevoObjeto.escala = nuevoObjeto.modelId === 'modelo-ballena' ? 1.5 : 1.0;
+            }
+
+            escenaObjetos.push(nuevoObjeto);
+            renderizarEntidad3D(nuevoObjeto);
+            seleccionarObjeto(nuevoObjeto);
+            renderOutliner();
+            marcarCambiosSinGuardar();
+            return nuevoObjeto;
+        }
+
+        function aplicarTransformacionObjeto(obj) {
+            const el = document.getElementById(obj.uuid);
+            if (!el) return;
+            el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
+            el.setAttribute('rotation', `0 ${obj.rotacion.y || 0} 0`);
+            el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
         }
 
         // Crear un nuevo Marcador AR dinámico en el escenario
         function crearMarcadorAR() {
+            if (!historialSuspendido) registrarEstadoHistorial('Crear marcador AR');
             contadorIds++;
             const uuid = `objeto-marcador-${contadorIds}`;
             const nuevoObjeto = {
@@ -2519,13 +3890,150 @@
                 rotacion: { y: 0 },
                 escala: 1.0,
                 markerImage: 'output/qr_presentacion.png', // Imagen de target por defecto
+                recognitionKey: uuid,
                 arAnchor: 'base'
             };
             escenaObjetos.push(nuevoObjeto);
             renderizarEntidad3D(nuevoObjeto);
             actualizarOpcionesAnclaje(); // Refrescar los selects de anclajes
             seleccionarObjeto(nuevoObjeto);
+            renderOutliner();
+            marcarCambiosSinGuardar();
             mostrarNotificacion(`🎯 ¡Añadido: ${nuevoObjeto.nombre}!`);
+        }
+
+        function crearExperienciaARRapida(modelId, nombreBase, mediaType) {
+            ejecutarComoAccionHistorial('Crear experiencia AR', () => {
+            crearMarcadorAR();
+            const marcador = entidadSeleccionada;
+            marcador.nombre = `Target ${nombreBase}`;
+            marcador.recognitionKey = marcador.uuid;
+            marcador.trackingMode = 'qr';
+
+            const contenido = crearContenidoAR(nombreBase, mediaType, marcador.uuid, mediaType === '3d' ? modelId : null, null);
+            actualizarOpcionesAnclaje();
+            renderOutliner();
+            seleccionarObjeto(contenido);
+            marcarCambiosSinGuardar();
+
+            if (mediaType === 'image' || mediaType === 'video') {
+                abrirModalAR(contenido);
+                mostrarNotificacion("Sube el QR/imagen fisica y el contenido que se proyectara encima.", "success");
+            } else {
+                mostrarNotificacion("Experiencia AR creada: configura la imagen/QR del marcador y guarda.", "success");
+            }
+            });
+        }
+
+        function crearPlantillaAR(tipo) {
+            ejecutarComoAccionHistorial('Crear plantilla AR', () => {
+            crearMarcadorAR();
+            const marcador = entidadSeleccionada;
+            marcador.nombre = tipo === 'demo' ? 'Target Demo Guiada' : 'Target Ficha Producto';
+            marcador.recognitionKey = marcador.uuid;
+            marcador.trackingMode = 'qr';
+
+            if (tipo === 'demo') {
+                crearContenidoAR('Video Demo', 'video', marcador.uuid, null, null);
+                const apoyo = crearContenidoAR('Modelo de Apoyo', '3d', marcador.uuid, 'modelo-laptop', null);
+                apoyo.posicion = { x: 0.42, y: 1.0, z: -3.5 };
+                apoyo.escala = 0.55;
+                const apoyoEl = document.getElementById(apoyo.uuid);
+                if (apoyoEl) {
+                    apoyoEl.setAttribute('position', `${apoyo.posicion.x} ${apoyo.posicion.y} ${apoyo.posicion.z}`);
+                    apoyoEl.setAttribute('scale', `${apoyo.escala} ${apoyo.escala} ${apoyo.escala}`);
+                }
+            } else {
+                crearContenidoAR('Ficha Explicativa', 'image', marcador.uuid, null, null);
+                const producto = crearContenidoAR('Producto 3D', '3d', marcador.uuid, 'modelo-ballena', null);
+                producto.posicion = { x: -0.45, y: 1.0, z: -3.5 };
+                producto.escala = 0.75;
+                const productoEl = document.getElementById(producto.uuid);
+                if (productoEl) {
+                    productoEl.setAttribute('position', `${producto.posicion.x} ${producto.posicion.y} ${producto.posicion.z}`);
+                    productoEl.setAttribute('scale', `${producto.escala} ${producto.escala} ${producto.escala}`);
+                }
+            }
+
+            actualizarOpcionesAnclaje();
+            renderOutliner();
+            marcarCambiosSinGuardar();
+            mostrarNotificacion("Plantilla AR creada. Configura el QR/target y los archivos multimedia.", "success");
+            });
+        }
+
+        function configurarMarcadorOIRA(marker, tipo, nombre, intro) {
+            marker.nombre = nombre;
+            marker.recognitionKey = tipo.toUpperCase();
+            marker.trackingMode = 'qr';
+            marker.oiraType = tipo;
+            marker.oiraIntro = intro;
+        }
+
+        function crearContenidoOIRA(nombre, markerUuid, posicion, escala, narracion, color = '#0f766e') {
+            const obj = crearContenidoAR(nombre, 'oira-node', markerUuid, null, null);
+            obj.posicion = posicion;
+            obj.escala = escala;
+            obj.relativeToAnchor = true;
+            obj.oiraLabel = nombre;
+            obj.oiraColor = color;
+            obj.oiraNarration = narracion;
+            obj.oiraAutoNarrate = false;
+            aplicarTransformacionObjeto(obj);
+            return obj;
+        }
+
+        function crearPlantillaOIRA(tipo) {
+            ejecutarComoAccionHistorial('Crear plantilla OIRA', () => {
+                crearMarcadorAR();
+                const marcador = entidadSeleccionada;
+
+                if (tipo === 'oira1') {
+                    configurarMarcadorOIRA(
+                        marcador,
+                        'oira1',
+                        'OIRA1 Voz Docker',
+                        'OIRA uno activo. Puedes hacer consultas por voz sobre Docker y recibir respuesta en texto y audio dentro de la experiencia.'
+                    );
+                    const asistente = crearContenidoOIRA(
+                        'Asistente de Voz Docker',
+                        marcador.uuid,
+                        { x: 0, y: 0.55, z: 0.05 },
+                        0.95,
+                        'Este disparador activa el asistente de voz para consultas sobre Docker, contenedores, imagenes y volumenes.',
+                        '#0369a1'
+                    );
+                    seleccionarObjeto(asistente);
+                } else if (tipo === 'oira2') {
+                    configurarMarcadorOIRA(
+                        marcador,
+                        'oira2',
+                        'OIRA2 Docker Desktop',
+                        'OIRA dos activo. Explora los objetos de la interfaz para escuchar definiciones de Docker Desktop.'
+                    );
+                    crearContenidoOIRA('Contenedores', marcador.uuid, { x: -0.55, y: 0.5, z: 0.05 }, 0.52, 'Contenedores representa las aplicaciones aisladas que se ejecutan con sus dependencias.', '#0f766e');
+                    crearContenidoOIRA('Imagenes', marcador.uuid, { x: 0, y: 0.5, z: 0.05 }, 0.52, 'Imagenes representa las plantillas versionadas desde donde se crean contenedores reproducibles.', '#1d4ed8');
+                    const volumenes = crearContenidoOIRA('Volumenes', marcador.uuid, { x: 0.55, y: 0.5, z: 0.05 }, 0.52, 'Volumenes representa la persistencia de datos que sobrevive aunque el contenedor se elimine.', '#7c3aed');
+                    seleccionarObjeto(volumenes);
+                } else {
+                    configurarMarcadorOIRA(
+                        marcador,
+                        'oira3',
+                        'OIRA3 Pipeline Docker',
+                        'OIRA tres activo. Recorre la pipeline 3D para explicar el flujo de construccion, prueba, despliegue y monitoreo.'
+                    );
+                    crearContenidoOIRA('Build', marcador.uuid, { x: -0.75, y: 0.5, z: 0.05 }, 0.46, 'Build compila la imagen Docker a partir del Dockerfile y sus dependencias.', '#0369a1');
+                    crearContenidoOIRA('Test', marcador.uuid, { x: -0.25, y: 0.5, z: 0.05 }, 0.46, 'Test valida que la imagen se comporte correctamente antes de publicarla.', '#0f766e');
+                    crearContenidoOIRA('Deploy', marcador.uuid, { x: 0.25, y: 0.5, z: 0.05 }, 0.46, 'Deploy transporta el contenedor a un entorno donde puede ejecutarse de forma portable.', '#7c3aed');
+                    const monitoreo = crearContenidoOIRA('Monitoreo', marcador.uuid, { x: 0.75, y: 0.55, z: 0.05 }, 0.46, 'Monitoreo observa salud, logs y comportamiento para cerrar el ciclo de operacion.', '#b45309');
+                    seleccionarObjeto(monitoreo);
+                }
+
+                actualizarOpcionesAnclaje();
+                renderOutliner();
+                marcarCambiosSinGuardar();
+                mostrarNotificacion("Plantilla OIRA creada. Configura el QR o target y guarda.", "success");
+            });
         }
 
         // Población dinámica del selector de anclajes en el inspector
@@ -2558,17 +4066,591 @@
             }
         }
 
+        function tipoEntidad(obj) {
+            if (obj.isMarker) return 'Target';
+            if (obj.mediaType === 'oira-node') return 'Nodo OIRA';
+            if (obj.mediaType === 'video') return 'Video';
+            if (obj.mediaType === 'image') return 'Imagen';
+            return 'Modelo 3D';
+        }
+
+        function iconoEntidad(obj) {
+            if (obj.isMarker) return '🎯';
+            if (obj.mediaType === 'oira-node') return '▣';
+            if (obj.mediaType === 'video') return '▶';
+            if (obj.mediaType === 'image') return '🖼';
+            return '📦';
+        }
+
+        function nombreAnclaje(obj) {
+            if (!obj.arAnchor || obj.arAnchor === 'base') return 'Mesa base';
+            const marker = escenaObjetos.find(o => o.uuid === obj.arAnchor);
+            return marker ? marker.nombre : obj.arAnchor;
+        }
+
+        function renderOutliner() {
+            const list = document.getElementById('outliner-list');
+            if (!list) return;
+
+            const query = (document.getElementById('outliner-search')?.value || '').trim().toLowerCase();
+            const markers = escenaObjetos.filter(obj => obj.isMarker);
+            const anchored = escenaObjetos.filter(obj => !obj.isMarker && obj.arAnchor && obj.arAnchor !== 'base');
+            const baseObjects = escenaObjetos.filter(obj => !obj.isMarker && (!obj.arAnchor || obj.arAnchor === 'base'));
+
+            document.getElementById('scene-stat-total').innerText = escenaObjetos.length;
+            document.getElementById('scene-stat-markers').innerText = markers.length;
+            document.getElementById('scene-stat-anchored').innerText = anchored.length;
+            document.getElementById('outliner-summary').innerText = `${escenaObjetos.length} objetos · ${markers.length} targets`;
+
+            const matches = (obj) => {
+                if (!query) return true;
+                return [
+                    obj.nombre,
+                    obj.uuid,
+                    tipoEntidad(obj),
+                    nombreAnclaje(obj),
+                    obj.modelId,
+                    obj.mediaType
+                ].some(value => String(value || '').toLowerCase().includes(query));
+            };
+
+            const createItem = (obj) => {
+                const item = document.createElement('div');
+                item.className = 'outliner-item';
+                if (entidadSeleccionada && entidadSeleccionada.uuid === obj.uuid) item.classList.add('active');
+                if (obj.hidden) item.classList.add('hidden');
+                const remoteLock = bloqueoRemoto(obj.uuid);
+                if (remoteLock) {
+                    item.style.boxShadow = `inset 3px 0 0 ${remoteLock.color || '#f59e0b'}`;
+                    item.style.opacity = '0.72';
+                }
+                item.onclick = () => seleccionarObjeto(obj);
+
+                const baseMeta = obj.isMarker
+                    ? `${obj.trackingMode === 'image' ? 'MindAR' : 'QR'} · ${obj.recognitionKey || obj.mindTargetUrl || 'sin clave'}`
+                    : `${tipoEntidad(obj)} · ${nombreAnclaje(obj)}`;
+                const meta = remoteLock ? `${baseMeta} · Editando: ${remoteLock.name}` : baseMeta;
+                const lockDisabled = remoteLock ? 'disabled style="opacity:0.35; pointer-events:none;"' : '';
+
+                item.innerHTML = `
+                    <div style="font-size: 15px;">${iconoEntidad(obj)}</div>
+                    <div style="min-width:0;">
+                        <div class="outliner-name" title="${obj.nombre || obj.uuid}">${obj.nombre || obj.uuid}</div>
+                        <div class="outliner-meta" title="${meta}">${meta}</div>
+                    </div>
+                    <div class="outliner-actions">
+                        <button class="outliner-btn" title="${obj.hidden ? 'Mostrar' : 'Ocultar'}" onclick="toggleObjetoVisible(event, '${obj.uuid}')" ${lockDisabled}>${obj.hidden ? '○' : '●'}</button>
+                        <button class="outliner-btn" title="${remoteLock ? `Editando: ${remoteLock.name}` : (obj.locked ? 'Desbloquear' : 'Bloquear')}" onclick="toggleObjetoBloqueado(event, '${obj.uuid}')" ${lockDisabled}>${remoteLock ? '●' : (obj.locked ? '🔒' : '◇')}</button>
+                        <button class="outliner-btn" title="Duplicar" onclick="duplicarEntidad(event, '${obj.uuid}')" ${lockDisabled}>⧉</button>
+                    </div>
+                `;
+                return item;
+            };
+
+            const createGroup = (title, items) => {
+                const filtered = items.filter(matches);
+                if (filtered.length === 0) return null;
+                const group = document.createElement('div');
+                group.className = 'outliner-group';
+                const header = document.createElement('div');
+                header.className = 'outliner-group-title';
+                header.innerHTML = `<span>${title}</span><span>${filtered.length}</span>`;
+                group.appendChild(header);
+                filtered.forEach(obj => group.appendChild(createItem(obj)));
+                return group;
+            };
+
+            list.innerHTML = '';
+            const groups = [
+                createGroup('Targets AR', markers),
+                createGroup('Anclados a targets', anchored),
+                createGroup('Mesa base', baseObjects)
+            ].filter(Boolean);
+
+            if (groups.length === 0) {
+                list.innerHTML = '<div class="outliner-empty">No hay objetos que coincidan.</div>';
+                return;
+            }
+
+            groups.forEach(group => list.appendChild(group));
+        }
+
+        function marcarCambiosSinGuardar() {
+            hayCambiosSinGuardar = true;
+            actualizarEstadoGuardado();
+            programarAutosave();
+            const publishPanel = document.getElementById('panel-publish');
+            if (publishPanel && publishPanel.classList.contains('active')) validarPublicacion();
+        }
+
+        function marcarGuardado(limpiarDraft = true) {
+            hayCambiosSinGuardar = false;
+            if (limpiarDraft) limpiarBorradorLocal();
+            actualizarEstadoGuardado();
+            validarPublicacion();
+        }
+
+        function actualizarEstadoGuardado() {
+            const badge = document.getElementById('save-state-badge');
+            if (!badge) return;
+            badge.classList.toggle('dirty', hayCambiosSinGuardar);
+            badge.innerText = hayCambiosSinGuardar ? 'Sin guardar' : 'Guardado';
+        }
+
+        function actualizarEstadoAutosave(texto, activo = true) {
+            const chip = document.getElementById('autosave-chip');
+            if (!chip) return;
+            chip.innerText = texto;
+            chip.classList.toggle('active', activo);
+        }
+
+        function setProyectoActivo(nombre, version = 0) {
+            proyectoActivo = normalizarNombreProyecto(nombre);
+            proyectoVersion = Number.isFinite(Number(version)) ? Number(version) : 0;
+            AUTOSAVE_KEY = `${AUTOSAVE_KEY_BASE}_${proyectoActivo}`;
+            localStorage.setItem('moby_studio_active_project_v1', proyectoActivo);
+            const select = document.getElementById('project-select');
+            if (select) select.value = proyectoActivo;
+            actualizarEstadoAutosave(`Proyecto ${proyectoActivo} · v${proyectoVersion}`, true);
+            cargarEstadoColaboracion();
+            enviarHeartbeatColaboracion();
+        }
+
+        function normalizarNombreProyecto(nombre) {
+            return String(nombre || 'default').trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'default';
+        }
+
+        function initColaboracion() {
+            let saved = null;
+            try { saved = JSON.parse(localStorage.getItem('moby_studio_collab_user_v1') || 'null'); } catch (_) {}
+            usuarioColaboracion = saved || {
+                userId: `user-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                name: `Usuario ${Math.floor(100 + Math.random() * 900)}`,
+                color: COLLAB_COLORS[Math.floor(Math.random() * COLLAB_COLORS.length)]
+            };
+            localStorage.setItem('moby_studio_collab_user_v1', JSON.stringify(usuarioColaboracion));
+            const input = document.getElementById('collab-user-name');
+            if (input) input.value = usuarioColaboracion.name;
+            if (collabTimer) clearInterval(collabTimer);
+            enviarHeartbeatColaboracion();
+            collabTimer = setInterval(enviarHeartbeatColaboracion, 5000);
+        }
+
+        function actualizarUsuarioColaboracion(nombre) {
+            if (!usuarioColaboracion) initColaboracion();
+            usuarioColaboracion.name = String(nombre || '').trim() || usuarioColaboracion.name;
+            localStorage.setItem('moby_studio_collab_user_v1', JSON.stringify(usuarioColaboracion));
+            enviarHeartbeatColaboracion();
+        }
+
+        function bloqueoRemoto(uuid) {
+            const lock = collabState?.locks?.[uuid];
+            if (!lock || !usuarioColaboracion || lock.userId === usuarioColaboracion.userId) return null;
+            return lock;
+        }
+
+        function objetoBloqueadoRemoto(obj) {
+            return Boolean(obj && bloqueoRemoto(obj.uuid));
+        }
+
+        function puedoEditarObjeto(obj, mostrar = true) {
+            const lock = bloqueoRemoto(obj?.uuid);
+            if (!lock) return true;
+            if (mostrar) mostrarNotificacion(`${lock.name || 'Otro usuario'} esta editando este objeto.`, 'error');
+            return false;
+        }
+
+        async function enviarHeartbeatColaboracion() {
+            if (!usuarioColaboracion) return;
+            const selectedObject = entidadSeleccionada && !bloqueoRemoto(entidadSeleccionada.uuid)
+                ? entidadSeleccionada.uuid
+                : null;
+            try {
+                const response = await fetch('/api/collab-heartbeat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        project: proyectoActivo,
+                        userId: usuarioColaboracion.userId,
+                        name: usuarioColaboracion.name,
+                        color: usuarioColaboracion.color,
+                        selectedObject
+                    })
+                });
+                if (!response.ok) return;
+                collabState = await response.json();
+                manejarVersionRemotaColaboracion();
+                actualizarPresenciaUI();
+            } catch (err) {
+                console.warn('No se pudo sincronizar colaboración:', err);
+            }
+        }
+
+        async function cargarEstadoColaboracion() {
+            try {
+                const response = await fetch(`/api/collab-state?project=${encodeURIComponent(proyectoActivo)}`, { cache: 'no-store' });
+                if (!response.ok) return;
+                collabState = await response.json();
+                manejarVersionRemotaColaboracion();
+                actualizarPresenciaUI();
+            } catch (err) {
+                console.warn('No se pudo cargar colaboración:', err);
+            }
+        }
+
+        function actualizarPresenciaUI() {
+            const users = (collabState.users || []).filter(user => !usuarioColaboracion || user.userId !== usuarioColaboracion.userId);
+            const chip = document.getElementById('presence-chip');
+            if (chip) {
+                chip.innerText = avisoCambioRemotoPendiente
+                    ? `Remoto v${collabState.version}`
+                    : (users.length ? `${users.length + 1} activos` : 'Solo tú');
+                chip.style.borderColor = avisoCambioRemotoPendiente ? 'rgba(234,179,8,0.45)' : (users.length ? 'rgba(34,197,94,0.35)' : '');
+                chip.style.color = avisoCambioRemotoPendiente ? '#fde68a' : (users.length ? '#86efac' : '');
+            }
+            renderOutliner();
+        }
+
+        async function manejarVersionRemotaColaboracion() {
+            const remoteVersion = Number(collabState?.version || 0);
+            if (!remoteVersion || remoteVersion <= proyectoVersion || sincronizandoRemoto) return;
+
+            if (hayCambiosSinGuardar) {
+                avisoCambioRemotoPendiente = true;
+                mostrarNotificacion(`Hay una version nueva del proyecto v${remoteVersion}. Guarda o cambia de proyecto antes de recargar.`, 'error');
+                return;
+            }
+
+            avisoCambioRemotoPendiente = false;
+            sincronizandoRemoto = true;
+            const versionAnterior = proyectoVersion;
+            await cargarDisenoDesdeServidor(proyectoActivo, { silent: true, skipDraftCheck: true });
+            sincronizandoRemoto = false;
+            if (proyectoVersion > versionAnterior) {
+                mostrarNotificacion(`Sincronizado con cambios remotos v${proyectoVersion}.`, 'success');
+            }
+        }
+
+        function snapshotLayout() {
+            return {
+                project: proyectoActivo,
+                version: proyectoVersion,
+                savedAt: Date.now(),
+                stage: JSON.parse(JSON.stringify(stageSize)),
+                entities: JSON.parse(JSON.stringify(escenaObjetos))
+            };
+        }
+
+        function programarAutosave() {
+            if (!hayCambiosSinGuardar) return;
+            if (autosaveTimer) clearTimeout(autosaveTimer);
+            actualizarEstadoAutosave('Autosave pendiente');
+            autosaveTimer = setTimeout(guardarBorradorLocal, 650);
+        }
+
+        function guardarBorradorLocal() {
+            autosaveTimer = null;
+            try {
+                const draft = snapshotLayout();
+                localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(draft));
+                ultimoBorradorLocal = draft;
+                actualizarEstadoAutosave(`Borrador ${new Date(draft.savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+            } catch (err) {
+                console.warn('No se pudo guardar el borrador local:', err);
+                actualizarEstadoAutosave('Autosave falló');
+            }
+        }
+
+        function obtenerBorradorLocal() {
+            try {
+                const raw = localStorage.getItem(AUTOSAVE_KEY);
+                if (!raw) return null;
+                const draft = JSON.parse(raw);
+                if (!draft || !Array.isArray(draft.entities)) return null;
+                return draft;
+            } catch (err) {
+                console.warn('Borrador local inválido:', err);
+                return null;
+            }
+        }
+
+        function limpiarBorradorLocal() {
+            if (autosaveTimer) {
+                clearTimeout(autosaveTimer);
+                autosaveTimer = null;
+            }
+            try {
+                localStorage.removeItem(AUTOSAVE_KEY);
+                localStorage.setItem(AUTOSAVE_PUBLISHED_KEY, String(Date.now()));
+            } catch (err) {
+                console.warn('No se pudo limpiar el borrador local:', err);
+            }
+            ultimoBorradorLocal = null;
+            const banner = document.getElementById('draft-recovery-banner');
+            if (banner) banner.classList.remove('active');
+            actualizarEstadoAutosave('Autosave listo', false);
+        }
+
+        function revisarBorradorLocal() {
+            const draft = obtenerBorradorLocal();
+            if (!draft || draft.entities.length === 0) return;
+
+            let lastPublished = 0;
+            try {
+                lastPublished = Number(localStorage.getItem(AUTOSAVE_PUBLISHED_KEY) || 0);
+            } catch (err) {
+                lastPublished = 0;
+            }
+            if (draft.savedAt && draft.savedAt <= lastPublished) return;
+
+            ultimoBorradorLocal = draft;
+            const banner = document.getElementById('draft-recovery-banner');
+            const detail = document.getElementById('draft-recovery-detail');
+            if (detail) {
+                const fecha = draft.savedAt ? new Date(draft.savedAt).toLocaleString() : 'fecha desconocida';
+                detail.innerText = `${draft.entities.length} objeto(s), guardado localmente el ${fecha}. Puedes restaurarlo o descartarlo.`;
+            }
+            if (banner) banner.classList.add('active');
+            actualizarEstadoAutosave('Borrador disponible');
+        }
+
+        function limpiarEscenaRenderizada() {
+            const container = document.getElementById('entities-container');
+            if (container) {
+                [...container.querySelectorAll('.interactive-entity')].forEach(el => el.remove());
+            }
+            entidadSeleccionada = null;
+            const inspector = document.getElementById('inspector-content');
+            const empty = document.getElementById('empty-inspector');
+            if (inspector) inspector.style.display = 'none';
+            if (empty) empty.style.display = 'flex';
+            actualizarGizmo3D();
+        }
+
+        function recalcularContadorIds() {
+            contadorIds = escenaObjetos.reduce((max, obj) => {
+                const uuid = String(obj.uuid || '');
+                const partes = uuid.split('-');
+                const num = parseInt(partes[partes.length - 1], 10);
+                return Number.isFinite(num) ? Math.max(max, num) : max;
+            }, 0);
+        }
+
+        function aplicarStageDesdeSnapshot(stage) {
+            if (stage) {
+                stageSize = {
+                    width: Number(stage.width) || 3,
+                    height: Number(stage.height) || 3,
+                    gridVisible: stage.gridVisible !== false
+                };
+            }
+
+            const slideW = document.getElementById('slide-stage-w');
+            const slideH = document.getElementById('slide-stage-h');
+            const checkGrid = document.getElementById('check-stage-grid');
+            if (slideW) slideW.value = stageSize.width;
+            if (slideH) slideH.value = stageSize.height;
+            if (checkGrid) checkGrid.checked = stageSize.gridVisible;
+
+            const valW = document.getElementById('val-stage-w');
+            const valH = document.getElementById('val-stage-h');
+            if (valW) valW.innerText = `${Number(stageSize.width).toFixed(2)}m`;
+            if (valH) valH.innerText = `${Number(stageSize.height).toFixed(2)}m`;
+
+            const grid = document.getElementById('workspace-grid');
+            if (grid) {
+                grid.setAttribute('width', stageSize.width);
+                grid.setAttribute('height', stageSize.height);
+                grid.setAttribute('visible', stageSize.gridVisible);
+            }
+        }
+
+        function restaurarBorradorLocal() {
+            const draft = ultimoBorradorLocal || obtenerBorradorLocal();
+            if (!draft || !Array.isArray(draft.entities)) {
+                mostrarNotificacion('No hay borrador local para restaurar.', 'error');
+                return;
+            }
+
+            registrarEstadoHistorial('Restaurar borrador');
+            limpiarEscenaRenderizada();
+            aplicarStageDesdeSnapshot(draft.stage);
+            escenaObjetos = JSON.parse(JSON.stringify(draft.entities));
+            escenaObjetos.forEach(obj => renderizarEntidad3D(obj));
+            recalcularContadorIds();
+            actualizarOpcionesAnclaje();
+            renderOutliner();
+            marcarCambiosSinGuardar();
+
+            const banner = document.getElementById('draft-recovery-banner');
+            if (banner) banner.classList.remove('active');
+            mostrarNotificacion('Borrador local restaurado. Guarda para publicarlo.', 'success');
+        }
+
+        function descartarBorradorLocal() {
+            limpiarBorradorLocal();
+            mostrarNotificacion('Borrador local descartado.', 'success');
+        }
+
+        function archivoLocalReferenciado(path) {
+            if (!path) return false;
+            return String(path).startsWith('output/') || String(path).startsWith('./output/');
+        }
+
+        function validarPublicacion() {
+            const checks = [];
+            const markers = escenaObjetos.filter(obj => obj.isMarker);
+            const content = escenaObjetos.filter(obj => !obj.isMarker);
+            const anchored = content.filter(obj => obj.arAnchor && obj.arAnchor !== 'base');
+
+            checks.push({
+                level: escenaObjetos.length > 0 ? 'ok' : 'error',
+                title: 'Escena con contenido',
+                detail: escenaObjetos.length > 0 ? `${escenaObjetos.length} objeto(s) en la escena.` : 'Agrega al menos un target o contenido AR.'
+            });
+
+            checks.push({
+                level: markers.length > 0 ? 'ok' : 'error',
+                title: 'Targets configurados',
+                detail: markers.length > 0 ? `${markers.length} target(s) disponible(s).` : 'Crea al menos un marcador/target AR.'
+            });
+
+            const markersSinTracking = markers.filter(marker => {
+                const mode = marker.trackingMode || 'qr';
+                return mode === 'image' ? !marker.mindTargetUrl : !marker.recognitionKey;
+            });
+            checks.push({
+                level: markersSinTracking.length === 0 ? 'ok' : 'error',
+                title: 'Reconocimiento de targets',
+                detail: markersSinTracking.length === 0 ? 'Todos los targets tienen clave QR o archivo MindAR.' : `${markersSinTracking.length} target(s) sin clave QR o .mind.`
+            });
+
+            const sinAnclaje = content.filter(obj => !obj.arAnchor || obj.arAnchor === 'base');
+            checks.push({
+                level: content.length === 0 ? 'warn' : (sinAnclaje.length === 0 ? 'ok' : 'warn'),
+                title: 'Contenido anclado',
+                detail: content.length === 0 ? 'No hay contenido AR para publicar.' : (sinAnclaje.length === 0 ? `${anchored.length} contenido(s) anclado(s).` : `${sinAnclaje.length} contenido(s) quedan en mesa base.`)
+            });
+
+            const contenidoSinArchivo = content.filter(obj => (obj.mediaType === 'image' || obj.mediaType === 'video') && !obj.mediaUrl);
+            checks.push({
+                level: contenidoSinArchivo.length === 0 ? 'ok' : 'error',
+                title: 'Archivos multimedia',
+                detail: contenidoSinArchivo.length === 0 ? 'Imagenes y videos tienen archivo asignado.' : `${contenidoSinArchivo.length} imagen/video sin archivo.`
+            });
+
+            const urlsExternas = escenaObjetos.filter(obj => archivoLocalReferenciado(obj.mediaUrl || obj.markerImage || obj.mindTargetUrl) === false && (obj.mediaUrl || obj.markerImage || obj.mindTargetUrl));
+            checks.push({
+                level: urlsExternas.length === 0 ? 'ok' : 'warn',
+                title: 'Recursos locales',
+                detail: urlsExternas.length === 0 ? 'Los recursos referenciados usan output/ o assets internos.' : `${urlsExternas.length} recurso(s) no son locales; revisa CORS/conexion.`
+            });
+
+            checks.push({
+                level: hayCambiosSinGuardar ? 'warn' : 'ok',
+                title: 'Estado de guardado',
+                detail: hayCambiosSinGuardar ? 'Hay cambios sin guardar antes de probar en telefono.' : 'Layout guardado en el servidor.'
+            });
+
+            const okCount = checks.filter(c => c.level === 'ok').length;
+            const errorCount = checks.filter(c => c.level === 'error').length;
+            const score = Math.round((okCount / checks.length) * 100);
+
+            const scoreEl = document.getElementById('publish-score-value');
+            const labelEl = document.getElementById('publish-score-label');
+            const summaryEl = document.getElementById('publish-summary');
+            if (scoreEl) scoreEl.innerText = `${score}%`;
+            if (labelEl) labelEl.innerText = errorCount > 0 ? 'Faltan correcciones' : (score === 100 ? 'Listo para probar' : 'Revisar advertencias');
+            if (summaryEl) summaryEl.innerText = `${checks.length} checks · ${errorCount} errores`;
+
+            const list = document.getElementById('publish-check-list');
+            if (list) {
+                list.innerHTML = '';
+                checks.forEach(check => {
+                    const row = document.createElement('div');
+                    row.className = `publish-check ${check.level}`;
+                    const icon = check.level === 'ok' ? '✓' : (check.level === 'warn' ? '!' : '×');
+                    row.innerHTML = `
+                        <div class="publish-check-icon">${icon}</div>
+                        <div>
+                            <div class="publish-check-title">${check.title}</div>
+                            <div class="publish-check-detail">${check.detail}</div>
+                        </div>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        function toggleObjetoVisible(event, uuid) {
+            event.stopPropagation();
+            const obj = escenaObjetos.find(o => o.uuid === uuid);
+            if (!obj) return;
+            if (!puedoEditarObjeto(obj)) return;
+            registrarEstadoHistorial(obj.hidden ? 'Mostrar objeto' : 'Ocultar objeto');
+            obj.hidden = !obj.hidden;
+            const el = document.getElementById(uuid);
+            if (el) el.setAttribute('visible', !obj.hidden);
+            marcarCambiosSinGuardar();
+            renderOutliner();
+        }
+
+        function toggleObjetoBloqueado(event, uuid) {
+            event.stopPropagation();
+            const obj = escenaObjetos.find(o => o.uuid === uuid);
+            if (!obj) return;
+            if (!puedoEditarObjeto(obj)) return;
+            registrarEstadoHistorial(obj.locked ? 'Desbloquear objeto' : 'Bloquear objeto');
+            obj.locked = !obj.locked;
+            marcarCambiosSinGuardar();
+            renderOutliner();
+            mostrarNotificacion(obj.locked ? 'Objeto bloqueado' : 'Objeto desbloqueado');
+        }
+
+        function duplicarEntidad(event, uuid) {
+            event.stopPropagation();
+            const obj = escenaObjetos.find(o => o.uuid === uuid);
+            if (!obj) return;
+            if (!puedoEditarObjeto(obj)) return;
+            registrarEstadoHistorial('Duplicar objeto');
+            contadorIds++;
+            const copia = JSON.parse(JSON.stringify(obj));
+            copia.uuid = `${obj.uuid}-copy-${contadorIds}`;
+            copia.nombre = `${obj.nombre || tipoEntidad(obj)} copia`;
+            copia.posicion = {
+                x: Number(obj.posicion?.x || 0) + 0.25,
+                y: Number(obj.posicion?.y || 0),
+                z: Number(obj.posicion?.z || -3.5) + 0.25
+            };
+            copia.hidden = false;
+            copia.locked = false;
+            if (copia.isMarker) {
+                copia.recognitionKey = copia.uuid;
+                copia.arAnchor = 'base';
+            }
+            escenaObjetos.push(copia);
+            renderizarEntidad3D(copia);
+            actualizarOpcionesAnclaje();
+            seleccionarObjeto(copia);
+            marcarCambiosSinGuardar();
+            mostrarNotificacion(`Duplicado: ${copia.nombre}`, 'success');
+        }
+
         // Actualizar el nombre de la entidad seleccionada en tiempo real
         function actualizarNombreEntidad() {
             if (!entidadSeleccionada) return;
+            if (!puedoEditarObjeto(entidadSeleccionada)) return;
             const nuevoNombre = document.getElementById('input-entity-name').value.trim();
             if (nuevoNombre) {
+                registrarEstadoHistorial('Renombrar objeto', { coalesceMs: 900 });
                 entidadSeleccionada.nombre = nuevoNombre;
                 document.getElementById('selected-entity-badge').innerText = nuevoNombre;
                 // Si es un marcador, refrescar los textos en el select de anclajes
                 if (entidadSeleccionada.isMarker) {
                     actualizarOpcionesAnclaje();
                 }
+                renderOutliner();
+                marcarCambiosSinGuardar();
             }
         }
 
@@ -2589,8 +4671,50 @@
                 plane.setAttribute('material', `src: ${obj.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
                 el.appendChild(plane);
             } else {
-                // Si hay URL directa (ej. Poly Pizza CDN), usarla directamente
-                if (obj.glbUrl) {
+                const mediaType = obj.mediaType || '3d';
+                if (mediaType === 'image') {
+                    const panel = document.createElement('a-plane');
+                    panel.setAttribute('width', '1.4');
+                    panel.setAttribute('height', '0.9');
+                    panel.setAttribute('material', obj.mediaUrl ? `src: ${obj.mediaUrl}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double');
+                    el.appendChild(panel);
+                } else if (mediaType === 'video') {
+                    const panel = document.createElement('a-plane');
+                    panel.setAttribute('width', '1.6');
+                    panel.setAttribute('height', '0.9');
+                    panel.setAttribute('material', 'color: #111827; shader: flat; side: double');
+                    const label = document.createElement('a-text');
+                    label.setAttribute('value', 'VIDEO');
+                    label.setAttribute('align', 'center');
+                    label.setAttribute('color', '#00f3ff');
+                    label.setAttribute('width', '2.4');
+                    label.setAttribute('position', '0 0 0.02');
+                    el.appendChild(panel);
+                    el.appendChild(label);
+                } else if (mediaType === 'oira-node') {
+                    const panel = document.createElement('a-plane');
+                    panel.setAttribute('width', '1.15');
+                    panel.setAttribute('height', '0.48');
+                    panel.setAttribute('material', `color: ${obj.oiraColor || '#0f766e'}; shader: flat; side: double; opacity: 0.92; transparent: true`);
+
+                    const accent = document.createElement('a-plane');
+                    accent.setAttribute('width', '1.15');
+                    accent.setAttribute('height', '0.035');
+                    accent.setAttribute('position', '0 0.24 0.025');
+                    accent.setAttribute('material', 'color: #22d3ee; shader: flat; side: double');
+
+                    const label = document.createElement('a-text');
+                    label.setAttribute('value', obj.oiraLabel || obj.nombre || 'OIRA');
+                    label.setAttribute('align', 'center');
+                    label.setAttribute('color', '#e0faff');
+                    label.setAttribute('width', '2.2');
+                    label.setAttribute('position', '0 0.02 0.035');
+
+                    el.appendChild(panel);
+                    el.appendChild(accent);
+                    el.appendChild(label);
+                } else if (obj.glbUrl) {
+                    // Si hay URL directa (ej. Poly Pizza CDN), usarla directamente
                     el.setAttribute('gltf-model', obj.glbUrl);
                 } else {
                     el.setAttribute('gltf-model', `#${obj.modelId}`);
@@ -2600,6 +4724,7 @@
             el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
             el.setAttribute('rotation', `0 ${obj.rotacion.y} 0`);
             el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
+            el.setAttribute('visible', obj.hidden ? 'false' : 'true');
             el.setAttribute('class', 'interactive-entity');
             el.setAttribute('selectable', ''); // Añadir comportamiento seleccionable al clic
             
@@ -2609,6 +4734,7 @@
 
         // Seleccionar un objeto en la escena 3D y cargar sus valores en el Inspector del HUD
         function seleccionarObjeto(obj) {
+            const remoteLock = bloqueoRemoto(obj.uuid);
             // Desmarcar selección anterior visualmente
             if (entidadSeleccionada) {
                 const elViejo = document.getElementById(entidadSeleccionada.uuid);
@@ -2618,12 +4744,14 @@
             }
 
             entidadSeleccionada = obj;
+            renderOutliner();
             
             // Resaltar visualmente el nuevo objeto con una luz neón integrada en el modelo
             const elNuevo = document.getElementById(obj.uuid);
             if (elNuevo) {
                 // Añadimos una luz neón pequeña al objeto para indicar selección
-                elNuevo.setAttribute('light', 'type: point; color: #00f3ff; intensity: 0.8; distance: 1.5; decay: 1;');
+                const color = remoteLock?.color || '#00f3ff';
+                elNuevo.setAttribute('light', `type: point; color: ${color}; intensity: 0.8; distance: 1.5; decay: 1;`);
             }
 
             // Ocultar pantalla vacía del inspector y mostrar controles
@@ -2633,6 +4761,12 @@
             // Rellenar badge de título y modo de control
             document.getElementById('selected-entity-badge').innerText = obj.nombre;
             document.getElementById('inspector-mode-val').innerText = getModeLabel(activeEditMode);
+            if (remoteLock) {
+                document.getElementById('inspector-mode-val').innerText = `Solo lectura · ${remoteLock.name}`;
+                mostrarNotificacion(`${remoteLock.name || 'Otro usuario'} esta editando este objeto.`, 'error');
+            } else {
+                enviarHeartbeatColaboracion();
+            }
             
             // Rellenar input de nombre
             document.getElementById('input-entity-name').value = obj.nombre || '';
@@ -2643,6 +4777,7 @@
             document.getElementById('slide-pos-z').value = obj.posicion.z;
             document.getElementById('slide-rot-y').value = obj.rotacion.y;
             document.getElementById('slide-scale').value = obj.escala;
+            sincronizarNumericosTransformacion();
 
             // Rellenar anclaje AR configurable dinámicamente
             actualizarOpcionesAnclaje();
@@ -2651,13 +4786,19 @@
             // Alternar controles según sea marcador o modelo
             const anchorGroup = document.getElementById('group-ar-anchor');
             const markerConfigGroup = document.getElementById('group-marker-config');
+            const contentConfigGroup = document.getElementById('group-content-config');
             if (obj.isMarker) {
                 if (anchorGroup) anchorGroup.style.display = 'none';
                 if (markerConfigGroup) markerConfigGroup.style.display = 'block';
+                if (contentConfigGroup) contentConfigGroup.style.display = 'none';
             } else {
                 if (anchorGroup) anchorGroup.style.display = 'block';
                 if (markerConfigGroup) markerConfigGroup.style.display = 'none';
+                if (contentConfigGroup) contentConfigGroup.style.display = 'block';
             }
+            document.querySelectorAll('#inspector-content input, #inspector-content select, #inspector-content button').forEach(control => {
+                control.disabled = Boolean(remoteLock);
+            });
 
             // Actualizar textos numéricos en el HUD
             document.getElementById('val-pos-x').innerText = Number(obj.posicion.x).toFixed(2);
@@ -2671,8 +4812,75 @@
         }
 
         // Actualizar la posición, escala y rotación del objeto 3D en A-Frame según el movimiento de los Sliders
+        function clampNumero(valor, min, max, fallback = 0) {
+            const n = Number(valor);
+            if (!Number.isFinite(n)) return fallback;
+            return Math.max(min, Math.min(max, n));
+        }
+
+        function sincronizarNumericosTransformacion() {
+            const pairs = [
+                ['slide-pos-x', 'num-pos-x'],
+                ['slide-pos-y', 'num-pos-y'],
+                ['slide-pos-z', 'num-pos-z'],
+                ['slide-rot-y', 'num-rot-y'],
+                ['slide-scale', 'num-scale']
+            ];
+            pairs.forEach(([sliderId, inputId]) => {
+                const slider = document.getElementById(sliderId);
+                const input = document.getElementById(inputId);
+                if (slider && input) input.value = slider.value;
+            });
+        }
+
+        function actualizarTransformacionDesdeNumericos() {
+            if (entidadSeleccionada && !puedoEditarObjeto(entidadSeleccionada)) return;
+            const map = [
+                ['num-pos-x', 'slide-pos-x', -6, 6, 0],
+                ['num-pos-y', 'slide-pos-y', -2, 5, 1],
+                ['num-pos-z', 'slide-pos-z', -10, -1, -3],
+                ['num-rot-y', 'slide-rot-y', 0, 360, 0],
+                ['num-scale', 'slide-scale', 0.1, 4, 1]
+            ];
+            map.forEach(([inputId, sliderId, min, max, fallback]) => {
+                const input = document.getElementById(inputId);
+                const slider = document.getElementById(sliderId);
+                if (!input || !slider) return;
+                const value = clampNumero(input.value, min, max, fallback);
+                input.value = value;
+                slider.value = value;
+            });
+            actualizarTransformacion();
+        }
+
+        function resetTransformAxis(axis) {
+            if (entidadSeleccionada && !puedoEditarObjeto(entidadSeleccionada)) return;
+            const defaults = {
+                'pos-x': ['num-pos-x', 0],
+                'pos-y': ['num-pos-y', 1.1],
+                'pos-z': ['num-pos-z', -3.5],
+                'rot-y': ['num-rot-y', 0],
+                'scale': ['num-scale', 1]
+            };
+            const config = defaults[axis];
+            if (!config) return;
+            const input = document.getElementById(config[0]);
+            if (input) input.value = config[1];
+            actualizarTransformacionDesdeNumericos();
+        }
+
         function actualizarTransformacion() {
             if (!entidadSeleccionada) return;
+            if (!puedoEditarObjeto(entidadSeleccionada)) {
+                seleccionarObjeto(entidadSeleccionada);
+                return;
+            }
+            if (entidadSeleccionada.locked) {
+                mostrarNotificacion("Objeto bloqueado. Desbloquéalo desde Escena para transformarlo.", "error");
+                seleccionarObjeto(entidadSeleccionada);
+                return;
+            }
+            registrarEstadoHistorial('Transformar objeto', { coalesceMs: 500 });
 
             // Leer valores de los sliders
             const px = parseFloat(document.getElementById('slide-pos-x').value);
@@ -2692,6 +4900,7 @@
             document.getElementById('val-pos-z').innerText = pz.toFixed(2);
             document.getElementById('val-rot-y').innerText = `${ry}°`;
             document.getElementById('val-scale').innerText = s.toFixed(2);
+            sincronizarNumericosTransformacion();
 
             // Reflejar cambios físicamente en el A-Frame Entity
             const el = document.getElementById(entidadSeleccionada.uuid);
@@ -2700,23 +4909,25 @@
                 el.setAttribute('rotation', `0 ${ry} 0`);
                 el.setAttribute('scale', `${s} ${s} ${s}`);
             }
+            renderOutliner();
+            marcarCambiosSinGuardar();
 
             // Actualizar Gizmo visual
             actualizarGizmo3D();
 
-            // Registrar en el historial local de Undo/Redo
-            registrarTransformacion(entidadSeleccionada);
         }
 
         // --- ESCENARIO: Actualizar dinámicamente las dimensiones de la mesa de trabajo ---
         let stageSize = { width: 3.0, height: 3.0, gridVisible: true };
 
         function actualizarTamanoEscenario() {
+            registrarEstadoHistorial('Cambiar escenario', { coalesceMs: 500 });
             const w = parseFloat(document.getElementById('slide-stage-w').value);
             const h = parseFloat(document.getElementById('slide-stage-h').value);
             
             stageSize.width = w;
             stageSize.height = h;
+            marcarCambiosSinGuardar();
             
             // Actualizar interfaz HUD
             document.getElementById('val-stage-w').innerText = `${w.toFixed(2)}m`;
@@ -2732,8 +4943,10 @@
 
         // --- ESCENARIO: Activar/desactivar la rejilla neón del escenario ---
         function toggleRejillaEscenario() {
+            registrarEstadoHistorial('Alternar rejilla');
             const visible = document.getElementById('check-stage-grid').checked;
             stageSize.gridVisible = visible;
+            marcarCambiosSinGuardar();
             
             const grid = document.getElementById('workspace-grid');
             if (grid) {
@@ -2744,6 +4957,7 @@
         // --- ANCLAJES: Actualizar el tipo de anclaje físico AR asignado al objeto seleccionado ---
         function actualizarAnclajeAR() {
             if (!entidadSeleccionada) return;
+            registrarEstadoHistorial('Cambiar anclaje AR');
             const nuevoAnclaje = document.getElementById('select-ar-anchor').value;
             entidadSeleccionada.arAnchor = nuevoAnclaje;
             
@@ -2759,14 +4973,16 @@
             
             mostrarNotificacion(`🔗 Anclaje AR actualizado: ${nombreAnclaje}`, "success");
             
-            // Registrar en el historial para Undo/Redo
-            registrarTransformacion(entidadSeleccionada);
+            renderOutliner();
+            marcarCambiosSinGuardar();
         }
 
 
         // Eliminar el objeto seleccionado tanto del lienzo 3D como de la memoria local
         function eliminarEntidadSeleccionada() {
             if (!entidadSeleccionada) return;
+            if (!puedoEditarObjeto(entidadSeleccionada)) return;
+            registrarEstadoHistorial('Eliminar objeto');
 
             const idEliminado = entidadSeleccionada.uuid;
             const eraMarcador = entidadSeleccionada.isMarker;
@@ -2800,6 +5016,8 @@
 
             // Ocultar Gizmo visual
             actualizarGizmo3D();
+            renderOutliner();
+            marcarCambiosSinGuardar();
         }
 
         // Guardar y Subir la composición completa a la API del servidor
@@ -2809,11 +5027,13 @@
                 
                 // Estructura unificada que contiene la configuración del escenario y todas las entidades
                 const layoutCompleto = {
+                    project: proyectoActivo,
+                    version: proyectoVersion,
                     stage: stageSize,
                     entities: escenaObjetos
                 };
                 
-                const response = await fetch('/api/save-layout', {
+                const response = await fetch(`/api/save-layout?project=${encodeURIComponent(proyectoActivo)}&version=${encodeURIComponent(proyectoVersion)}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2823,27 +5043,156 @@
 
                 const data = await response.json();
                 if (response.ok) {
-                    mostrarNotificacion("💾 ¡Escenario guardado exitosamente en la red!", "success");
+                    proyectoVersion = Number.isFinite(Number(data.version)) ? Number(data.version) : proyectoVersion;
+                    avisoCambioRemotoPendiente = false;
+                    setProyectoActivo(data.project || proyectoActivo, proyectoVersion);
+                    marcarGuardado();
+                    cargarListaProyectos();
+                    mostrarNotificacion(`💾 Proyecto ${proyectoActivo} guardado v${proyectoVersion}.`, "success");
+                    return true;
                 } else {
-                    mostrarNotificacion(`Error al guardar: ${data.error || 'Falla de servidor'}`, "error");
+                    if (response.status === 409) {
+                        mostrarNotificacion(`Conflicto: ${data.message || 'otra persona guardó antes. Recarga el proyecto.'}`, "error");
+                    } else {
+                        mostrarNotificacion(`Error al guardar: ${data.error || 'Falla de servidor'}`, "error");
+                    }
+                    return false;
                 }
             } catch (err) {
                 console.error("Error al conectar con la API de guardado:", err);
                 mostrarNotificacion("Error crítico al subir los cambios a la red.", "error");
+                return false;
             }
         }
 
-        // Descargar la configuración inicial del diseño guardado en la red
-        async function cargarDisenoDesdeServidor() {
+        async function exportarExperiencia() {
+            const btn = document.getElementById('btn-export-experience');
+            const detail = document.getElementById('publish-export-detail');
+            const link = document.getElementById('publish-export-link');
+            if (btn) btn.disabled = true;
+            if (link) link.style.display = 'none';
+            if (detail) detail.innerText = 'Guardando layout y preparando paquete...';
+
             try {
-                // Leer el archivo layout.json directamente (servido estáticamente por el lanzador)
-                const response = await fetch('output/layout.json', { cache: 'no-store' });
+                const saved = await guardarDiseno();
+                if (!saved) {
+                    if (detail) detail.innerText = 'No se pudo guardar el layout. Corrige el error antes de exportar.';
+                    return;
+                }
+
+                const name = `moby_experience_${new Date().toISOString().slice(0, 10)}`;
+                const response = await fetch(`/api/export-experience?name=${encodeURIComponent(name)}`, { method: 'POST' });
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(data.error || data.message || `HTTP ${response.status}`);
+                }
+
+                if (detail) {
+                    const missing = data.missingAssets && data.missingAssets.length > 0
+                        ? ` · faltan ${data.missingAssets.length} asset(s)`
+                        : '';
+                    detail.innerText = `${data.zipName} · ${data.assetCount} asset(s) · ${data.size}${missing}`;
+                }
+                if (link) {
+                    link.href = data.zipPath;
+                    link.download = data.zipName;
+                    link.innerText = `Descargar ${data.zipName}`;
+                    link.style.display = 'block';
+                }
+                mostrarNotificacion('Experiencia exportada correctamente.', 'success');
+                validarPublicacion();
+            } catch (err) {
+                if (detail) detail.innerText = `Error al exportar: ${err.message}`;
+                mostrarNotificacion(`Error al exportar: ${err.message}`, 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function cargarListaProyectos() {
+            try {
+                const response = await fetch('/api/list-projects', { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const select = document.getElementById('project-select');
+                if (!select) return;
+                const projects = data.projects || [];
+                select.innerHTML = '';
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.name;
+                    option.innerText = `${project.name} · v${project.version || 0}`;
+                    select.appendChild(option);
+                });
+                if (!projects.some(project => project.name === proyectoActivo)) {
+                    const option = document.createElement('option');
+                    option.value = proyectoActivo;
+                    option.innerText = `${proyectoActivo} · nuevo`;
+                    select.appendChild(option);
+                }
+                select.value = proyectoActivo;
+            } catch (err) {
+                console.warn('No se pudo cargar lista de proyectos:', err);
+            }
+        }
+
+        async function cargarProyectosYCargarActual() {
+            await cargarListaProyectos();
+            await cargarDisenoDesdeServidor(proyectoActivo);
+        }
+
+        async function cambiarProyectoActivo(nombre) {
+            const next = normalizarNombreProyecto(nombre);
+            if (hayCambiosSinGuardar && !confirm('Hay cambios sin guardar. ¿Cambiar de proyecto y perder esos cambios locales?')) {
+                const select = document.getElementById('project-select');
+                if (select) select.value = proyectoActivo;
+                return;
+            }
+            await cargarDisenoDesdeServidor(next);
+        }
+
+        async function crearProyectoDesdeInput() {
+            const input = document.getElementById('project-name-input');
+            const nombre = normalizarNombreProyecto(input?.value || '');
+            if (!nombre) return;
+            if (input) input.value = '';
+            await cargarDisenoDesdeServidor(nombre);
+            marcarCambiosSinGuardar();
+            await guardarDiseno();
+        }
+
+        function limpiarEscenaEditor() {
+            document.querySelectorAll('#entities-container > .interactive-entity').forEach(el => el.remove());
+            escenaObjetos = [];
+            entidadSeleccionada = null;
+            contadorIds = 0;
+            const inspector = document.getElementById('inspector-content');
+            const empty = document.getElementById('empty-inspector');
+            if (inspector) inspector.style.display = 'none';
+            if (empty) empty.style.display = 'flex';
+        }
+
+        // Descargar la configuración inicial del diseño guardado en la red
+        async function cargarDisenoDesdeServidor(project = proyectoActivo, options = {}) {
+            try {
+                const silent = Boolean(options.silent);
+                const skipDraftCheck = Boolean(options.skipDraftCheck);
+                const safeProject = normalizarNombreProyecto(project);
+                const response = await fetch(`/api/load-layout?project=${encodeURIComponent(safeProject)}`, { cache: 'no-store' });
                 if (!response.ok) {
-                    console.log("No se encontró ningún diseño guardado en la red. Iniciando lienzo vacío.");
+                    limpiarEscenaEditor();
+                    setProyectoActivo(safeProject, 0);
+                    inicializarHistorialBase('Lienzo vacio');
+                    if (!skipDraftCheck) revisarBorradorLocal();
+                    renderOutliner();
+                    actualizarEstadoGuardado();
+                    if (!silent) mostrarNotificacion(`Proyecto ${safeProject} listo para crear.`, "success");
                     return;
                 }
 
                 const data = await response.json();
+                limpiarEscenaEditor();
+                setProyectoActivo(data.project || safeProject, data.version || 0);
                 let entidadesACargar = [];
                 
                 // 1. Cargar configuración de límites del escenario si existe (formato unificado nuevo)
@@ -2887,11 +5236,21 @@
                     });
                     
                     actualizarOpcionesAnclaje();
-                    mostrarNotificacion("✨ Diseño anterior cargado de forma exitosa.", "success");
+                    renderOutliner();
+                    marcarGuardado(false);
+                    if (!silent) mostrarNotificacion(`✨ Proyecto ${proyectoActivo} cargado v${proyectoVersion}.`, "success");
+                } else {
+                    actualizarOpcionesAnclaje();
+                    renderOutliner();
+                    marcarGuardado(false);
                 }
             } catch (err) {
                 console.warn("Lienzo vacío o error en lectura de base de datos:", err);
             }
+            renderOutliner();
+            actualizarEstadoGuardado();
+            inicializarHistorialBase('Layout cargado');
+            if (!skipDraftCheck) revisarBorradorLocal();
         }
 
         // Mostrar un cartel de alerta flotante e interactivo en la parte inferior del HUD
@@ -3065,6 +5424,8 @@
             document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
             document.getElementById(`panel-${tab}`).classList.add('active');
+            if (tab === 'scene') renderOutliner();
+            if (tab === 'publish') validarPublicacion();
             if (tab === 'media') cargarMediateca();
             if (tab === 'buscar') inicializarBuscadorPoly();
         }
@@ -3296,67 +5657,137 @@
         }
 
 
-        // --- MEDIATECA: Cargar lista de modelos desde el servidor ---
+        // --- MEDIATECA: Cargar y gestionar assets desde el servidor ---
+        let mediatecaAssets = [];
+        let mediaFiltroActivo = 'all';
+
+        function escapeAttr(value) {
+            return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function jsArg(value) {
+            return String(value || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '');
+        }
+
+        function tipoAssetLabel(kind) {
+            return {
+                model: 'Modelo 3D',
+                image: 'Imagen',
+                video: 'Video',
+                target: 'Target AR',
+                data: 'Dato',
+                other: 'Archivo'
+            }[kind] || 'Archivo';
+        }
+
+        function iconoAsset(asset) {
+            if (asset.kind === 'image') return `<img src="${escapeAttr(asset.src)}" alt="">`;
+            if (asset.kind === 'video') return `<video src="${escapeAttr(asset.src)}" muted></video>`;
+            if (asset.kind === 'model') return '📦';
+            if (asset.kind === 'target') return '🎯';
+            if (asset.kind === 'data') return '◫';
+            return '📄';
+        }
+
+        function setMediaFilter(filter) {
+            mediaFiltroActivo = filter;
+            document.querySelectorAll('.media-filter').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderMediateca();
+        }
+
         async function cargarMediateca() {
             const list = document.getElementById('media-file-list');
             const stats = document.getElementById('media-stats-text');
             list.innerHTML = '<div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">⏳ Sincronizando...</div>';
             try {
-                const response = await fetch('/api/list-models', { cache: 'no-store' });
+                const response = await fetch('/api/list-assets', { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const modelos = await response.json();
+                mediatecaAssets = await response.json();
 
-                // Sincronizar visibilidad de las tarjetas de Modelos Base en el panel izquierdo
-                const nombresArchivosPresentes = modelos.map(m => m.name);
-                document.querySelectorAll('#panel-models .asset-card[data-filename]').forEach(card => {
-                    const filename = card.getAttribute('data-filename');
-                    if (nombresArchivosPresentes.includes(filename)) {
-                        card.style.display = 'flex'; // Usamos flex para coincidir con el display original de las cards
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-
-                list.innerHTML = '';
-                if (modelos.length === 0) {
-                    list.innerHTML = '<div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">📭 No hay modelos en el servidor.</div>';
-                    stats.textContent = '0 modelos';
-                    return;
-                }
-
-                const totalBytes = modelos.reduce((acc, m) => acc + (m.sizeBytes || 0), 0);
-                const totalMB = totalBytes >= 1024*1024 ? `${(totalBytes/(1024*1024)).toFixed(2)} MB` : `${(totalBytes/1024).toFixed(1)} KB`;
-                stats.textContent = `${modelos.length} modelos · ${totalMB} total`;
-
-                const iconMap = {
-                    'ballena': '🐳', 'whale': '🐳', 'buque': '🚢', 'laptop': '💻',
-                    'servidor': '🖥️', 'rack': '🖥️', 'contenedor': '📦', 'docker': '📦'
-                };
-
-                modelos.forEach(m => {
-                    const icon = Object.entries(iconMap).find(([k]) => m.name.toLowerCase().includes(k))?.[1] || '📄';
-                    const item = document.createElement('div');
-                    item.className = 'media-item';
-                    item.innerHTML = `
-                        <div class="media-item-icon">${icon}</div>
-                        <div class="media-item-info">
-                            <div class="media-item-name" title="${m.name}">${m.friendlyName || m.name}</div>
-                            <div class="media-item-meta">${m.size} · ${m.name}</div>
-                        </div>
-                        <div class="media-item-actions">
-                            <button class="media-btn add" title="Añadir a escena" onclick="instanciarDesdeMedia('${m.modelId}', '${m.src}', '${m.name.replace(/'/g,'')}')">＋</button>
-                            <button class="media-btn del" title="Eliminar del servidor" onclick="eliminarModeloMediateca('${m.name}', '${m.modelId}', this)">✕</button>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
+                renderMediateca();
             } catch(err) {
                 list.innerHTML = `<div style="text-align:center; color: var(--color-error); font-size: 12px; padding: 20px 0;">❌ Error al cargar: ${err.message}</div>`;
                 stats.textContent = 'Error de conexión';
             }
         }
 
-        // --- MEDIATECA: Instanciar modelo desde la mediateca en la escena ---
+        function renderMediateca() {
+            const list = document.getElementById('media-file-list');
+            const stats = document.getElementById('media-stats-text');
+            if (!list || !stats) return;
+
+            const query = (document.getElementById('media-search-input')?.value || '').trim().toLowerCase();
+            const filtered = mediatecaAssets.filter(asset => {
+                const matchesQuery = !query || [asset.name, asset.friendlyName, asset.kind, asset.extension]
+                    .some(value => String(value || '').toLowerCase().includes(query));
+                const matchesFilter = mediaFiltroActivo === 'all'
+                    || asset.kind === mediaFiltroActivo
+                    || (mediaFiltroActivo === 'unused' && !asset.protected && Number(asset.usedCount || 0) === 0);
+                return matchesQuery && matchesFilter;
+            });
+
+            const totalBytes = filtered.reduce((acc, m) => acc + (m.sizeBytes || 0), 0);
+            const totalSize = totalBytes >= 1024 * 1024 ? `${(totalBytes/(1024*1024)).toFixed(2)} MB` : `${(totalBytes/1024).toFixed(1)} KB`;
+            const totalUsed = filtered.filter(asset => asset.usedCount > 0).length;
+            stats.textContent = `${filtered.length} assets · ${totalSize} · ${totalUsed} en uso`;
+
+            list.innerHTML = '';
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color: #64748b; font-size: 12px; padding: 20px 0;">📭 No hay assets que coincidan.</div>';
+                return;
+            }
+
+            filtered.forEach(asset => {
+                const item = document.createElement('div');
+                item.className = `media-item ${asset.usedCount > 0 ? 'in-use' : ''}`;
+                const usageTitle = (asset.usedBy || []).map(u => `${u.object} (${u.field})`).join(', ');
+                item.innerHTML = `
+                        <div class="media-item-icon">${iconoAsset(asset)}</div>
+                        <div class="media-item-info">
+                            <div class="media-item-name" title="${escapeAttr(asset.name)}">${asset.friendlyName || asset.name}</div>
+                            <div class="media-item-meta">${tipoAssetLabel(asset.kind)} · ${asset.size} · ${asset.name}</div>
+                            <div class="media-badges">
+                                <span class="media-badge">${asset.extension || 'file'}</span>
+                                ${asset.usedCount > 0 ? `<span class="media-badge used" title="${escapeAttr(usageTitle)}">${asset.usedCount} uso(s)</span>` : '<span class="media-badge">sin uso</span>'}
+                                ${asset.protected ? '<span class="media-badge">protegido</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="media-item-actions">
+                            <button class="media-btn add" title="Añadir a escena" onclick="agregarAssetAEscena('${jsArg(asset.name)}')">＋</button>
+                            <button class="media-btn assign" title="Asignar al objeto seleccionado" onclick="asignarAssetSeleccionado('${jsArg(asset.name)}')">↧</button>
+                            <button class="media-btn" title="Copiar ruta" onclick="copiarRutaAsset('${jsArg(asset.src)}')">⧉</button>
+                            <button class="media-btn del" title="Eliminar del servidor" ${asset.protected ? 'disabled' : ''} onclick="eliminarAssetMediateca('${jsArg(asset.name)}', this)">✕</button>
+                        </div>
+                    `;
+                list.appendChild(item);
+            });
+        }
+
+        function obtenerAssetPorNombre(fileName) {
+            return mediatecaAssets.find(asset => asset.name === fileName);
+        }
+
+        async function subirAssetMediateca(file) {
+            if (!file) return;
+            mostrarNotificacion(`Subiendo asset: ${file.name}...`);
+            try {
+                const response = await fetch(`/api/upload-media?name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/octet-stream' },
+                    body: file
+                });
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') throw new Error(data.error || data.message || `HTTP ${response.status}`);
+                document.getElementById('asset-upload-input').value = '';
+                await cargarMediateca();
+                mostrarNotificacion('Asset subido y disponible en mediateca.', 'success');
+            } catch (err) {
+                mostrarNotificacion(`Error al subir asset: ${err.message}`, 'error');
+            }
+        }
+
         async function instanciarDesdeMedia(modelId, src, fileName) {
             // Verificar si el asset ya está cargado en A-Frame
             let assetItem = document.getElementById(modelId);
@@ -3372,21 +5803,112 @@
             mostrarNotificacion(`✨ ${nombreBase} añadido a la escena`);
         }
 
-        // --- MEDIATECA: Eliminar modelo del servidor y la mediateca ---
-        async function eliminarModeloMediateca(fileName, modelId, btnEl) {
-            if (!confirm(`¿Eliminar permanentemente "${fileName}" del servidor?\n\nEsta acción no se puede deshacer.`)) return;
+        function agregarAssetAEscena(fileName) {
+            const asset = obtenerAssetPorNombre(fileName);
+            if (!asset) return;
+
+            if (asset.kind === 'model') {
+                instanciarDesdeMedia(asset.modelId, asset.src, asset.name);
+                return;
+            }
+
+            if (asset.kind === 'image' || asset.kind === 'video') {
+                const obj = crearContenidoAR(asset.friendlyName || asset.name, asset.kind, 'base', null, asset.src);
+                obj.mediaType = asset.kind;
+                seleccionarObjeto(obj);
+                mostrarNotificacion(`${tipoAssetLabel(asset.kind)} añadido como panel AR.`, 'success');
+                return;
+            }
+
+            mostrarNotificacion('Este tipo de asset se asigna desde un objeto seleccionado.', 'error');
+        }
+
+        function asignarAssetSeleccionado(fileName) {
+            const asset = obtenerAssetPorNombre(fileName);
+            if (!asset) return;
+            if (!entidadSeleccionada) {
+                mostrarNotificacion('Selecciona un objeto o marcador antes de asignar un asset.', 'error');
+                return;
+            }
+
+            registrarEstadoHistorial('Asignar asset');
+            if (entidadSeleccionada.isMarker) {
+                if (asset.kind === 'image') {
+                    entidadSeleccionada.markerImage = asset.src;
+                    const el = document.getElementById(entidadSeleccionada.uuid);
+                    const plane = el ? el.querySelector('a-plane') : null;
+                    if (plane) plane.setAttribute('material', `src: ${asset.src}; shader: flat; side: double`);
+                } else if (asset.kind === 'target') {
+                    entidadSeleccionada.trackingMode = 'image';
+                    entidadSeleccionada.mindTargetUrl = asset.src;
+                } else {
+                    mostrarNotificacion('A un marcador puedes asignarle imagen o target .mind.', 'error');
+                    return;
+                }
+            } else if (asset.kind === 'model') {
+                entidadSeleccionada.mediaType = '3d';
+                entidadSeleccionada.modelId = asset.modelId;
+                entidadSeleccionada.glbUrl = null;
+                let assetItem = document.getElementById(asset.modelId);
+                if (!assetItem) {
+                    const assets = document.querySelector('a-assets');
+                    assetItem = document.createElement('a-asset-item');
+                    assetItem.setAttribute('id', asset.modelId);
+                    assetItem.setAttribute('src', asset.src + '?t=' + Date.now());
+                    assets.appendChild(assetItem);
+                }
+                const el = document.getElementById(entidadSeleccionada.uuid);
+                if (el) {
+                    el.parentNode.removeChild(el);
+                    renderizarEntidad3D(entidadSeleccionada);
+                    seleccionarObjeto(entidadSeleccionada);
+                }
+            } else if (asset.kind === 'image' || asset.kind === 'video') {
+                entidadSeleccionada.mediaType = asset.kind;
+                entidadSeleccionada.mediaUrl = asset.src;
+                const el = document.getElementById(entidadSeleccionada.uuid);
+                if (el) {
+                    el.parentNode.removeChild(el);
+                    renderizarEntidad3D(entidadSeleccionada);
+                    seleccionarObjeto(entidadSeleccionada);
+                }
+            } else {
+                mostrarNotificacion('Tipo de asset no asignable al objeto seleccionado.', 'error');
+                return;
+            }
+
+            actualizarOpcionesAnclaje();
+            renderOutliner();
+            marcarCambiosSinGuardar();
+            mostrarNotificacion(`Asset asignado: ${asset.name}`, 'success');
+        }
+
+        async function copiarRutaAsset(src) {
+            try {
+                await navigator.clipboard.writeText(src);
+                mostrarNotificacion(`Ruta copiada: ${src}`, 'success');
+            } catch (err) {
+                mostrarNotificacion(`Ruta del asset: ${src}`, 'success');
+            }
+        }
+
+        async function eliminarAssetMediateca(fileName, btnEl) {
+            const asset = obtenerAssetPorNombre(fileName);
+            if (!asset || asset.protected) return;
+            const usedText = asset.usedCount > 0 ? `\n\nAtencion: aparece usado por ${asset.usedCount} objeto(s) en el layout guardado.` : '';
+            if (!confirm(`¿Eliminar permanentemente "${fileName}" del servidor?${usedText}\n\nEsta accion no se puede deshacer.`)) return;
 
             btnEl.disabled = true;
             btnEl.textContent = '...';
-            mostrarNotificacion(`Eliminando ${fileName}... 🗑️`);
+            mostrarNotificacion(`Eliminando ${fileName}...`);
 
             try {
-                const response = await fetch(`/api/delete-model?name=${encodeURIComponent(fileName)}`, { method: 'POST' });
+                const response = await fetch(`/api/delete-asset?name=${encodeURIComponent(fileName)}`, { method: 'POST' });
                 const data = await response.json();
 
                 if (response.ok && data.status === 'success') {
                     // Quitar de A-Frame assets si estaba cargado
-                    const assetItem = document.getElementById(modelId);
+                    const assetItem = asset.modelId ? document.getElementById(asset.modelId) : null;
                     if (assetItem) assetItem.parentNode.removeChild(assetItem);
 
                     // Eliminar la fila de la UI
@@ -3423,69 +5945,141 @@
             }
         }
 
-        // --- TOOLBAR: Historial de Transformaciones (simple stack) ---
-        let historialTransformaciones = [];
-        let historialIndice = -1;
+        // --- TOOLBAR: Historial profesional por snapshots de escena ---
+        function crearSnapshotHistorial(label = 'Estado') {
+            const base = snapshotLayout();
+            base.label = label;
+            base.selectedUuid = entidadSeleccionada ? entidadSeleccionada.uuid : null;
+            base.counter = contadorIds;
+            return base;
+        }
 
-        function registrarTransformacion(objeto) {
-            const estado = {
-                uuid: objeto.uuid,
-                posicion: { ...objeto.posicion },
-                rotacion: { ...objeto.rotacion },
-                escala: objeto.escala,
-                arAnchor: objeto.arAnchor // registrar anclaje AR
-            };
-            // Si estamos en medio del historial, cortar el futuro
-            if (historialIndice < historialTransformaciones.length - 1) {
-                historialTransformaciones = historialTransformaciones.slice(0, historialIndice + 1);
-            }
-            historialTransformaciones.push(estado);
-            historialIndice = historialTransformaciones.length - 1;
+        function inicializarHistorialBase(label = 'Estado inicial') {
+            historialEstados = [crearSnapshotHistorial(label)];
+            historialIndice = 0;
+            historialSincronizado = true;
             actualizarBotonesHistorial();
+        }
+
+        function firmaSnapshotHistorial(snapshot) {
+            if (!snapshot) return '';
+            return JSON.stringify({
+                stage: snapshot.stage,
+                entities: snapshot.entities,
+                selectedUuid: snapshot.selectedUuid,
+                counter: snapshot.counter
+            });
+        }
+
+        function registrarEstadoHistorial(label = 'Editar escena', options = {}) {
+            if (historialSuspendido) return;
+
+            const now = Date.now();
+            const coalesceMs = options.coalesceMs || 0;
+            if (
+                coalesceMs > 0 &&
+                ultimaAccionHistorial.label === label &&
+                now - ultimaAccionHistorial.at < coalesceMs
+            ) {
+                ultimaAccionHistorial.at = now;
+                return;
+            }
+
+            if (historialIndice < historialEstados.length - 1) {
+                historialEstados = historialEstados.slice(0, historialIndice + 1);
+            }
+
+            const snapshot = crearSnapshotHistorial(label);
+            const ultimo = historialEstados[historialEstados.length - 1];
+            if (firmaSnapshotHistorial(snapshot) !== firmaSnapshotHistorial(ultimo)) {
+                historialEstados.push(snapshot);
+                if (historialEstados.length > HISTORIAL_LIMITE) {
+                    historialEstados.shift();
+                }
+                historialIndice = historialEstados.length - 1;
+            }
+            historialSincronizado = false;
+            ultimaAccionHistorial = { label, at: now };
+            actualizarBotonesHistorial();
+        }
+
+        function ejecutarComoAccionHistorial(label, fn) {
+            registrarEstadoHistorial(label);
+            historialSuspendido = true;
+            try {
+                return fn();
+            } finally {
+                historialSuspendido = false;
+            }
+        }
+
+        function registrarTransformacion() {
+            registrarEstadoHistorial('Transformar objeto', { coalesceMs: 500 });
+        }
+
+        function aplicarSnapshotHistorial(snapshot) {
+            if (!snapshot) return;
+            historialSuspendido = true;
+            try {
+                limpiarEscenaRenderizada();
+                aplicarStageDesdeSnapshot(snapshot.stage);
+                escenaObjetos = JSON.parse(JSON.stringify(snapshot.entities || []));
+                escenaObjetos.forEach(obj => renderizarEntidad3D(obj));
+                contadorIds = Number.isFinite(Number(snapshot.counter)) ? Number(snapshot.counter) : 0;
+                if (!contadorIds) recalcularContadorIds();
+                actualizarOpcionesAnclaje();
+                renderOutliner();
+
+                const selected = snapshot.selectedUuid ? escenaObjetos.find(obj => obj.uuid === snapshot.selectedUuid) : null;
+                if (selected) {
+                    seleccionarObjeto(selected);
+                } else {
+                    entidadSeleccionada = null;
+                    const inspector = document.getElementById('inspector-content');
+                    const empty = document.getElementById('empty-inspector');
+                    if (inspector) inspector.style.display = 'none';
+                    if (empty) empty.style.display = 'flex';
+                    actualizarGizmo3D();
+                }
+            } finally {
+                historialSuspendido = false;
+            }
         }
 
         function ejecutarUndo() {
-            if (historialIndice <= 0) return;
-            historialIndice--;
-            const estado = historialTransformaciones[historialIndice];
-            aplicarEstadoTransformacion(estado);
+            if (historialIndice <= 0 && historialSincronizado) return;
+            if (!historialSincronizado) {
+                const actual = crearSnapshotHistorial('Estado actual');
+                const futuro = historialEstados[historialIndice + 1];
+                if (firmaSnapshotHistorial(actual) !== firmaSnapshotHistorial(futuro)) {
+                    historialEstados = historialEstados.slice(0, historialIndice + 1);
+                    historialEstados.push(actual);
+                }
+                historialSincronizado = true;
+            } else {
+                historialIndice--;
+            }
+            aplicarSnapshotHistorial(historialEstados[historialIndice]);
             actualizarBotonesHistorial();
-            mostrarNotificacion('↩️ Acción deshecha');
+            marcarCambiosSinGuardar();
+            mostrarNotificacion(`Accion deshecha: ${historialEstados[historialIndice + 1]?.label || 'edicion'}`);
         }
 
         function ejecutarRedo() {
-            if (historialIndice >= historialTransformaciones.length - 1) return;
+            if (historialIndice >= historialEstados.length - 1) return;
             historialIndice++;
-            const estado = historialTransformaciones[historialIndice];
-            aplicarEstadoTransformacion(estado);
+            aplicarSnapshotHistorial(historialEstados[historialIndice]);
+            historialSincronizado = true;
             actualizarBotonesHistorial();
-            mostrarNotificacion('↪️ Acción rehecha');
-        }
-
-        function aplicarEstadoTransformacion(estado) {
-            const obj = escenaObjetos.find(o => o.uuid === estado.uuid);
-            if (!obj) return;
-            obj.posicion = { ...estado.posicion };
-            obj.rotacion = { ...estado.rotacion };
-            obj.escala = estado.escala;
-            obj.arAnchor = estado.arAnchor; // aplicar anclaje AR
-
-            const el = document.getElementById(obj.uuid);
-            if (el) {
-                el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
-                el.setAttribute('rotation', `0 ${obj.rotacion.y} 0`);
-                el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
-            }
-            if (entidadSeleccionada && entidadSeleccionada.uuid === obj.uuid) {
-                seleccionarObjeto(obj);
-            }
+            marcarCambiosSinGuardar();
+            mostrarNotificacion(`Accion rehecha: ${historialEstados[historialIndice]?.label || 'edicion'}`);
         }
 
         function actualizarBotonesHistorial() {
             const btnUndo = document.getElementById('tool-undo');
             const btnRedo = document.getElementById('tool-redo');
-            if (btnUndo) btnUndo.disabled = historialIndice <= 0;
-            if (btnRedo) btnRedo.disabled = historialIndice >= historialTransformaciones.length - 1;
+            if (btnUndo) btnUndo.disabled = historialIndice <= 0 && historialSincronizado;
+            if (btnRedo) btnRedo.disabled = historialIndice < 0 || historialIndice >= historialEstados.length - 1;
         }
 
 

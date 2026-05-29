@@ -1,247 +1,327 @@
-# Moby Studio — Arquitectura de Software
+# Moby Studio - Arquitectura
 
-Este documento proporciona una radiografía técnica exacta y detallada de la arquitectura, componentes, flujos de datos y pila tecnológica de **Moby Studio** tal como está programado en este momento.
+Este documento describe la arquitectura actual de Moby Studio segun el codigo activo en `moby_studio/`.
 
----
-
-## 1. Visión General del Sistema
-
-**Moby Studio** es una plataforma interactiva de diseño y visualización en 3D y Realidad Aumentada (WebXR). El sistema se basa en una arquitectura desacoplada de dos capas:
+## 1. Componentes
 
 ```mermaid
-graph TD
-    subgraph Frontend (Cliente - Navegador)
-        E[editor.html - Canvas de Diseño 3D]
-        I[index.html - Experiencia AR + IA]
-        EC[js/EditorCore.js]
-        SM[js/StateManager.js]
-        HM[js/HistoryManager.js]
-        LS[js/LightingSetup.js]
-    end
+flowchart TD
+    Editor[editor.html\nEditor 3D + AR]
+    Client[index.html\nCliente movil AR + IA]
+    Server[lanzador_ar.py\nHTTP + API local]
+    Output[(output/\nlayout + assets)]
+    Projects[(projects/\nlayouts versionados)]
+    Collab[(COLLAB_STATE\npresencia + locks)]
+    Blender[Blender headless\nscripts/*.py]
+    YOLO[YOLOv8 local]
+    Ollama[Ollama qwen\nlocalhost:11434]
 
-    subgraph Backend (Host Local / Servidor de Lanzamiento)
-        L[lanzador_ar.py - Servidor HTTP/HTTPS]
-        B[Blender Headless - Exportación GLB]
-        Y[Inferencia YOLOv8]
-        O[cerebro Ollama - Modelo qwen]
-    end
-
-    E <-->|API /api/save-layout & /api/generate-model| L
-    I <-->|API /api/vision| L
-    L <-->|Línea de comandos --background| B
-    L <-->|Inferencia ultralytics| Y
-    L <-->|HTTP POST 11434| O
+    Editor -->|fetch /api/save-layout?project&version| Server
+    Editor -->|fetch /api/load-layout| Server
+    Editor -->|fetch /api/list-projects| Server
+    Editor -->|fetch /api/collab-*| Server
+    Editor -->|fetch /api/list-assets| Server
+    Editor -->|fetch /api/upload-media| Server
+    Client -->|fetch output/layout.json| Output
+    Client -->|POST /api/vision| Server
+    Server --> Output
+    Server --> Projects
+    Server --> Collab
+    Server --> Blender
+    Server --> YOLO
+    Server --> Ollama
 ```
 
-1. **Frontend (Cliente - Ejecución en Sandbox de Navegador)**:
-   - Administrado a través de módulos interactivos de JavaScript puro (ES6) y elementos personalizados de WebXR mediante **A-Frame**.
-   - Proporciona dos experiencias diferenciadas: `editor.html` (estación interactiva de composición 3D al estilo de Unity y Blender) e `index.html` (visor inmersivo de Realidad Aumentada asistido por Inteligencia Artificial conversacional).
-2. **Backend (Host Local - Servidor de Lanzamiento Python)**:
-   - Orquestado por `lanzador_ar.py`, un servidor Web/API de alto rendimiento montado con el módulo estándar de Python `http.server` y configurado con soporte SSL/HTTPS nativo.
-   - Actúa como coordinador de sistema de archivos y pasarela de orquestación local ejecutando Blender en modo desatendido (headless) y corriendo modelos de visión y lenguaje localmente.
+## 2. Frontend
 
----
+### `editor.html`
 
-## 2. Pila Tecnológica Actual
+Es la herramienta de autoria. El JavaScript activo esta embebido en el propio HTML.
 
-El ecosistema técnico del proyecto se compone de las siguientes herramientas de desarrollo:
+Responsabilidades:
 
-- **Motor Gráfico & Renderizado**:
-  - **Three.js (r128)**: Utilizado para la creación de primitivas, control espacial de transformaciones 3D, cálculos de matrices globales e inyección de flujos físicos de iluminación.
-  - **A-Frame (1.4.2)**: Capa declarativa basada en componentes y entidades que expone la escena WebGL en HTML, adaptada para renderizado WebXR interactivo en dispositivos móviles.
-- **Interacciones del Canvas**:
-  - **THREE.TransformControls**: Control interactivo de Gizmos espaciales en pantalla (flechas/aros RGB) para alterar directamente matrices del escenario.
-- **Herramientas de Servidor & Backend**:
-  - **Python 3**: Entorno principal del servidor que gestiona rutas estáticas y endpoints asíncronos.
-  - **Blender (Headless Mode)**: Motor procedural externo convocado dinámicamente mediante línea de comandos (`blender --background --python scripts/<script>`) para compilar y exportar archivos GLB PBR al vuelo.
-- **Procesamiento de Inteligencia Artificial (IA)**:
-  - **YOLOv8 (ultralytics)**: Modelo de visión artificial de red neuronal convolucional para la clasificación y delimitación física de objetos reales en fotogramas de la cámara.
-  - **Ollama**: Entorno de ejecución de Modelos de Lenguaje Grandes (LLMs) configurado localmente en el puerto `11434` para ejecutar el modelo liviano y ágil `qwen`.
+- Mantener el estado local en `escenaObjetos`.
+- Renderizar entidades A-Frame dentro de `#entities-container`.
+- Editar transformaciones, nombres, anclajes y configuracion AR.
+- Guardar el layout con `/api/save-layout`.
+- Leer proyectos con `/api/load-layout?project=...`.
+- Listar proyectos con `/api/list-projects`.
+- Mantener presencia y locks con `/api/collab-heartbeat`.
+- Administrar autosave local en `localStorage`.
+- Administrar Undo/Redo por snapshots completos.
+- Mostrar outliner, validador de publicacion y mediateca.
+- Detectar versiones remotas y recargar cuando no hay cambios locales.
 
----
+Estado principal:
 
-## 3. Desglose del Editor 3D (`editor.html`)
-
-El editor en `editor.html` proporciona una suite completa de modelado espacial que imita el comportamiento dinámico de los motores de videojuegos de escritorio a través de cuatro módulos:
-
-### A. Scene Graph y Árbol de Estado (`js/StateManager.js`)
-- **Clase Central**: `StateManager` vinculada a la escena física `THREE.Scene`.
-- **Estructura Jerárquica**: Almacena y computa una representación en árbol limpia de los objetos del usuario (Outliner), compuesta de nodos lógicos (`StateNode`).
-- **Filtro del Sistema**: Excluye mediante la rutina privada `_isUserObject(obj)` todos los elementos auxiliares de Three.js que actúan como decoradores de interfaz (como `TransformControls`, `GridHelper`, `AxesHelper` y luces del sistema).
-- **Pub/Sub (Observable)**: Cuenta con un método `subscribe(callback)` que acumula suscriptores en un `Set` interno. Dispara notificaciones asíncronas automáticas enviando el árbol reconstruido cada vez que se ejecutan los métodos `addObject(object, parent)` o `removeObject(object)`.
-
-### B. Historial Undo/Redo (`js/HistoryManager.js`)
-- **Patrón Command**: Implementa una interfaz base `Command` que expone los contratos `execute()` y `undo()`.
-- **Comandos Concretos**:
-  - `AddObjectCommand`: Invoca al `StateManager` para insertar el elemento en el lienzo físico y el árbol lógico.
-  - `RemoveObjectCommand`: Desacopla el Gizmo y extrae la entidad, guardando referencias a su contenedor padre para restaurarlo si es necesario.
-  - `TransformCommand`: Captura y clona la matriz de transformación original `oldMatrix` y la final `newMatrix` de tipo `THREE.Matrix4`. Ejecuta reversiones aplicando `matrix.copy()` y decompone las coordenadas espaciales (`matrix.decompose(position, quaternion, scale)`) actualizando el espacio del mundo.
-- **Historial Lineal**: Controla dos arreglos (`undoStack` y `redoStack`) y limpia la pila de rehacer inmediatamente tras cualquier nueva acción ejecutada por el usuario.
-
-### C. Viewport Controls & Snapping Matemático (`js/EditorCore.js`)
-- **Orquestador**: La clase `EditorCore` inicializa e integra la instancia de `TransformControls`. Sincroniza la navegación deshabilitando dinámicamente los controles orbitales de cámara (`OrbitControls`) al interceptar el evento `dragging-changed` del Gizmo (evitando interferencias al arrastrar flechas).
-- **Control de Cambios en Historial**:
-  - Al detectar `drag-start`, clona y respalda la matriz tridimensional activa.
-  - Al detectar `drag-end`, si la matriz resultante difiere de la original, instancia un `TransformCommand` y lo despacha al `HistoryManager` para habilitar el retorno de estado.
-- **Snapping Manual**:
-  - Evaluado en tiempo real dentro del callback del evento `objectChange` de `TransformControls` cuando `isSnapEnabled` es verdadero.
-  - **Traslación**: Restringe la posición redondeando matemáticamente a intervalos fijos de `0.5` unidades.
-  - **Rotación**: Restringe los ángulos redondeando matemáticamente a pasos exactos de `15 grados` (`Math.PI / 12` radianes).
-  - **Escala**: Restringe las proporciones dimensionales a intervalos de `10%` (`0.1` unidades).
-
-### D. Iluminación Profesional & PBR (`js/LightingSetup.js`)
-- **Inyección de Luces**:
-  - Inyecta una luz ambiental suave (`AmbientLight`) para iluminar zonas de sombra.
-  - Inserta una luz direccional principal (`DirectionalLight`) configurada con `castShadow = true`.
-- **Sombras Definidas**: Aumenta la resolución del mapa de sombras a `2048 x 2048` píxeles e implementa una cámara de sombras ortogonal adaptativa para evitar recortes. Aplica un leve offset negativo (`shadow.bias = -0.0003`) y `shadow.normalBias = 0.02` para eliminar interferencias de visualización sobre mallas cerradas (shadow acne).
-- **Entorno Equirectangular**: Utiliza la extensión `RGBELoader` para cargar asíncronamente imágenes HDR de alta resolución. Procesa la textura cargada usando `PMREMGenerator` y compila los shaders reflectores asignando la textura resultante a `scene.environment`.
-
----
-
-## 4. Desglose de AR e IA (`index.html`)
-
-El visor `index.html` proporciona una experiencia híbrida de hologramas e interactividad en tiempo real asistida por Visión Computacional local:
-
-### A. Transparencia Híbrida WebGL en A-Frame
-Para fusionar objetos holográficos con el mundo real capturado por la cámara física en móviles sin pantallas opacas, el sistema realiza tres acciones en cascada:
-
-1. **Parámetro Escena**: Configura `<a-scene background="transparent: true">`.
-2. **Estilo CSS**: Sobrescribe y anula el fondo de borrado por defecto de A-Frame forzando total transparencia en el contenedor del lienzo:
-   ```css
-   a-scene, .a-canvas {
-       background: transparent !important;
-       background-color: transparent !important;
-   }
-   ```
-3. **Controlador WebGLRenderer**: Escucha el evento `renderstart` de A-Frame para inyectarse directamente en el contexto del renderizador WebGL subyacente de Three.js:
-   ```javascript
-   sceneEl.addEventListener('renderstart', function () {
-       this.renderer.setClearColor(0x000000, 0); // Canal alfa en cero
-       this.renderer.alpha = true;
-   });
-   ```
-
-### B. Pipeline de Inferencia Visual
-
-La interacción del "Sonar Visual" de Moby sigue un flujo asíncrono estricto de cinco fases secuenciales:
-
-```
-[Feed de Video HTML5] ➔ [Captura Canvas 2D (Base64)] ➔ [API POST /api/vision]
-                                                                  │
-                                                                  ▼
-[Speech TTS + HUD] 🔀 [Filtro de Texto MD] ◀ [Ollama (qwen)] ◀ [YOLOv8 Inferencia]
+```javascript
+let escenaObjetos = [];
+let entidadSeleccionada = null;
+let contadorIds = 0;
+let stageSize = { width: 3.0, height: 3.0, gridVisible: true };
+let proyectoActivo = "default";
+let proyectoVersion = 0;
+let usuarioColaboracion = null;
+let collabState = { users: [], locks: {} };
 ```
 
-1. **Captura Físico-Digital (Navegador)**:
-   - Al presionar **Escanear Entorno**, se extrae el fotograma activo del elemento HTML `<video>` y se dibuja sobre un lienzo auxiliar bidimensional en memoria de `640 x 480` píxeles.
-   - Se exporta a formato JPEG codificado en Base64 utilizando `canvas.toDataURL("image/jpeg", 0.85)`.
-2. **Ingesta y Transmisión Asíncrona**:
-   - Envía el paquete JSON `{ image: base64Image }` mediante una llamada POST AJAX al endpoint local `/api/vision` de `lanzador_ar.py`.
-3. **Inferencia de Visión (Servidor Python Local)**:
-   - El backend decodifica la cadena a binario y la almacena en `temp_capture.jpg`.
-   - Inicializa de forma perezosa (lazy-load) el módulo de `ultralytics`. Corre la inferencia física sobre la imagen temporal priorizando el modelo especializado `yolov8_docker_custom.pt` (y cayendo en `yolov8n.pt` si no existe).
-   - Filtra las cajas de clasificación detectadas descartando aquellas con confianza inferior al `50%`. Destruye el archivo temporal.
-4. **Pensamiento Cognitivo (Ollama Local)**:
-   - Formatea un prompt estructurado de comportamiento inyectando los objetos detectados (ej. `"laptop (87% de confianza), cup (92% de confianza)"`).
-   - Envía una petición HTTP interna a `http://localhost:11434/api/generate` indicando el modelo `"qwen"`.
-   - Ollama genera en tiempo real una respuesta conversacional didáctica de máximo 2 oraciones en español simulando la personalidad de Moby (la ballena de Docker), realizando analogías inteligentes sobre cómo esos objetos cotidianos se relacionan con la contenedorización.
-5. **HUD Subtitulado & Voz Sintetizada**:
-   - El cliente recibe la respuesta del servidor y ejecuta `limpiarMarkdown(texto)` para normalizar la cadena (removiendo marcas de negritas, títulos o caracteres extraños de control).
-   - Dispara la animación tridimensional `hacerSaltarMoby()`.
-   - Lanza el Typewriter HUD (mecanografía por pasos de caracteres en subtítulos) e inicializa la API nativa de síntesis de voz del navegador (`window.speechSynthesis`) para que Moby relate de viva voz su análisis al usuario.
+Subsistemas del editor:
 
----
+- **Creacion AR rapida**: crea marcador + contenido y abre el flujo de configuracion.
+- **Modal de disparador AR**: configura target fisico, QR/MindAR y contenido proyectado desde archivo local o URL directa.
+- **Nodos OIRA**: contenido generado (`mediaType: "oira-node"`) sin depender de modelos GLB heredados.
+- **Outliner**: lista targets, objetos anclados y objetos de mesa base.
+- **Colaboracion**: muestra usuarios activos, bloquea objetos seleccionados por otros y avisa versiones remotas.
+- **Validador de publicacion**: revisa targets, recursos, anclajes y guardado.
+- **Mediateca**: lista assets de `output/`, filtra, sube, asigna y elimina.
+- **Autosave**: guarda borradores en `localStorage`.
+- **Undo/Redo**: guarda snapshots de `stage`, `entities`, seleccion y contador.
 
-## 5. Estructura de Datos (layout.json)
+### `index.html`
 
-El estado espacial completo del escenario tridimensional interactivo de Moby Studio se serializa, almacena y transmite a través de un archivo en formato JSON denominado `layout.json`, guardado en el subdirectorio de salida `output/`.
+Es el cliente final para telefono y pruebas AR.
 
-### Estructura de Datos de `layout.json`
+Responsabilidades:
 
-La jerarquía del diseño se compone de un objeto estructurado que unifica la configuración del escenario (`stage`) y el listado de entidades lógicas (`entities`). Cada objeto de entidad expone las siguientes propiedades espaciales y de anclaje:
+- Leer `output/layout.json`.
+- Reconstruir la escena A-Frame final.
+- Activar contenido por QR o MindAR.
+- Mostrar contenido flotante para imagenes y videos.
+- Mostrar nodos OIRA generados desde layout.
+- Exponer controles compactos para telefono.
+- Capturar frames de camara para `/api/vision`.
+
+El cliente soporta:
+
+- `BarcodeDetector` cuando el navegador lo ofrece.
+- MindAR mediante CDN cuando un marcador tiene `trackingMode: "image"` y `mindTargetUrl`.
+- Eventos de target encontrado/perdido para mostrar u ocultar contenido.
+
+## 3. Backend
+
+### `lanzador_ar.py`
+
+Servidor local basado en `http.server.SimpleHTTPRequestHandler`.
+
+Responsabilidades:
+
+- Servir archivos estaticos.
+- Guardar layouts.
+- Guardar proyectos versionados.
+- Mantener estado colaborativo en memoria.
+- Subir y eliminar assets.
+- Listar assets con metadata.
+- Generar QR.
+- Ejecutar scripts de Blender.
+- Procesar vision local con YOLOv8 y Ollama.
+
+Endpoints activos:
+
+| Endpoint | Metodo | Responsabilidad |
+|---|---:|---|
+| `/api/save-layout?project=...&version=...` | POST | Guarda `projects/<project>/layout.json`, incrementa version y actualiza `output/layout.json`. |
+| `/api/list-projects` | GET | Lista proyectos guardados con version y cantidad de entidades. |
+| `/api/load-layout?project=...` | GET | Devuelve el layout versionado de un proyecto. |
+| `/api/collab-heartbeat` | POST | Registra usuario activo, seleccion actual y lock temporal. |
+| `/api/collab-release` | POST | Libera locks del usuario. |
+| `/api/collab-state?project=...` | GET | Devuelve usuarios activos, locks y version remota. |
+| `/api/list-assets` | GET | Lista assets con tipo, tamano, fecha, uso y proteccion. |
+| `/api/delete-asset?name=...` | POST | Elimina assets no protegidos. |
+| `/api/export-experience?name=...` | POST | Empaqueta visor, layout, assets usados y manifiesto en un ZIP. |
+| `/api/list-models` | GET | Lista solo modelos para compatibilidad. |
+| `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia. |
+| `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
+| `/api/delete-model?name=...` | POST | Elimina modelos. |
+| `/api/generate-qr?text=...&name=...` | POST | Genera QR en `output/`. |
+| `/api/generate-model?script=...` | POST | Ejecuta Blender headless. |
+| `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
+| `/api/vision` | POST | Procesa imagen base64 con YOLOv8 y Ollama. |
+
+## 4. Persistencia
+
+### `projects/<proyecto>/layout.json`
+
+Archivo principal de autoria. Contiene proyecto, version, fecha de actualizacion, escenario y entidades.
 
 ```json
 {
-    "stage": {
-        "width": 3.0,
-        "height": 3.0,
-        "gridVisible": true
-    },
-    "entities": [
-        {
-            "uuid": "string (Identificador único)",
-            "nombre": "string (Nombre amigable del objeto)",
-            "modelId": "string (ID del modelo GLB base o null si es marcador)",
-            "posicion": { "x": 0.0, "y": 0.0, "z": 0.0 },
-            "rotacion": { "y": 0.0 },
-            "escala": 1.0,
-            "isMarker": "boolean (true si actúa como marcador AR físico)",
-            "markerImage": "string (Ruta de textura del target, ej: output/target.png)",
-            "arAnchor": "string (UUID del marcador al que está anclado, o 'base')",
-            "mediaType": "string ('3d' | 'image' | 'video' para disparadores multimedia)",
-            "mediaUrl": "string (Ruta del recurso a reproducir)"
-        }
-    ]
+  "project": "default",
+  "version": 2,
+  "updatedAt": "2026-05-29 15:03:57",
+  "stage": {
+    "width": 3,
+    "height": 3,
+    "gridVisible": true
+  },
+  "entities": []
 }
 ```
 
-### Ejemplo de Datos de Producción Real con Anclajes Dinámicos
+### `output/layout.json`
 
-```json
-{
-    "stage": {
-        "width": 3.0,
-        "height": 3.0,
-        "gridVisible": true
-    },
-    "entities": [
-        {
-            "uuid": "objeto-marcador-1",
-            "nombre": "Marcador Tarjeta Presentación",
-            "isMarker": true,
-            "posicion": { "x": -1.5, "y": 0.02, "z": -3.5 },
-            "rotacion": { "y": 0.0 },
-            "escala": 1.0,
-            "markerImage": "output/mi_tarjeta.png",
-            "arAnchor": "base"
-        },
-        {
-            "uuid": "objeto-laptop-caos-2",
-            "nombre": "Laptop Desarrollo Caos",
-            "modelId": "modelo-laptop",
-            "posicion": { "x": 0.0, "y": 0.25, "z": 0.1 },
-            "rotacion": { "y": 180.0 },
-            "escala": 0.85,
-            "arAnchor": "objeto-marcador-1",
-            "mediaType": "video",
-            "mediaUrl": "output/demo_docker.mp4"
-        }
-    ]
+Archivo de compatibilidad y runtime. Se actualiza cada vez que se guarda un proyecto para que `index.html` y la exportacion sigan leyendo una ruta simple.
+
+Cada entidad puede representar un target AR, modelo 3D, imagen o video.
+
+Campos comunes:
+
+- `uuid`
+- `nombre`
+- `posicion`
+- `rotacion`
+- `escala`
+- `arAnchor`
+- `hidden`
+- `locked`
+
+Campos de marcador:
+
+- `isMarker: true`
+- `markerImage`
+- `recognitionKey`
+- `trackingMode`
+- `mindTargetUrl`
+- `mindTargetIndex`
+
+Campos de contenido:
+
+- `modelId`
+- `glbUrl`
+- `mediaType`
+- `mediaUrl`
+- `relativeToAnchor`
+- `oiraLabel`
+- `oiraColor`
+- `oiraNarration`
+
+Valores principales de `mediaType`:
+
+- `3d`
+- `image`
+- `video`
+- `oira-node`
+
+## 5. Mediateca
+
+La mediateca se basa en `/api/list-assets`.
+
+El backend clasifica extensiones:
+
+- `.glb`, `.gltf` -> `model`
+- `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` -> `image`
+- `.mp4`, `.webm`, `.mov` -> `video`
+- `.mind` -> `target`
+- `.json` -> `data`
+
+La respuesta incluye:
+
+- `name`
+- `friendlyName`
+- `kind`
+- `extension`
+- `size`
+- `sizeBytes`
+- `src`
+- `modelId`
+- `date`
+- `protected`
+- `usedBy`
+- `usedCount`
+
+`layout.json` esta protegido. La deteccion de uso revisa rutas como `mediaUrl`, `markerImage`, `mindTargetUrl`, `glbUrl` y referencias por `modelId`.
+
+## 6. Autosave
+
+El autosave del editor usa:
+
+- `moby_studio_editor_draft_v1_<proyecto>`
+- `moby_studio_editor_last_published_v1`
+
+Guarda un snapshot con:
+
+- `stage`
+- `entities`
+- `savedAt`
+- `version`
+- `project`
+
+Cuando el editor inicia, compara si hay un borrador local posterior al ultimo guardado y muestra un banner para restaurar o descartar.
+
+## 7. Undo/Redo
+
+El historial usa snapshots completos, no comandos parciales.
+
+Cada snapshot guarda:
+
+- `stage`
+- `entities`
+- `selectedUuid`
+- `counter`
+- `label`
+
+Limite actual:
+
+```javascript
+const HISTORIAL_LIMITE = 50;
+```
+
+El sistema registra estado antes de operaciones mutantes y captura el estado actual al primer Undo si hay cambios no sincronizados. Esto permite Redo hacia el resultado real de la accion.
+
+## 8. Colaboracion
+
+La colaboracion actual es local/red LAN y usa estado en memoria del backend.
+
+Estado backend:
+
+```python
+COLLAB_STATE = {
+    "default": {
+        "users": {},
+        "locks": {}
+    }
 }
 ```
 
----
+Reglas:
 
-## 6. Sistema de Image Tracking Dinámico y Marcadores AR Ilimitados
+- Cada navegador crea un `userId`, nombre y color en `localStorage`.
+- Cada 5 segundos envia `/api/collab-heartbeat`.
+- Si el usuario tiene un objeto seleccionado, el servidor crea/renueva un lock temporal.
+- Los locks expiran si no hay heartbeat en aproximadamente 18 segundos.
+- El editor bloquea inputs, transformaciones, duplicar, ocultar y borrar cuando el lock pertenece a otro usuario.
+- El heartbeat tambien devuelve `version`; si es mayor que la version local, el editor sincroniza automaticamente cuando no hay cambios locales.
+- Si hay cambios locales sin guardar, se muestra aviso de version remota pendiente.
 
-Hemos evolucionado el Image Tracking estático a una arquitectura matricial y dinámica que funciona de la siguiente manera:
+Limitacion actual: la sincronizacion es por version guardada, no por operacion atomica en tiempo real. Para edicion simultanea fina se requeriria WebSocket + operaciones/patches o CRDT.
 
-### A. Gestión de Marcadores como Entidades de Primer Orden
-* En `editor.html`, los marcadores AR se crean y gestionan como objetos interactivos en 3D (`isMarker: true`). Se representan visualmente mediante planos horizontales texturizados con su imagen de target física asignada.
-* Cuentan con soporte completo para transformaciones espaciales en los ejes X, Y, Z (Mover, Rotar, Escalar) usando Gizmos de arrastre profesionales, registrándose limpiamente en el historial de deshacer/rehacer (`Undo/Redo`).
+## 9. Flujo AR
 
-### B. Mapeo y Relación Padre-Hijo (Anchor Pipeline)
-* Al seleccionar un modelo normal en el lienzo, el sistema barre todas las entidades marcadoras activas y reconstruye en tiempo real las opciones del selector **"Anclaje Físico AR (Target)"** en el inspector.
-* Cuando el usuario asigna un marcador, el objeto guarda el UUID de dicho marcador en su atributo `arAnchor`.
-* Al salvar, `/api/save-layout` almacena el layout unificado de forma plana.
+1. El usuario presiona una plantilla, por ejemplo `Marcador + Imagen`.
+2. El editor crea un marcador y un contenido asociado.
+3. El modal permite subir o generar el target fisico: QR, imagen/icono o `.mind`.
+4. El modal permite subir archivo local o pegar URL directa del contenido.
+5. El contenido guarda `arAnchor` con el UUID del marcador.
+6. El layout se guarda en el proyecto y se copia a `output/layout.json`.
+7. `index.html` carga `output/layout.json`.
+8. El cliente activa contenido cuando detecta el QR o target MindAR.
 
-### C. Reconstrucción de Escena e Interacción de Canales
-* Al cargar la experiencia WebXR (`index.html`), el lector analiza la colección de entidades.
-* **Fase 1 (Instanciación de Contenedores):** Para cada marcador (`isMarker: true`), crea dinámicamente un canal de rastreo virtual `<a-entity id="anchor-markerUUID">` y le acopla un billboard Glassmorphic interactivo.
-* **Fase 2 (Nidificación):** Para cada modelo cuyo `arAnchor` coincide con el UUID de un marcador, calcula su desplazamiento relativo flotante `(0, 0.25, 0.1)` y lo añade físicamente como hijo dentro de su respectivo contenedor de anclaje A-Frame.
-* **Fase 3 (Retrocompatibilidad):** Si el diseño antiguo de `layout.json` tiene referencias estáticas (`marcador_a`, `marcador_b`, `marcador_c`), el sistema detecta que faltan en la escena y autogenera marcadores dinámicos equivalentes en sus coordenadas métricas originales.
-* **Fase 4 (Simulación por Clic):** En navegadores de PC, hacer clic en la interfaz espacial del marcador dispara el lanzamiento del contenedor Docker flotante, emite eventos de visión (`targetFound`/`targetLost`) y activa/pausa el video o recurso multimedia asociado de sus hijos de forma reactiva por canal.
+## 10. Flujo De Assets
 
-### D. Flujo de Sincronización de Datos
-* **Persistencia**: Al presionar **Guardar Escenario** en el panel, el cliente captura el estado activo de `escenaObjetos` y realiza una petición POST con los datos serializados a `/api/save-layout`, escribiendo físicamente el archivo `output/layout.json`.
-* **Hidratación**: Al cargar el visor (`editor.html` o `index.html`), se efectúa un fetch GET a `output/layout.json`. Si el archivo existe, itera la colección, crea los elementos dinámicamente (`document.createElement('a-entity')`), inyecta los atributos espaciales correspondientes e hidrata el estado local.
+1. El usuario sube un recurso desde la mediateca o desde el modal AR.
+2. El backend lo guarda en `output/`.
+3. `/api/list-assets` lo lista con metadata.
+4. El editor puede asignarlo al objeto seleccionado.
+5. Si el asset esta referenciado en el layout guardado, aparece como "en uso".
+
+## 11. Backlog
+
+Las mejoras pendientes estan en `MEJORAS_PENDIENTES.md`.
+
+Prioridades actuales:
+
+1. Editor guiado de targets MindAR.
+2. Inspector profesional de contenido AR.
+3. Optimizacion de assets 3D.
+4. QA movil.
+5. Roles, comentarios y estados de revision.
+6. Sincronizacion granular en vivo.

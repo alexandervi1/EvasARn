@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Moby AI Assistant 3D - Docker Conversational AR</title>
     
     <!-- Librería A-Frame para WebXR y renderizado 3D -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <!-- Fuentes de Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,11 +38,24 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            min-height: 100dvh;
         }
 
         body.camera-active-body {
             background-color: transparent !important;
             background: transparent !important;
+        }
+
+        body.presentation-mode header,
+        body.presentation-mode .chat-panel {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(16px);
+        }
+
+        body.chat-panel-collapsed .mobile-action-dock {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         /* Contenedor HUD Flotante */
@@ -51,11 +65,12 @@
             left: 0;
             width: 100%;
             height: 100%;
+            min-height: 100dvh;
             pointer-events: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
             z-index: 10;
         }
 
@@ -76,6 +91,10 @@
             pointer-events: auto;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             animation: fadeInDown 0.6s ease-out;
+        }
+
+        .mobile-status-row {
+            display: none;
         }
 
         .header-title h1 {
@@ -138,6 +157,14 @@
             pointer-events: auto;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             animation: fadeInUp 0.8s ease-out;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 2px;
+            flex-wrap: wrap;
         }
 
         /* Ventana del Mensaje */
@@ -421,6 +448,87 @@
             pointer-events: auto;
         }
 
+        .mobile-action-dock {
+            position: absolute;
+            left: 50%;
+            bottom: calc(122px + env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            z-index: 18;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(7, 12, 24, 0.78);
+            border-radius: 999px;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.42);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: opacity 0.2s ease, transform 0.25s ease, bottom 0.25s ease;
+        }
+
+        .ar-control-sheet {
+            position: absolute;
+            right: max(10px, env(safe-area-inset-right));
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 19;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto;
+            padding: 8px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(7, 12, 24, 0.74);
+            border-radius: 999px;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.38);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .ar-control-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.06);
+            color: #f8fafc;
+            font-size: 15px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .dock-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255,255,255,0.06);
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .dock-btn.primary {
+            width: 58px;
+            height: 58px;
+            background: linear-gradient(135deg, #0284c7, #0f766e);
+            border-color: rgba(56, 189, 248, 0.55);
+            box-shadow: 0 0 22px rgba(2,132,199,0.38);
+        }
+
+        .dock-btn:active {
+            transform: scale(0.94);
+        }
+
         .btn-action:hover {
             background: rgba(2, 132, 199, 0.2);
             border-color: var(--color-docker);
@@ -460,17 +568,277 @@
         }
 
         /* Responsividad Móvil */
-        @media (max-width: 480px) {
-            #hud-container { padding: 12px; }
-            header { padding: 10px 14px; gap: 6px; }
-            .btn-camera span { display: none; }
-            .chat-panel { padding: 14px; border-radius: 20px; }
-            .dialogue-box { padding: 10px 14px; min-height: 60px; }
-            .chat-form { height: 44px; }
-            .btn-send { padding: 0 12px; }
-            .btn-send span { display: none; }
-            .radar-arrow span { display: none; } /* En celulares ocultar texto para no estorbar la vista */
-            .radar-arrow { padding: 10px; border-radius: 50%; }
+        @media (max-width: 640px) {
+            #hud-container {
+                padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+            }
+
+            header {
+                max-width: none;
+                min-height: 56px;
+                padding: 8px 10px;
+                gap: 8px;
+                border-radius: 14px;
+            }
+
+            .header-title {
+                min-width: 0;
+            }
+
+            .header-title h1 {
+                font-size: 12px;
+                letter-spacing: 1px;
+                white-space: nowrap;
+            }
+
+            .header-title p,
+            header .status-indicator {
+                display: none;
+            }
+
+            .mobile-status-row {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                color: #cbd5e1;
+                font-size: 10px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+            .btn-camera {
+                min-width: 46px;
+                min-height: 46px;
+                justify-content: center;
+                border-radius: 50%;
+                padding: 0;
+            }
+
+            .btn-camera span {
+                display: none;
+            }
+
+            .chat-panel {
+                max-width: none;
+                padding: 12px;
+                border-radius: 18px;
+                gap: 10px;
+                margin-bottom: env(safe-area-inset-bottom);
+            }
+
+            .dialogue-box {
+                padding: 10px 12px;
+                min-height: 58px;
+                max-height: 112px;
+                border-radius: 12px;
+            }
+
+            .dialogue-text {
+                font-size: 12.5px;
+                line-height: 1.42;
+            }
+
+            .quick-actions {
+                display: none;
+            }
+
+            .mobile-action-dock {
+                display: flex;
+            }
+
+            body:not(.chat-panel-collapsed) .mobile-action-dock {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateX(-50%) translateY(12px);
+            }
+
+            .ar-control-sheet {
+                display: flex;
+            }
+
+            .chat-form {
+                height: 50px;
+                gap: 7px;
+            }
+
+            .btn-mic {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .chat-input {
+                min-width: 0;
+                border-radius: 999px;
+                font-size: 13px;
+                padding: 0 13px;
+            }
+
+            .btn-send {
+                width: 50px;
+                height: 50px;
+                padding: 0;
+                justify-content: center;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .btn-send span,
+            .voice-control span {
+                display: none;
+            }
+
+            .voice-control {
+                align-self: center;
+                min-height: 24px;
+            }
+
+            .ar-detection-pill {
+                top: 76px;
+                max-width: calc(100vw - 24px);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .radar-arrow span {
+                display: none;
+            }
+
+            .radar-arrow {
+                padding: 10px;
+                border-radius: 50%;
+            }
+        }
+
+        @media (max-width: 430px) and (min-height: 740px) {
+            #hud-container {
+                padding:
+                    max(12px, env(safe-area-inset-top))
+                    max(12px, env(safe-area-inset-right))
+                    max(12px, env(safe-area-inset-bottom))
+                    max(12px, env(safe-area-inset-left));
+            }
+
+            header {
+                min-height: 52px;
+                padding: 7px 9px;
+                border-radius: 13px;
+                gap: 7px;
+            }
+
+            .header-title h1 {
+                font-size: 11px;
+                letter-spacing: 0.7px;
+                max-width: 132px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .mobile-status-row {
+                font-size: 9px;
+                max-width: 94px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .btn-camera {
+                min-width: 42px;
+                min-height: 42px;
+            }
+
+            .chat-panel {
+                padding: 10px;
+                gap: 8px;
+                border-radius: 16px;
+                max-height: 34dvh;
+                overflow: visible;
+            }
+
+            .dialogue-box {
+                min-height: 52px;
+                max-height: 86px;
+                padding: 9px 11px;
+            }
+
+            .speaker-tag {
+                font-size: 9px;
+            }
+
+            .dialogue-text {
+                font-size: 12px;
+                line-height: 1.35;
+            }
+
+            .chat-form {
+                height: 44px;
+                gap: 6px;
+            }
+
+            .btn-mic,
+            .btn-send {
+                width: 44px;
+                height: 44px;
+            }
+
+            .chat-input {
+                font-size: 12px;
+                padding: 0 11px;
+            }
+
+            .voice-control {
+                display: none;
+            }
+
+            .mobile-action-dock {
+                bottom: calc(86px + env(safe-area-inset-bottom));
+                gap: 7px;
+                padding: 7px;
+            }
+
+            .dock-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 16px;
+            }
+
+            .dock-btn.primary {
+                width: 50px;
+                height: 50px;
+            }
+
+            .ar-control-sheet {
+                right: max(8px, env(safe-area-inset-right));
+                top: calc(50% + 16px);
+                gap: 7px;
+                padding: 7px;
+            }
+
+            .ar-control-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+
+            .ar-detection-pill {
+                top: max(72px, calc(env(safe-area-inset-top) + 58px));
+                max-width: calc(100vw - 28px);
+                padding: 8px 11px;
+                font-size: 10px;
+            }
+
+            .chat-panel.collapsed {
+                transform: translateY(calc(100% - 58px)) !important;
+            }
+
+            body.chat-panel-collapsed .mobile-action-dock {
+                bottom: calc(92px + env(safe-area-inset-bottom));
+            }
+
+            body.camera-active-body .chat-panel:not(.collapsed) {
+                max-height: 30dvh;
+            }
         }
 
         /* ESTILO HUD COLAPSABLE (SPATIAL UX) */
@@ -517,7 +885,7 @@
         }
 
         .chat-panel.collapsed {
-            transform: translate(-50%, calc(100% - 68px)) !important;
+            transform: translateY(calc(100% - 68px)) !important;
             padding-top: 20px !important;
         }
 
@@ -529,7 +897,8 @@
         .chat-panel.collapsed .btn-action,
         .chat-panel.collapsed .chat-input,
         .chat-panel.collapsed .btn-send,
-        .chat-panel.collapsed .voice-control {
+        .chat-panel.collapsed .voice-control,
+        .chat-panel.collapsed .btn-mic {
             opacity: 0 !important;
             pointer-events: none !important;
             display: none !important;
@@ -570,6 +939,33 @@
             animation: scanOverlay 2.2s infinite linear;
         }
 
+        .ar-detection-pill {
+            position: absolute;
+            top: 88px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            pointer-events: none;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(10, 15, 30, 0.86);
+            border: 1px solid rgba(34, 197, 94, 0.45);
+            color: #dcfce7;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 20px rgba(34, 197, 94, 0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .ar-detection-pill.active {
+            display: flex;
+        }
+
         @keyframes scanOverlay {
             0% { transform: translateY(-100%); }
             100% { transform: translateY(100%); }
@@ -590,6 +986,7 @@
 
     <!-- LÁSER DE ESCANEO DE VISIÓN MÁQUINA -->
     <div id="scanner-laser" class="scanner-laser"></div>
+    <div id="ar-detection-pill" class="ar-detection-pill">Target AR detectado</div>
 
     <!-- Animación de Escáner de Radar Holográfico -->
     <div id="scanner-overlay" class="scanner-overlay" style="display: none;"></div>
@@ -611,6 +1008,9 @@
             <div class="header-title">
                 <h1>Moby AI Assistant v2</h1>
                 <p>Mascota Docker interactiva por Voz y Hologramas</p>
+                <div class="mobile-status-row">
+                    <span id="mobile-client-state">AR listo</span>
+                </div>
             </div>
 
             <!-- Botón de Realidad Aumentada Real (Cámara) -->
@@ -620,6 +1020,14 @@
                     <circle cx="12" cy="13" r="4"/>
                 </svg>
                 <span>Cámara RA</span>
+            </button>
+
+            <button type="button" id="btn-presentation-toggle" class="btn-camera" onclick="togglePresentationMode()" title="Modo presentación">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                    <path d="M3 4h18v12H3z"/>
+                    <path d="M8 20h8M12 16v4"/>
+                </svg>
+                <span>Presentar</span>
             </button>
 
             <div class="status-indicator">
@@ -650,7 +1058,7 @@
             <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
                 
                 <!-- Acciones Rápidas Estilo Pokémon Go -->
-                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 2px; flex-wrap: wrap;">
+                <div class="quick-actions">
                     <button type="button" class="btn-action" onclick="lanzarContenedor()" title="Lanzar un contenedor Docker a Moby">
                         📦 Lanzar Contenedor
                     </button>
@@ -695,6 +1103,20 @@
                 </label>
             </div>
         </div>
+    </div>
+
+    <div class="mobile-action-dock" aria-label="Acciones AR">
+        <button type="button" class="dock-btn" onclick="lanzarContenedor()" title="Lanzar contenedor">📦</button>
+        <button type="button" class="dock-btn primary" onclick="escanearEntorno()" title="Escanear entorno">⌕</button>
+        <button type="button" class="dock-btn" onclick="hacerSaltarMoby()" title="Animar Moby">↺</button>
+        <button type="button" class="dock-btn" onclick="togglePresentationMode()" title="Modo presentación">▣</button>
+    </div>
+
+    <div class="ar-control-sheet" aria-label="Controles del contenido AR">
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 1.12)" title="Aumentar contenido">＋</button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 0.9)" title="Reducir contenido">－</button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', -0.12)" title="Acercar contenido">↥</button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', 0.12)" title="Alejar contenido">↧</button>
     </div>
 
     <!-- Cámara de video en segundo plano para Realidad Aumentada Real -->
@@ -837,7 +1259,7 @@
         const elNeonLight = document.getElementById("neon-light");
 
         // Referencias a las Entidades 3D de A-Frame (se asignarán dinámicamente)
-        const entities = {
+        let entities = {
             defecto: null,
             caos: null,
             servidor: null,
@@ -857,6 +1279,20 @@
         let voiceContextUnlocked = false;
         let recording = false;
         let recognition = null;
+        const markerRegistry = new Map();
+        let qrDetector = null;
+        let qrScanTimer = null;
+        let lastQrScanAt = 0;
+        const activeMarkerTimeouts = new Map();
+
+        function esDispositivoMovil() {
+            return window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+        }
+
+        function debeMostrarSimuladorMarcadores() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('debugMarkers') === '1' || !esDispositivoMovil();
+        }
 
         // Desbloquear audio del navegador
         function unlockAudioContext() {
@@ -871,12 +1307,58 @@
         document.addEventListener("click", unlockAudioContext);
         document.addEventListener("touchstart", unlockAudioContext);
 
+        function feedbackMovil(ms = 18) {
+            if (navigator.vibrate) navigator.vibrate(ms);
+        }
+
+        function setMobileClientState(text) {
+            const stateEl = document.getElementById("mobile-client-state");
+            if (stateEl) stateEl.textContent = text;
+        }
+
+        function togglePresentationMode() {
+            feedbackMovil(16);
+            const enabled = document.body.classList.toggle("presentation-mode");
+            setMobileClientState(enabled ? "Presentacion" : (cameraStream ? "Camara activa" : "AR listo"));
+            mostrarNotificacion(enabled ? "Modo presentacion activado." : "Interfaz completa activada.");
+        }
+
+        function obtenerContenidosARVisibles() {
+            return Array.from(document.querySelectorAll('.ar-experience-content'))
+                .filter(el => el.getAttribute('visible') !== 'false');
+        }
+
+        function ajustarContenidoAR(tipo, valor) {
+            feedbackMovil(12);
+            const contenidos = obtenerContenidosARVisibles();
+            if (contenidos.length === 0) {
+                mostrarNotificacion("No hay contenido AR visible para ajustar.");
+                return;
+            }
+
+            contenidos.forEach(el => {
+                if (tipo === 'scale') {
+                    const current = el.getAttribute('scale') || { x: 1, y: 1, z: 1 };
+                    const nx = Math.max(0.15, Math.min(5, current.x * valor));
+                    const ny = Math.max(0.15, Math.min(5, current.y * valor));
+                    const nz = Math.max(0.15, Math.min(5, current.z * valor));
+                    el.setAttribute('scale', `${nx} ${ny} ${nz}`);
+                } else if (tipo === 'distance') {
+                    const pos = el.getAttribute('position') || { x: 0, y: 0, z: 0 };
+                    const nextZ = Math.max(-2, Math.min(2, pos.z + valor));
+                    el.setAttribute('position', `${pos.x} ${pos.y} ${nextZ}`);
+                }
+            });
+        }
+
         // --- SPATIAL UX: Alternar HUD colapsable ---
         function toggleChatPanel() {
             const panel = document.getElementById('chat-panel');
             if (panel) {
+                feedbackMovil(10);
                 panel.classList.toggle('collapsed');
                 const isCollapsed = panel.classList.contains('collapsed');
+                document.body.classList.toggle('chat-panel-collapsed', isCollapsed);
                 mostrarNotificacion(isCollapsed ? "HUD colapsado" : "HUD ampliado");
             }
         }
@@ -897,24 +1379,29 @@
             switch (state) {
                 case 'idle':
                     speakerLabel.innerText = "Moby (Ballena)";
+                    setMobileClientState("AR listo");
                     break;
                 case 'capturing':
                     speakerLabel.innerText = "📸 Capturando";
+                    setMobileClientState("Capturando");
                     dialogueDisplay.innerHTML = `<span style="color: #00f3ff;">[Captura]</span> Enfocando visor y tomando captura de pantalla real...`;
                     break;
                 case 'yolo_vision':
                     speakerLabel.innerText = "👁️ Visión YOLOv8";
+                    setMobileClientState("Analizando");
                     dialogueDisplay.innerHTML = `<span style="color: #ef4444; font-weight: bold;">[YOLOv8]</span> Analizando entorno y localizando contenedores...`;
                     laser.classList.add('active');
                     panel.classList.add('hud-thinking');
                     break;
                 case 'ollama_reasoning':
                     speakerLabel.innerText = "🧠 Razonamiento LLM";
+                    setMobileClientState("Pensando");
                     dialogueDisplay.innerHTML = `<span style="color: #eab308; font-weight: bold;">[Ollama]</span> Pensando respuesta Docker en el servidor local...`;
                     panel.classList.add('hud-thinking');
                     break;
                 case 'speaking':
                     speakerLabel.innerText = "🐳 Moby (Hablando)";
+                    setMobileClientState("Hablando");
                     if (micBtn) micBtn.classList.add('mic-active-glow');
                     break;
             }
@@ -1099,9 +1586,11 @@
         let cameraStream = null;
 
         async function activarCamaraRA() {
+            feedbackMovil(22);
             const videoEl = document.getElementById("camera-stream");
             const skyEl = document.querySelector("a-sky");
             const btnCamara = document.getElementById("btn-camera-toggle");
+            let cameraStarted = false;
 
             if (cameraStream) {
                 // Si ya está activa, la apagamos (toggle off)
@@ -1120,6 +1609,7 @@
                 // Restaurar fondo del body removiendo la clase transparente
                 document.body.classList.remove("camera-active-body");
                 document.body.style.backgroundColor = "#05070f";
+                detenerScannerQR();
                 
                 // Hacer visible el cielo virtual
                 skyEl.setAttribute("visible", "true");
@@ -1127,6 +1617,7 @@
                 
                 // Cambiar estado visual del botón
                 btnCamara.classList.remove("camera-active");
+                setMobileClientState("Camara off");
                 btnCamara.innerHTML = `
                     <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -1207,6 +1698,7 @@
                 videoEl.style.opacity = "1";
                 videoEl.style.pointerEvents = "auto";
                 videoEl.srcObject = cameraStream;
+                cameraStarted = true;
                 
                 // Hacer transparente el fondo del body aplicando la clase CSS especial
                 document.body.classList.add("camera-active-body");
@@ -1225,6 +1717,7 @@
                 
                 // Cambiar estado visual del botón
                 btnCamara.classList.add("camera-active");
+                setMobileClientState("Camara activa");
                 btnCamara.innerHTML = `
                     <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -1243,9 +1736,20 @@
 
                 escribirTexto(`¡Conexión exitosa! Sonar enlazado a cámara: "${trackName}" (${resString}). Ahora Moby y los hologramas de Docker flotan en tu espacio físico real. 🐳🏠✨`, 15);
                 hablar("Acceso concedido. Ahora floto en tu espacio real.");
+                const panel = document.getElementById('chat-panel');
+                if (panel && window.innerWidth <= 640 && !panel.classList.contains('collapsed')) {
+                    panel.classList.add('collapsed');
+                    document.body.classList.add('chat-panel-collapsed');
+                }
+                iniciarScannerQR();
 
             } catch (err) {
                 console.error("Error al acceder a la cámara:", err);
+                if (cameraStarted || cameraStream) {
+                    setMobileClientState("Camara activa");
+                    mostrarNotificacion("Camara activa. Hubo un detalle menor al preparar el tracking.");
+                    return;
+                }
                 if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
                     escribirTexto("El acceso a la cámara fue denegado por el navegador. Por favor, haz clic en el candado de la barra de direcciones de tu navegador y permite el uso de la cámara. 🐳🔒", 15);
                     hablar("El acceso a la cámara fue denegado. Por favor concede permisos.");
@@ -1253,6 +1757,133 @@
                     escribirTexto(`No pudimos iniciar la cámara: ${err.message || err.name}. Asegúrate de estar en HTTPS y otorgar permisos. 🐳🔒`, 15);
                     hablar("No pudimos iniciar la cámara.");
                 }
+            }
+        }
+
+        function iniciarScannerQR() {
+            const hasImageTargets = Array.from(markerRegistry.values()).some(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+            if (hasImageTargets && !('BarcodeDetector' in window)) {
+                setMobileClientState("Tracking imagen");
+                mostrarNotificacion("Tracking de imagen activo si MindAR esta disponible.");
+                return;
+            }
+
+            if (!('BarcodeDetector' in window)) {
+                console.warn("[AR Tracking] BarcodeDetector no disponible. Se mantiene simulador por clic.");
+                if (debeMostrarSimuladorMarcadores()) {
+                    setMobileClientState("Simulador AR");
+                    mostrarNotificacion("Tu navegador no soporta lectura QR automatica; usa clic en el marcador para simular deteccion.");
+                } else {
+                    setMobileClientState("QR no disponible");
+                    mostrarNotificacion("Lectura QR automatica no disponible en este navegador.");
+                }
+                return;
+            }
+
+            try {
+                qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
+            } catch (err) {
+                console.warn("[AR Tracking] No se pudo crear BarcodeDetector:", err);
+                return;
+            }
+
+            detenerScannerQR();
+            qrScanTimer = window.setInterval(escanearQRDesdeCamara, 650);
+            setMobileClientState("Buscando target");
+            mostrarNotificacion("Scanner QR activo: apunta la camara al target asociado.");
+        }
+
+        function detenerScannerQR() {
+            if (qrScanTimer) {
+                window.clearInterval(qrScanTimer);
+                qrScanTimer = null;
+            }
+            activeMarkerTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+            activeMarkerTimeouts.clear();
+            setMobileClientState("AR listo");
+        }
+
+        async function escanearQRDesdeCamara() {
+            if (!qrDetector || !cameraStream) return;
+            const videoEl = document.getElementById("camera-stream");
+            if (!videoEl || videoEl.readyState < 2) return;
+            if (performance.now() - lastQrScanAt < 550) return;
+            lastQrScanAt = performance.now();
+
+            try {
+                const codes = await qrDetector.detect(videoEl);
+                codes.forEach(code => activarMarcadorPorClave(code.rawValue || ""));
+            } catch (err) {
+                console.warn("[AR Tracking] Falla leyendo QR:", err);
+            }
+        }
+
+        function normalizarClaveAR(value) {
+            return String(value || "").trim().toLowerCase();
+        }
+
+        function activarMarcadorPorClave(rawValue) {
+            const claveLeida = normalizarClaveAR(rawValue);
+            if (!claveLeida) return;
+
+            for (const marker of markerRegistry.values()) {
+                const candidates = [
+                    marker.uuid,
+                    marker.nombre,
+                    marker.recognitionKey,
+                    marker.markerImage
+                ].map(normalizarClaveAR).filter(Boolean);
+
+                const match = candidates.some(key => claveLeida === key || claveLeida.includes(key) || key.includes(claveLeida));
+                if (match) {
+                    setMarkerDetected(marker.uuid, true, "qr");
+                }
+            }
+        }
+
+        function setMarkerDetected(markerId, detected, source = "manual") {
+            const marker = markerRegistry.get(markerId);
+            const markerContainer = document.getElementById(`anchor-${markerId}`);
+            if (!marker || !markerContainer) return;
+
+            const alreadyDetected = markerContainer.dataset.detected === "true";
+            if (detected && !alreadyDetected) {
+                feedbackMovil(35);
+                markerContainer.dataset.detected = "true";
+                markerContainer.setAttribute('visible', 'true');
+                markerContainer.dispatchEvent(new CustomEvent('targetFound', { detail: { source } }));
+                lanzarContenedorEnMarcador(markerId);
+                setMobileClientState("Target activo");
+                mostrarNotificacion(`Target detectado: ${marker.nombre || markerId}`);
+                if (marker.oiraIntro) {
+                    escribirTexto(marker.oiraIntro, 14);
+                    hablar(marker.oiraIntro);
+                }
+                const pill = document.getElementById('ar-detection-pill');
+                if (pill) {
+                    pill.textContent = `Target AR detectado: ${marker.nombre || markerId}`;
+                    pill.classList.add('active');
+                }
+            } else if (!detected && alreadyDetected) {
+                markerContainer.dataset.detected = "false";
+                markerContainer.dispatchEvent(new CustomEvent('targetLost', { detail: { source } }));
+                setMobileClientState(cameraStream ? "Buscando target" : "AR listo");
+                const pill = document.getElementById('ar-detection-pill');
+                if (pill) pill.classList.remove('active');
+                const prevTimeout = activeMarkerTimeouts.get(markerId);
+                if (prevTimeout) {
+                    window.clearTimeout(prevTimeout);
+                    activeMarkerTimeouts.delete(markerId);
+                }
+            }
+
+            if (detected) {
+                const prevTimeout = activeMarkerTimeouts.get(markerId);
+                if (prevTimeout) window.clearTimeout(prevTimeout);
+                activeMarkerTimeouts.set(markerId, window.setTimeout(() => {
+                    setMarkerDetected(markerId, false, "timeout");
+                    activeMarkerTimeouts.delete(markerId);
+                }, 3200));
             }
         }
 
@@ -1567,6 +2198,7 @@
         
         // Hacer saltar a Moby con animación de alegría
         function hacerSaltarMoby() {
+            feedbackMovil(18);
             if (modeloActivo !== "defecto") {
                 escribirTexto("¡Espera a que Moby esté activo en pantalla para pedirle trucos! 🐳✨", 15);
                 return;
@@ -1633,6 +2265,7 @@
         ];
 
         function lanzarContenedor() {
+            feedbackMovil(18);
             if (modeloActivo !== "defecto") {
                 escribirTexto("¡Espera a que Moby esté en pantalla para lanzarle contenedores! 🐳📦", 15);
                 return;
@@ -1871,12 +2504,50 @@
             }
         }
 
+        function crearMarcoEspacial(obj, contentEl, options = {}) {
+            const frame = document.createElement('a-entity');
+            frame.setAttribute('id', obj.uuid);
+            frame.setAttribute('class', 'interactive-entity ar-experience-content ar-content-frame');
+            frame.setAttribute('billboard-ui', '');
+
+            const width = options.width || 1.6;
+            const height = options.height || 0.9;
+
+            const back = document.createElement('a-plane');
+            back.setAttribute('width', width + 0.16);
+            back.setAttribute('height', height + 0.28);
+            back.setAttribute('position', '0 0 -0.035');
+            back.setAttribute('material', 'shader: flat; color: #07111f; opacity: 0.72; transparent: true; side: double;');
+            frame.appendChild(back);
+
+            const topBar = document.createElement('a-plane');
+            topBar.setAttribute('width', width + 0.16);
+            topBar.setAttribute('height', '0.08');
+            topBar.setAttribute('position', `0 ${(height / 2) + 0.08} 0`);
+            topBar.setAttribute('material', 'shader: flat; color: #00f3ff; opacity: 0.72; transparent: true; side: double;');
+            frame.appendChild(topBar);
+
+            const title = document.createElement('a-text');
+            title.setAttribute('value', options.title || obj.nombre || 'Contenido AR');
+            title.setAttribute('align', 'center');
+            title.setAttribute('width', '2.8');
+            title.setAttribute('position', `0 ${(height / 2) + 0.08} 0.035`);
+            title.setAttribute('color', '#e0faff');
+            title.setAttribute('font', 'mozillavr');
+            frame.appendChild(title);
+
+            contentEl.setAttribute('position', '0 -0.02 0.025');
+            frame.appendChild(contentEl);
+            return frame;
+        }
+
         // Cargar escenario de forma dinámica desde output/layout.json o escenario panorámico por defecto
         async function cargarEscenarioDinamico() {
             // Limpiar entidades interactivas previas en todos los contenedores para evitar duplicados
             document.querySelectorAll('.interactive-entity').forEach(el => el.parentNode.removeChild(el));
             // Limpiar contenedores de marcadores dinámicos que hayamos creado
             document.querySelectorAll('.dynamic-marker-container').forEach(el => el.parentNode.removeChild(el));
+            markerRegistry.clear();
             
             let datosLienzo = null;
             let stageConfig = { width: 3.0, height: 3.0, gridVisible: true };
@@ -1911,36 +2582,29 @@
             if (!Array.isArray(datosLienzo) || datosLienzo.length === 0) {
                 datosLienzo = [
                     {
-                        uuid: "entidad-ballena",
-                        modelId: "modelo-ballena",
-                        posicion: { x: 0, y: 1.1, z: -3.0 },
-                        rotacion: { y: 180 },
-                        escala: 2.2,
-                        arAnchor: "base"
-                    },
-                    {
-                        uuid: "entidad-laptop",
-                        modelId: "modelo-laptop",
-                        posicion: { x: -2.0, y: 1.1, z: -3.5 },
-                        rotacion: { y: 180 },
+                        uuid: "demo-target-oira",
+                        nombre: "Target OIRA Demo",
+                        isMarker: true,
+                        posicion: { x: 0, y: 0.02, z: -3.0 },
+                        rotacion: { y: 0 },
                         escala: 1.0,
+                        markerImage: "output/qr_presentacion.png",
+                        recognitionKey: "OIRA-DEMO",
+                        trackingMode: "qr",
                         arAnchor: "base"
                     },
                     {
-                        uuid: "entidad-rack",
-                        modelId: "modelo-rack",
-                        posicion: { x: 2.0, y: 0.8, z: -3.5 },
-                        rotacion: { y: 45 },
-                        escala: 0.8,
-                        arAnchor: "base"
-                    },
-                    {
-                        uuid: "entidad-buque",
-                        modelId: "modelo-buque",
-                        posicion: { x: 0, y: 1.0, z: -5.5 },
-                        rotacion: { y: 45 },
-                        escala: 0.6,
-                        arAnchor: "base"
+                        uuid: "demo-node-oira",
+                        nombre: "Nodo OIRA Demo",
+                        mediaType: "oira-node",
+                        oiraLabel: "OIRA Demo",
+                        oiraColor: "#0369a1",
+                        oiraNarration: "Este nodo demuestra una capa flotante sin depender de modelos base heredados.",
+                        posicion: { x: 0, y: 0.55, z: 0.05 },
+                        rotacion: { y: 0 },
+                        escala: 0.95,
+                        relativeToAnchor: true,
+                        arAnchor: "demo-target-oira"
                     }
                 ];
             }
@@ -1966,7 +2630,8 @@
                         posicion: pos,
                         rotacion: { y: 0 },
                         escala: 1.0,
-                        markerImage: 'output/qr_presentacion.png'
+                        markerImage: 'output/qr_presentacion.png',
+                        recognitionKey: anc
                     };
                     marcadores.push(mLegacy);
                     datosLienzo.push(mLegacy);
@@ -1975,86 +2640,90 @@
 
             // 2. Instanciar dinámicamente cada marcador en la escena
             const sceneEl = document.querySelector('a-scene');
+            const markerMind = marcadores.find(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+            if (markerMind && sceneEl) {
+                sceneEl.setAttribute('mindar-image', `imageTargetSrc: ${markerMind.mindTargetUrl}; autoStart: true; uiScanning: yes;`);
+                setMobileClientState("Tracking imagen");
+            }
+
+            const mostrarSimulador = debeMostrarSimuladorMarcadores();
+
             marcadores.forEach(marker => {
+                marker.recognitionKey = marker.recognitionKey || marker.uuid;
+                markerRegistry.set(marker.uuid, marker);
                 const markerContainer = document.createElement('a-entity');
                 markerContainer.setAttribute('id', `anchor-${marker.uuid}`);
                 markerContainer.setAttribute('class', 'dynamic-marker-container');
                 markerContainer.setAttribute('position', `${marker.posicion.x} ${marker.posicion.y} ${marker.posicion.z}`);
                 markerContainer.setAttribute('rotation', `0 ${marker.rotacion.y || 0} 0`);
                 markerContainer.setAttribute('scale', `${marker.escala} ${marker.escala} ${marker.escala}`);
+                if (marker.trackingMode === 'image' && marker.mindTargetUrl) {
+                    markerContainer.setAttribute('mindar-image-target', `targetIndex: ${marker.mindTargetIndex || 0}`);
+                }
 
-                // Plano del marcador físico texturizado
-                const markerPlane = document.createElement('a-plane');
-                markerPlane.setAttribute('width', '0.8');
-                markerPlane.setAttribute('height', '0.8');
-                markerPlane.setAttribute('rotation', '-90 0 0');
-                markerPlane.setAttribute('material', `src: ${marker.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
-                markerContainer.appendChild(markerPlane);
+                if (mostrarSimulador) {
+                    const markerPlane = document.createElement('a-plane');
+                    markerPlane.setAttribute('width', '0.8');
+                    markerPlane.setAttribute('height', '0.8');
+                    markerPlane.setAttribute('rotation', '-90 0 0');
+                    markerPlane.setAttribute('material', `src: ${marker.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                    markerContainer.appendChild(markerPlane);
 
-                // Billboard flotante Glassmorphic de Interfaz Espacial
-                const billboard = document.createElement('a-plane');
-                billboard.setAttribute('billboard-ui', '');
-                billboard.setAttribute('class', 'clickable');
-                billboard.setAttribute('width', '1.2');
-                billboard.setAttribute('height', '0.65');
-                billboard.setAttribute('position', '0 0.5 0');
-                billboard.setAttribute('material', 'shader: flat; color: #0a0f1e; opacity: 0.8; transparent: true; side: double;');
-                
-                const border = document.createElement('a-plane');
-                border.setAttribute('width', '1.23');
-                border.setAttribute('height', '0.68');
-                border.setAttribute('position', '0 0 -0.005');
-                border.setAttribute('color', '#00f3ff');
-                border.setAttribute('material', 'shader: flat; side: double; opacity: 0.65; transparent: true;');
-                billboard.appendChild(border);
-
-                const textTitle = document.createElement('a-text');
-                textTitle.setAttribute('value', marker.nombre.toUpperCase());
-                textTitle.setAttribute('align', 'center');
-                textTitle.setAttribute('width', '2.2');
-                textTitle.setAttribute('position', '0 0.12 0.01');
-                textTitle.setAttribute('color', '#00f3ff');
-                textTitle.setAttribute('font', 'mozillavr');
-                billboard.appendChild(textTitle);
-
-                const textAction = document.createElement('a-text');
-                textAction.setAttribute('value', 'Clic para simular deteccion');
-                textAction.setAttribute('align', 'center');
-                textAction.setAttribute('width', '1.5');
-                textAction.setAttribute('position', '0 -0.18 0.01');
-                textAction.setAttribute('color', '#cbd5e1');
-                textAction.setAttribute('font', 'mozillavr');
-                billboard.appendChild(textAction);
-
-                // Evento de clic interactivo para simular targetFound / targetLost
-                billboard.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const isDetected = markerContainer.dataset.detected === "true";
+                    // Billboard de simulacion solo para escritorio/debug.
+                    const billboard = document.createElement('a-plane');
+                    billboard.setAttribute('billboard-ui', '');
+                    billboard.setAttribute('class', 'clickable');
+                    billboard.setAttribute('width', '1.2');
+                    billboard.setAttribute('height', '0.65');
+                    billboard.setAttribute('position', '0 0.5 0');
+                    billboard.setAttribute('material', 'shader: flat; color: #0a0f1e; opacity: 0.8; transparent: true; side: double;');
                     
-                    if (!isDetected) {
-                        markerContainer.dataset.detected = "true";
-                        border.setAttribute('color', '#22c55e'); // Green glow
+                    const border = document.createElement('a-plane');
+                    border.setAttribute('width', '1.23');
+                    border.setAttribute('height', '0.68');
+                    border.setAttribute('position', '0 0 -0.005');
+                    border.setAttribute('color', '#00f3ff');
+                    border.setAttribute('material', 'shader: flat; side: double; opacity: 0.65; transparent: true;');
+                    billboard.appendChild(border);
+
+                    const textTitle = document.createElement('a-text');
+                    textTitle.setAttribute('value', marker.nombre.toUpperCase());
+                    textTitle.setAttribute('align', 'center');
+                    textTitle.setAttribute('width', '2.2');
+                    textTitle.setAttribute('position', '0 0.12 0.01');
+                    textTitle.setAttribute('color', '#00f3ff');
+                    textTitle.setAttribute('font', 'mozillavr');
+                    billboard.appendChild(textTitle);
+
+                    const textAction = document.createElement('a-text');
+                    textAction.setAttribute('value', 'Clic para simular deteccion');
+                    textAction.setAttribute('align', 'center');
+                    textAction.setAttribute('width', '1.5');
+                    textAction.setAttribute('position', '0 -0.18 0.01');
+                    textAction.setAttribute('color', '#cbd5e1');
+                    textAction.setAttribute('font', 'mozillavr');
+                    billboard.appendChild(textAction);
+
+                    billboard.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isDetected = markerContainer.dataset.detected === "true";
+                        setMarkerDetected(marker.uuid, !isDetected, "manual");
+                    });
+
+                    markerContainer.addEventListener('targetFound', () => {
+                        border.setAttribute('color', '#22c55e');
                         textAction.setAttribute('value', 'Marcador Detectado');
                         textAction.setAttribute('color', '#22c55e');
-                        
-                        lanzarContenedorEnMarcador(marker.uuid);
+                    });
 
-                        // Disparar evento targetFound
-                        markerContainer.dispatchEvent(new CustomEvent('targetFound'));
-                        mostrarNotificacion(`🎯 Target Detectado: ${marker.nombre}`);
-                    } else {
-                        markerContainer.dataset.detected = "false";
-                        border.setAttribute('color', '#00f3ff'); // Blue stand-by
+                    markerContainer.addEventListener('targetLost', () => {
+                        border.setAttribute('color', '#00f3ff');
                         textAction.setAttribute('value', 'Clic para simular deteccion');
                         textAction.setAttribute('color', '#cbd5e1');
-                        
-                        // Disparar evento targetLost
-                        markerContainer.dispatchEvent(new CustomEvent('targetLost'));
-                        mostrarNotificacion(`❌ Target Perdido: ${marker.nombre}`);
-                    }
-                });
+                    });
 
-                markerContainer.appendChild(billboard);
+                    markerContainer.appendChild(billboard);
+                }
                 sceneEl.appendChild(markerContainer);
             });
 
@@ -2079,7 +2748,9 @@
                     const markerContainer = document.getElementById(`anchor-${anchor}`);
                     if (markerContainer) {
                         targetContainer = markerContainer;
-                        posX = 0; posY = 0.25; posZ = 0.1;
+                        if (!obj.relativeToAnchor) {
+                            posX = 0; posY = 0.25; posZ = 0.1;
+                        }
                     }
                 }
                 
@@ -2099,28 +2770,71 @@
                         document.body.appendChild(videoEl);
                     }
                     
-                    el = document.createElement('a-video');
-                    el.setAttribute('id', obj.uuid);
-                    el.setAttribute('src', `#${videoId}`);
-                    el.setAttribute('width', '1.6');
-                    el.setAttribute('height', '0.9');
+                    const videoPanel = document.createElement('a-video');
+                    videoPanel.setAttribute('id', `${obj.uuid}-media`);
+                    videoPanel.setAttribute('src', `#${videoId}`);
+                    videoPanel.setAttribute('width', '1.6');
+                    videoPanel.setAttribute('height', '0.9');
+                    el = crearMarcoEspacial(obj, videoPanel, { width: 1.6, height: 0.9, title: obj.nombre || 'Video AR' });
                     
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => {
                             console.log(`🎯 targetFound: Reproduciendo video ${videoId}`);
+                            el.setAttribute('visible', 'true');
                             videoEl.play().catch(e => console.warn(e));
                         });
                         targetContainer.addEventListener('targetLost', () => {
                             console.log(`❌ targetLost: Pausando video ${videoId}`);
                             videoEl.pause();
+                            if (anchor !== 'base') el.setAttribute('visible', 'false');
                         });
                     }
                 } else if (mediaType === 'image' && mediaUrl) {
-                    el = document.createElement('a-image');
+                    const imagePanel = document.createElement('a-image');
+                    imagePanel.setAttribute('id', `${obj.uuid}-media`);
+                    imagePanel.setAttribute('src', mediaUrl);
+                    imagePanel.setAttribute('width', '1.35');
+                    imagePanel.setAttribute('height', '0.9');
+                    el = crearMarcoEspacial(obj, imagePanel, { width: 1.35, height: 0.9, title: obj.nombre || 'Imagen AR' });
+                    if (targetContainer) {
+                        targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
+                        targetContainer.addEventListener('targetLost', () => {
+                            if (anchor !== 'base') el.setAttribute('visible', 'false');
+                        });
+                    }
+                } else if (mediaType === 'oira-node') {
+                    el = document.createElement('a-entity');
                     el.setAttribute('id', obj.uuid);
-                    el.setAttribute('src', mediaUrl);
-                    el.setAttribute('width', '1.0');
-                    el.setAttribute('height', '1.0');
+                    el.setAttribute('billboard-ui', '');
+
+                    const panel = document.createElement('a-plane');
+                    panel.setAttribute('width', '1.05');
+                    panel.setAttribute('height', '0.42');
+                    panel.setAttribute('material', `shader: flat; color: ${obj.oiraColor || '#0f766e'}; opacity: 0.9; transparent: true; side: double;`);
+
+                    const accent = document.createElement('a-plane');
+                    accent.setAttribute('width', '1.05');
+                    accent.setAttribute('height', '0.035');
+                    accent.setAttribute('position', '0 0.21 0.025');
+                    accent.setAttribute('material', 'shader: flat; color: #22d3ee; side: double;');
+
+                    const label = document.createElement('a-text');
+                    label.setAttribute('value', obj.oiraLabel || obj.nombre || 'OIRA');
+                    label.setAttribute('align', 'center');
+                    label.setAttribute('width', '2.0');
+                    label.setAttribute('position', '0 0.01 0.035');
+                    label.setAttribute('color', '#e0faff');
+
+                    el.appendChild(panel);
+                    el.appendChild(accent);
+                    el.appendChild(label);
+
+                    if (targetContainer) {
+                        targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
+                        targetContainer.addEventListener('targetLost', () => {
+                            if (anchor !== 'base') el.setAttribute('visible', 'false');
+                        });
+                    }
                 } else {
                     el = document.createElement('a-entity');
                     el.setAttribute('id', obj.uuid);
@@ -2135,11 +2849,26 @@
                 el.setAttribute('position', `${posX} ${posY} ${posZ}`);
                 el.setAttribute('rotation', `0 ${obj.rotacion.y || 0} 0`);
                 el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
-                el.setAttribute('class', 'interactive-entity');
-                el.setAttribute('visible', 'true');
+                const contentClass = anchor === 'base' ? 'interactive-entity' : 'interactive-entity ar-experience-content';
+                const existingClass = el.getAttribute('class');
+                el.setAttribute('class', existingClass ? `${existingClass} ${contentClass}` : contentClass);
+                el.setAttribute('visible', anchor === 'base' ? 'true' : 'false');
+                if (anchor !== 'base' && mediaType === '3d') {
+                    targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
+                    targetContainer.addEventListener('targetLost', () => el.setAttribute('visible', 'false'));
+                }
                 
                 if (targetContainer) {
                     targetContainer.appendChild(el);
+                }
+
+                if (obj.oiraNarration) {
+                    el.setAttribute('data-oira-narration', obj.oiraNarration);
+                    el.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        escribirTexto(obj.oiraNarration, 14);
+                        hablar(obj.oiraNarration);
+                    });
                 }
 
                 // Asignar referencias globales
@@ -2172,6 +2901,7 @@
         }
 
         async function escanearEntorno() {
+            feedbackMovil(24);
             const video = document.getElementById("camera-stream");
             const btnScan = document.getElementById("btn-scan");
 

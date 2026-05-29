@@ -5,7 +5,6 @@ import io
 import socket
 import http.server
 import socketserver
-import qrcode
 import json
 import urllib.request
 import urllib.parse
@@ -14,12 +13,269 @@ import base64
 import subprocess
 import shutil
 import glob
+import time
+import zipfile
+
+try:
+    import qrcode
+except ImportError:
+    qrcode = None
 
 # Forzar codificación UTF-8 en flujos estándar de consola para Windows
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 PORT = 8000
+
+ASSET_EXTENSIONS = {
+    ".glb": "model",
+    ".gltf": "model",
+    ".png": "image",
+    ".jpg": "image",
+    ".jpeg": "image",
+    ".webp": "image",
+    ".gif": "image",
+    ".mp4": "video",
+    ".webm": "video",
+    ".mov": "video",
+    ".mind": "target",
+    ".json": "data"
+}
+
+PROTECTED_OUTPUT_FILES = {"layout.json"}
+PROJECTS_DIR = "projects"
+COLLAB_TTL_SECONDS = 18
+COLLAB_STATE = {}
+
+def send_json(handler, status, payload):
+    handler.send_response(status)
+    handler.send_header('Content-Type', 'application/json')
+    handler.send_header('Access-Control-Allow-Origin', '*')
+    handler.end_headers()
+    handler.wfile.write(json.dumps(payload, ensure_ascii=False).encode('utf-8'))
+
+def safe_project_name(name):
+    raw = (name or "default").strip().lower()
+    safe = "".join(c if c.isalnum() or c in ("-", "_") else "-" for c in raw).strip("-_")
+    return safe or "default"
+
+def project_layout_path(project):
+    safe = safe_project_name(project)
+    return os.path.join(PROJECTS_DIR, safe, "layout.json")
+
+def read_layout_file(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def ensure_default_project():
+    os.makedirs(PROJECTS_DIR, exist_ok=True)
+    default_path = project_layout_path("default")
+    if not os.path.exists(default_path):
+        legacy_path = os.path.join("output", "layout.json")
+        os.makedirs(os.path.dirname(default_path), exist_ok=True)
+        if os.path.exists(legacy_path):
+            shutil.copyfile(legacy_path, default_path)
+        else:
+            with open(default_path, "w", encoding="utf-8") as f:
+                json.dump({"stage": {"width": 3, "height": 3, "gridVisible": True}, "entities": [], "version": 0}, f, indent=4, ensure_ascii=False)
+
+def list_projects():
+    ensure_default_project()
+    projects = []
+    for name in os.listdir(PROJECTS_DIR):
+        path = project_layout_path(name)
+        if not os.path.isfile(path):
+            continue
+        try:
+            data = read_layout_file(path)
+        except Exception:
+            data = {}
+        stat_info = os.stat(path)
+        projects.append({
+            "name": name,
+            "version": int(data.get("version", 0)) if isinstance(data, dict) else 0,
+            "updatedAt": data.get("updatedAt") if isinstance(data, dict) else None,
+            "entities": len(data.get("entities", [])) if isinstance(data, dict) and isinstance(data.get("entities"), list) else 0,
+            "date": stat_info.st_mtime
+        })
+    projects.sort(key=lambda item: item["date"], reverse=True)
+    return projects
+
+def collab_project_state(project):
+    safe = safe_project_name(project)
+    if safe not in COLLAB_STATE:
+        COLLAB_STATE[safe] = {"users": {}, "locks": {}}
+    cleanup_collab_state(safe)
+    return COLLAB_STATE[safe]
+
+def cleanup_collab_state(project):
+    state = COLLAB_STATE.get(project)
+    if not state:
+        return
+    now = time.time()
+    expired_users = [
+        user_id for user_id, user in state["users"].items()
+        if now - float(user.get("lastSeen", 0)) > COLLAB_TTL_SECONDS
+    ]
+    for user_id in expired_users:
+        state["users"].pop(user_id, None)
+    expired_locks = [
+        object_id for object_id, lock in state["locks"].items()
+        if lock.get("userId") in expired_users or now - float(lock.get("lastSeen", 0)) > COLLAB_TTL_SECONDS
+    ]
+    for object_id in expired_locks:
+        state["locks"].pop(object_id, None)
+
+def collab_payload(project):
+    safe = safe_project_name(project)
+    state = collab_project_state(project)
+    layout_version = 0
+    updated_at = None
+    path = project_layout_path(safe)
+    if os.path.exists(path):
+        try:
+            data = read_layout_file(path)
+            if isinstance(data, dict):
+                layout_version = int(data.get("version", 0))
+                updated_at = data.get("updatedAt")
+        except Exception:
+            pass
+    return {
+        "project": safe,
+        "version": layout_version,
+        "updatedAt": updated_at,
+        "users": list(state["users"].values()),
+        "locks": state["locks"]
+    }
+
+def format_size(size_bytes):
+    if size_bytes < 1024 * 1024:
+        return f"{size_bytes / 1024:.1f} KB"
+    return f"{size_bytes / (1024 * 1024):.2f} MB"
+
+def asset_kind(file_name):
+    return ASSET_EXTENSIONS.get(os.path.splitext(file_name.lower())[1], "other")
+
+def friendly_asset_name(file_name):
+    name = os.path.splitext(file_name)[0].replace("_", " ").replace("-", " ").title()
+    known = {
+        "blue whale 3d model.glb": "Ballena Azul (Original)",
+        "ballena_docker.glb": "Ballena Docker (Procedural)",
+        "contenedor_docker.glb": "Contenedor Estandar (Procedural)",
+        "laptop_caos.glb": "Laptop de Caos (Procedural)",
+        "servidor_rack.glb": "Servidor Rack (Procedural)",
+        "buque_carga.glb": "Buque de Carga (Procedural)",
+        "qr_presentacion.png": "QR de Presentacion"
+    }
+    return known.get(file_name, name)
+
+def collect_layout_asset_usage():
+    usage = {}
+    model_id_to_file = {
+        "modelo-ballena": "blue whale 3d model.glb",
+        "modelo-laptop": "laptop_caos.glb",
+        "modelo-rack": "servidor_rack.glb",
+        "modelo-buque": "buque_carga.glb"
+    }
+    layout_path = os.path.join("output", "layout.json")
+    if not os.path.exists(layout_path):
+        return usage
+    try:
+        with open(layout_path, "r", encoding="utf-8") as f:
+            layout = json.load(f)
+        entities = layout.get("entities", []) if isinstance(layout, dict) else layout
+        for obj in entities if isinstance(entities, list) else []:
+            label = obj.get("nombre") or obj.get("uuid") or "Objeto"
+            model_id = obj.get("modelId")
+            if isinstance(model_id, str):
+                if model_id in model_id_to_file:
+                    usage.setdefault(model_id_to_file[model_id], []).append({"field": "modelId", "object": label})
+                elif model_id.startswith("modelo-"):
+                    guessed = model_id.replace("modelo-", "").replace("_", " ")
+                    for ext in (".glb", ".gltf"):
+                        file_name = f"{guessed}{ext}"
+                        if os.path.exists(os.path.join("output", file_name)):
+                            usage.setdefault(file_name, []).append({"field": "modelId", "object": label})
+                            break
+            for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl"):
+                value = obj.get(field)
+                if isinstance(value, str) and value.startswith("output/"):
+                    name = os.path.basename(value)
+                    usage.setdefault(name, []).append({"field": field, "object": label})
+    except Exception as err:
+        print(f"[ASSETS WARNING] No se pudo leer uso de layout: {err}")
+    return usage
+
+def export_experience_package(package_name="moby_experience"):
+    output_dir = "output"
+    exports_dir = os.path.join(output_dir, "exports")
+    layout_path = os.path.join(output_dir, "layout.json")
+
+    if not os.path.exists(layout_path):
+        raise FileNotFoundError("No existe output/layout.json. Guarda la escena antes de exportar.")
+
+    os.makedirs(exports_dir, exist_ok=True)
+    safe_name = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in package_name).strip("_") or "moby_experience"
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    zip_name = f"{safe_name}_{timestamp}.zip"
+    zip_path = os.path.join(exports_dir, zip_name)
+
+    usage = collect_layout_asset_usage()
+    used_files = sorted(usage.keys())
+    missing_assets = []
+    included_assets = []
+
+    with open(layout_path, "r", encoding="utf-8") as f:
+        layout_data = json.load(f)
+
+    manifest = {
+        "name": safe_name,
+        "generatedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "entrypoint": "index.html",
+        "layout": "output/layout.json",
+        "assets": [],
+        "missingAssets": []
+    }
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as package:
+        if os.path.exists("index.html"):
+            package.write("index.html", "index.html")
+        package.write(layout_path, "output/layout.json")
+
+        for file_name in used_files:
+            asset_path = os.path.join(output_dir, file_name)
+            fallback_path = file_name if os.path.exists(file_name) and os.path.isfile(file_name) else None
+            source_path = asset_path if os.path.exists(asset_path) and os.path.isfile(asset_path) else fallback_path
+            if source_path:
+                package.write(source_path, f"output/{file_name}")
+                included_assets.append(file_name)
+                manifest["assets"].append({
+                    "name": file_name,
+                    "path": f"output/{file_name}",
+                    "kind": asset_kind(file_name),
+                    "usedBy": usage.get(file_name, [])
+                })
+            else:
+                missing_assets.append(file_name)
+                manifest["missingAssets"].append(file_name)
+
+        package.writestr("manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False))
+        package.writestr(
+            "README_EXPORT.txt",
+            "Moby Studio export\n\n"
+            "Abre esta experiencia sirviendo la carpeta descomprimida con un servidor HTTP local.\n"
+            "Entrada: index.html\n"
+            "Layout: output/layout.json\n"
+        )
+
+    return {
+        "zipName": zip_name,
+        "zipPath": f"output/exports/{zip_name}",
+        "assetCount": len(included_assets),
+        "missingAssets": missing_assets,
+        "size": format_size(os.path.getsize(zip_path)),
+        "layoutEntities": len(layout_data.get("entities", [])) if isinstance(layout_data, dict) else 0
+    }
 
 def find_blender():
     """
@@ -234,38 +490,193 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 response_body = json.dumps({"error": f"Falla en el procesamiento de visión: {str(e)}"})
                 self.wfile.write(response_body.encode('utf-8'))
-        elif self.path == '/api/save-layout':
+        elif self.path.startswith('/api/save-layout'):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             
             try:
                 layout_data = json.loads(post_data.decode('utf-8'))
+                query = urllib.parse.urlparse(self.path).query
+                params = urllib.parse.parse_qs(query)
+                requested_project = layout_data.get("project", "default") if isinstance(layout_data, dict) else "default"
+                requested_version = layout_data.get("expectedVersion", None) if isinstance(layout_data, dict) else None
+                project = safe_project_name(params.get('project', [requested_project])[0])
+                expected_version_raw = params.get('version', [requested_version])[0]
                 
                 output_dir = "output"
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
-                
+
+                ensure_default_project()
+                ruta_proyecto = project_layout_path(project)
+                os.makedirs(os.path.dirname(ruta_proyecto), exist_ok=True)
+
+                current_version = 0
+                if os.path.exists(ruta_proyecto):
+                    try:
+                        current_data = read_layout_file(ruta_proyecto)
+                        current_version = int(current_data.get("version", 0)) if isinstance(current_data, dict) else 0
+                    except Exception:
+                        current_version = 0
+
+                if expected_version_raw not in (None, ""):
+                    try:
+                        expected_version = int(expected_version_raw)
+                    except Exception:
+                        expected_version = current_version
+                    if expected_version != current_version:
+                        send_json(self, 409, {
+                            "error": "conflict",
+                            "message": "El proyecto fue guardado por otra persona. Recarga antes de sobrescribir.",
+                            "project": project,
+                            "serverVersion": current_version,
+                            "clientVersion": expected_version
+                        })
+                        return
+
+                next_version = current_version + 1
+                if isinstance(layout_data, dict):
+                    layout_data["project"] = project
+                    layout_data["version"] = next_version
+                    layout_data["updatedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+                with open(ruta_proyecto, "w", encoding="utf-8") as f:
+                    json.dump(layout_data, f, indent=4, ensure_ascii=False)
+
+                # Mantener compatibilidad: la vista final sigue leyendo output/layout.json.
                 ruta_layout = os.path.join(output_dir, "layout.json")
                 with open(ruta_layout, "w", encoding="utf-8") as f:
                     json.dump(layout_data, f, indent=4, ensure_ascii=False)
                 
-                print(f"[LAYOUT] Diseño de escenario guardado en: {os.path.abspath(ruta_layout)}")
-                
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({"status": "success", "message": "Diseño guardado exitosamente."})
-                self.wfile.write(response_body.encode('utf-8'))
+                print(f"[LAYOUT] Proyecto '{project}' guardado v{next_version}: {os.path.abspath(ruta_proyecto)}")
+                send_json(self, 200, {
+                    "status": "success",
+                    "message": "Diseño guardado exitosamente.",
+                    "project": project,
+                    "version": next_version,
+                    "layoutPath": ruta_proyecto
+                })
                 
             except Exception as e:
                 print(f"[LAYOUT ERROR] Error al guardar el diseño: {str(e)}")
+                send_json(self, 500, {"error": f"Falla al guardar el diseño: {str(e)}"})
+        elif self.path.startswith('/api/collab-heartbeat'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project", "default"))
+                user_id = str(data.get("userId") or "").strip()
+                if not user_id:
+                    send_json(self, 400, {"error": "Falta userId."})
+                    return
+
+                now = time.time()
+                state = collab_project_state(project)
+                user = {
+                    "userId": user_id,
+                    "name": str(data.get("name") or "Usuario").strip()[:40],
+                    "color": str(data.get("color") or "#22d3ee")[:24],
+                    "selectedObject": data.get("selectedObject") or None,
+                    "lastSeen": now
+                }
+                state["users"][user_id] = user
+
+                for object_id, lock in list(state["locks"].items()):
+                    if lock.get("userId") == user_id:
+                        state["locks"].pop(object_id, None)
+
+                selected = data.get("selectedObject")
+                if selected:
+                    existing = state["locks"].get(selected)
+                    if not existing or existing.get("userId") == user_id or now - float(existing.get("lastSeen", 0)) > COLLAB_TTL_SECONDS:
+                        state["locks"][selected] = {
+                            "userId": user_id,
+                            "name": user["name"],
+                            "color": user["color"],
+                            "lastSeen": now
+                        }
+
+                send_json(self, 200, collab_payload(project))
+            except Exception as e:
+                print(f"[COLLAB ERROR] Heartbeat falló: {str(e)}")
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/collab-release'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project", "default"))
+                user_id = str(data.get("userId") or "").strip()
+                state = collab_project_state(project)
+                for object_id, lock in list(state["locks"].items()):
+                    if lock.get("userId") == user_id:
+                        state["locks"].pop(object_id, None)
+                send_json(self, 200, collab_payload(project))
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/generate-qr'):
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            qr_text = params.get('text', [''])[0].strip()
+            file_name = params.get('name', [''])[0].strip()
+
+            if not qr_text:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Texto QR no especificado."}).encode('utf-8'))
+                return
+
+            if qrcode is None:
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                response_body = json.dumps({"error": f"Falla al guardar el diseño: {str(e)}"})
+                self.wfile.write(json.dumps({"error": "La librería qrcode no está instalada en este Python. Usa moby_studio\\venv\\Scripts\\python.exe lanzador_ar.py."}).encode('utf-8'))
+                return
+
+            safe_name = os.path.basename(file_name or f"qr_{abs(hash(qr_text))}.png")
+            if not safe_name.lower().endswith(".png"):
+                safe_name += ".png"
+
+            try:
+                output_dir = "output"
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+
+                qr = qrcode.QRCode(
+                    version=1,
+                    error_correction=qrcode.constants.ERROR_CORRECT_M,
+                    box_size=10,
+                    border=4,
+                )
+                qr.add_data(qr_text)
+                qr.make(fit=True)
+                img = qr.make_image(fill_color="black", back_color="white")
+                ruta_qr = os.path.join(output_dir, safe_name)
+                img.save(ruta_qr)
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                response_body = json.dumps({
+                    "status": "success",
+                    "message": "QR generado exitosamente.",
+                    "src": f"output/{safe_name}",
+                    "text": qr_text
+                })
                 self.wfile.write(response_body.encode('utf-8'))
+            except Exception as e:
+                print(f"[QR ERROR] Error al generar QR: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Falla al generar QR: {str(e)}"}).encode('utf-8'))
         elif self.path.startswith('/api/upload-model'):
             query = urllib.parse.urlparse(self.path).query
             params = urllib.parse.parse_qs(query)
@@ -403,6 +814,75 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 response_body = json.dumps({"error": f"Falla al eliminar modelo: {str(e)}"})
                 self.wfile.write(response_body.encode('utf-8'))
+        elif self.path.startswith('/api/delete-asset'):
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            file_name = os.path.basename(params.get('name', [''])[0])
+
+            if not file_name:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Nombre de archivo no especificado."}).encode('utf-8'))
+                return
+
+            if file_name in PROTECTED_OUTPUT_FILES:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Este archivo esta protegido y no se puede eliminar desde la mediateca."}).encode('utf-8'))
+                return
+
+            try:
+                ruta_archivo = os.path.join("output", file_name)
+                if not os.path.exists(ruta_archivo):
+                    self.send_response(404)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "warning", "message": "El archivo no existe en el disco."}).encode('utf-8'))
+                    return
+
+                os.remove(ruta_archivo)
+                print(f"[DELETE-ASSET] Asset eliminado: {os.path.abspath(ruta_archivo)}")
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success", "message": "Asset eliminado correctamente."}).encode('utf-8'))
+            except Exception as e:
+                print(f"[DELETE-ASSET ERROR] Error al eliminar asset: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Falla al eliminar asset: {str(e)}"}).encode('utf-8'))
+        elif self.path.startswith('/api/export-experience'):
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            package_name = params.get('name', ['moby_experience'])[0]
+
+            try:
+                export_data = export_experience_package(package_name)
+                print(f"[EXPORT] Experiencia exportada: {export_data['zipPath']}")
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "status": "success",
+                    "message": "Experiencia exportada correctamente.",
+                    **export_data
+                }).encode('utf-8'))
+            except Exception as e:
+                print(f"[EXPORT ERROR] Error al exportar experiencia: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": f"Falla al exportar experiencia: {str(e)}"}).encode('utf-8'))
         elif self.path.startswith('/api/generate-model'):
             query = urllib.parse.urlparse(self.path).query
             params = urllib.parse.parse_qs(query)
@@ -521,6 +1001,91 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
     def do_GET(self):
+        if self.path.startswith('/api/list-projects'):
+            try:
+                send_json(self, 200, {"projects": list_projects()})
+            except Exception as e:
+                print(f"[PROJECTS ERROR] Error al enlistar proyectos: {str(e)}")
+                send_json(self, 500, {"error": str(e)})
+            return
+
+        if self.path.startswith('/api/load-layout'):
+            try:
+                query = urllib.parse.urlparse(self.path).query
+                params = urllib.parse.parse_qs(query)
+                project = safe_project_name(params.get('project', ['default'])[0])
+                ensure_default_project()
+                path = project_layout_path(project)
+                if not os.path.exists(path):
+                    send_json(self, 404, {"error": "Proyecto no encontrado.", "project": project})
+                    return
+                data = read_layout_file(path)
+                if isinstance(data, dict):
+                    data.setdefault("project", project)
+                    data.setdefault("version", 0)
+                send_json(self, 200, data)
+            except Exception as e:
+                print(f"[LAYOUT ERROR] Error al cargar proyecto: {str(e)}")
+                send_json(self, 500, {"error": str(e)})
+            return
+
+        if self.path.startswith('/api/collab-state'):
+            try:
+                query = urllib.parse.urlparse(self.path).query
+                params = urllib.parse.parse_qs(query)
+                project = safe_project_name(params.get('project', ['default'])[0])
+                send_json(self, 200, collab_payload(project))
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+            return
+
+        if self.path == '/api/list-assets':
+            try:
+                output_dir = "output"
+                if not os.path.exists(output_dir):
+                    os.makedirs(output_dir)
+
+                usage = collect_layout_asset_usage()
+                assets = []
+                for file_name in os.listdir(output_dir):
+                    ruta = os.path.join(output_dir, file_name)
+                    if not os.path.isfile(ruta):
+                        continue
+                    ext = os.path.splitext(file_name.lower())[1]
+                    kind = asset_kind(file_name)
+                    stat_info = os.stat(ruta)
+                    src = f"output/{file_name}"
+                    usage_items = usage.get(file_name, [])
+                    assets.append({
+                        "name": file_name,
+                        "friendlyName": friendly_asset_name(file_name),
+                        "kind": kind,
+                        "extension": ext,
+                        "size": format_size(stat_info.st_size),
+                        "sizeBytes": stat_info.st_size,
+                        "src": src,
+                        "modelId": f"modelo-{file_name.replace('.glb', '').replace('.gltf', '').replace(' ', '_')}" if kind == "model" else None,
+                        "date": os.path.getmtime(ruta),
+                        "protected": file_name in PROTECTED_OUTPUT_FILES,
+                        "usedBy": usage_items,
+                        "usedCount": len(usage_items)
+                    })
+
+                assets.sort(key=lambda x: x["date"], reverse=True)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(assets).encode('utf-8'))
+            except Exception as e:
+                print(f"[ASSETS ERROR] Error al enlistar assets: {str(e)}")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+            return
+
         if self.path == '/api/list-models':
             try:
                 output_dir = "output"

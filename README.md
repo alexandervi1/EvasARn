@@ -1,132 +1,260 @@
-# 🐳 Moby Studio — Plataforma AR 3D & AI WebXR de Docker
+# Moby Studio
 
-<p align="center">
-  <img src="medios/image.png" alt="Moby Studio Preview" width="700px" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);"/>
-</p>
+Moby Studio es una aplicacion local para crear, editar y probar experiencias AR desde el navegador. Incluye un editor 3D, un cliente movil AR, gestion de assets, disparadores por QR o imagen entrenada, y un backend Python que guarda el layout y sirve los recursos desde `moby_studio/output/`.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Blender-F5792A?style=for-the-badge&logo=blender&logoColor=white" alt="Blender"/>
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/YOLOv8-00FFA6?style=for-the-badge&logo=ultralytics&logoColor=black" alt="YOLOv8"/>
-  <img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama"/>
-  <img src="https://img.shields.io/badge/A--Frame-EF2D5E?style=for-the-badge&logo=aframe&logoColor=white" alt="A-Frame"/>
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5"/>
-</p>
+## Estado Actual
 
-¡Bienvenido a **Moby Studio**! Una suite de desarrollo y simulación en **Realidad Aumentada (AR) interactiva y visión local por Inteligencia Artificial**. Diseñada originalmente sobre tecnologías WebXR, esta plataforma permite a desarrolladores y entusiastas DevOps experimentar un ecosistema de modelado 3D procedural controlado por Blender, análisis de radar asistido por YOLOv8, integración didáctica con Ollama (Qwen) y un lienzo 3D interactivo premium de alto rendimiento.
+La aplicacion ya incluye:
 
----
+- Editor 3D en `moby_studio/editor.html`.
+- Cliente AR/movil en `moby_studio/index.html`.
+- Backend local en `moby_studio/lanzador_ar.py`.
+- Persistencia de escena en `moby_studio/output/layout.json`.
+- Proyectos guardados por nombre en `moby_studio/projects/<proyecto>/layout.json`.
+- Versionado basico por proyecto para evitar sobrescrituras.
+- Presencia colaborativa, nombre de usuario y bloqueo temporal por objeto.
+- Sincronizacion remota por version: recarga automatica si no hay cambios locales.
+- Mediateca profesional para modelos, imagenes, videos y targets `.mind`.
+- Autosave local y recuperacion de borradores.
+- Undo/Redo real por snapshots de escena.
+- Validador de publicacion.
+- Soporte para QR y MindAR.
+- Flujo AR target fisico + contenido proyectado desde el mismo modal.
+- Contenido por archivo local o URL directa para imagen, video y GLB/GLTF.
+- Nodos OIRA generados sin depender de modelos base heredados.
+- Cliente movil con controles compactos para telefono.
+- Integracion opcional de vision local con YOLOv8 y Ollama.
 
-## ✨ Características de Calidad Premium
-
-### 🕹️ 1. Lienzo 3D y Gizmos de Transformación (Estilo Blender/Unity)
-*   **Gizmos Interactivos Directos (Viewport Drag):** Sustituimos las líneas de coordenadas base por **3 flechas cilíndricas tridimensionales estilizadas con puntas cónicas** (Rojo: X, Verde: Y, Azul: Z) renderizadas sobre la geometría (`depthTest: false`) para que nunca queden ocultas.
-*   **Arrastre Preciso (Three.js Math):** Al hacer clic y arrastrar un eje, se calcula la proyección 3D del arrastre en 2D según la orientación de la cámara (`camera.quaternion`) mapeando la sensibilidad proporcionalmente a la distancia cámara-objeto. Bloquea temporalmente los controles orbitales de cámara (`look-controls`) durante el arrastre.
-*   **Barra de Herramientas Flotante:** Acceso rápido a herramientas de navegación, imán de snapping (pasos de 0.5 unidades / 15°), borrado rápido de entidades y un robusto historial de transformaciones con **Deshacer (Undo - `Ctrl+Z`) y Rehacer (Redo - `Ctrl+Y`)**.
-*   **Estrella de Orientación del Viewport (Compass Widget):** Widget circular Glassmorphic en la esquina superior derecha que renderiza dinámicamente un canvas 2D con ordenamiento por profundidad de atrás hacia adelante (Depth Sorting) de las 6 orientaciones cartesianas. Ofrece **vista ortográfica rápida** (Top, Front, Side, etc.) con transiciones de suavizado (easing cubic-out).
-
-### 📱 2. Refactorización Spatial UI/UX (index.html - Cliente WebXR)
-*   **HUD Colapsable:** Botón interactivo chevron (`.btn-collapse`) que desliza mediante hardware GPU (`translateY`) el panel completo ocultando bloques pesados para liberar espacio de cámara física en celulares, dejando visible únicamente un micro-panel con el botón del micrófono.
-*   **Máquina de Estados de Inferencia (AI):** Función reactiva `setInferenceState(state)` para fases de inferencia (`idle`, `capturing`, `yolo_vision`, `ollama_reasoning`, `speaking`). Integra pulsos glow en el micrófono y una cortina de luz láser holográfica móvil (`#scanner-laser`) que simula el análisis visual del entorno.
-*   **Interfaces Flotantes (A-Frame Billboard):** Componente `billboard-ui` de A-Frame que reorienta dinámicamente planos en cada frame para que siempre miren al usuario. Permite click interactivo para **lanzar contenedores virtuales con rotación acrobática** directa a marcadores WebXR físicos.
-*   **Iluminación PBR y Sombras Físicas:** Inyección de luces direccionales con proyección fidedigna de sombras (`castShadow: true`) y ambientales suaves para un sombreado realista sobre texturas físicas y metálicas.
-
-### 📸 3. Sistema de Image Tracking y Disparadores Multimedia
-*   **Menú Contextual 3D via Raycaster:** Al hacer click derecho (`contextmenu`) en el lienzo, proyectamos un `THREE.Raycaster` para ubicar el objeto raíz y desplegar un menú Glassmorphic flotante con opciones contextuales.
-*   **Modal de Configuración de targets (`#ar-trigger-modal`):** Panel interactivo con selectores para configurar disparadores fidedignos asociando imágenes físicas a tres tipos de contenidos AR:
-    *   `3d`: Modelos tridimensionales GLTF (`<a-entity gltf-model="...">`).
-    *   `image`: Planos de imagen plana (`<a-image>`).
-    *   `video`: Planos `<a-video>` alimentados dinámicamente por tags `<video>` HTML invisibles con restricciones móviles (`playsinline loop muted`).
-*   **Autoplay Reactivo en WebAR:** Controladores automáticos que reproducen el video (`play()`) al detectar el marcador con la cámara (`targetFound`) y lo pausan instantáneamente (`pause()`) al perder el marcador de vista (`targetLost`).
-*   **Simulador de Escritorio (Desktop debug):** Permite hacer click en computadoras sobre el marcador flotante para simular la detección del target en pantalla y depurar la reproducción rápidamente sin dispositivos móviles.
-
-### 🎯 4. Sistema Dinámico Ilimitado de Marcadores AR y Targets Personalizados
-*   **Creación e Instanciación Dinámica:** Sustituimos el sistema antiguo de 3 marcadores fijos (`marcador_a`, `marcador_b`, `marcador_c`) por una arquitectura de **Marcadores AR ilimitados** creados por el desarrollador. Se añade una tarjeta interactiva en el menú de assets para instanciar y posicionar marcadores planos directamente en la mesa 3D.
-*   **Target Uploader Integrado:** Al hacer clic derecho o usar el inspector, abre un modal Glassmorphic para subir archivos de targets personalizados (imágenes físicas o códigos QR) a través de la API `/api/upload-media`, actualizando la textura del plano 3D en el editor al instante.
-*   **Asociación Dinámica de Anclajes (Inspector):** Al seleccionar un objeto 3D, el inspector barre todos los marcadores creados en la escena para repoblar dinámicamente el desplegable **"Anclaje Físico AR (Target)"**, permitiendo asociar cualquier objeto a cualquier marcador de forma 100% interactiva.
-*   **Reproducción Dinámica en index.html:** El cliente WebXR lee el archivo `layout.json` y genera de forma dinámica canales y contenedores de rastreo A-Frame para cada marcador personalizado, agrupando físicamente a las entidades hijas en la posición exacta del target. 
-*   **Compatibilidad Retrospectiva y Simulador de Canales:** Auto-mapea e instancia virtualmente marcadores equivalentes para diseños antiguos que referencian los identificadores fijos. En ordenadores de escritorio, permite cliquear sobre las interfaces espaciales flotantes de cada marcador para simular el reconocimiento físico de cámara (`targetFound`/`targetLost`) y testear la reproducción de video y animación de contenedores en tiempo real.
-
----
-
-## 📂 Arquitectura Organizada del Repositorio
-
-El proyecto ha sido saneado y organizado en carpetas estructuradas de acuerdo a sus responsabilidades:
+## Estructura Del Proyecto
 
 ```text
-mcpBlender/ (Raíz del Repositorio)
-├── medios/                 # Recursos multimedia e imágenes de documentación del proyecto
-│   ├── image.png           # Captura principal de pantalla
-│   └── WhatsApp Image...   # Captura complementaria
-├── moby_studio/            # Carpeta Core de la Aplicación
-│   ├── _archive/           # Backups históricos de código (server.py anterior y JS redundantes)
-│   ├── output/             # Directorio activo de guardado (layout.json y modelos GLB/multimedia)
-│   ├── scripts/            # Scripts generadores procedurales de Blender
-│   │   ├── gen_ballena.py
-│   │   ├── gen_buque.py
-│   │   ├── gen_laptop.py
-│   │   ├── gen_server.py
-│   │   ├── generar_contenedor.py
-│   │   └── compress_model.py
-│   ├── vision/             # Modelos y pesos de Inteligencia Artificial (YOLO)
-│   │   ├── yolov8_docker_custom.pt
-│   │   └── yolov8n.pt
-│   ├── venv/               # Entorno Virtual Python con dependencias locales
-│   ├── editor.html         # Lienzo e interfaz premium de edición 3D (Gizmos, menus, modal)
-│   ├── index.html          # Vista de presentación y Realidad Aumentada (Play AR, Image tracking)
-│   └── lanzador_ar.py      # Servidor HTTP unificado y Backend API REST (Soporte upload-media)
-├── .gitignore              # Reglas de exclusión para no subir venv/ ni pesos pesados .pt
-└── README.md               # El documento que estás leyendo
+mcpBlender/
+├── README.md
+├── medios/
+│   └── image.png
+└── moby_studio/
+    ├── ARCHITECTURE.md
+    ├── MEJORAS_PENDIENTES.md
+    ├── editor.html
+    ├── index.html
+    ├── lanzador_ar.py
+    ├── output/
+    │   ├── layout.json
+    │   ├── *.glb
+    │   ├── *.png / *.jpg / *.webp
+    │   ├── *.mp4 / *.webm
+    │   └── *.mind
+    ├── projects/
+    │   └── <proyecto>/
+    │       └── layout.json
+    ├── scripts/
+    ├── vision/
+    └── venv/
 ```
 
----
+## Como Ejecutar
 
-## 🛠️ Guía de Inicio Rápido (Desarrollo Local)
+Desde la raiz del proyecto:
 
-### 1. Requisitos Previos
-*   **Python 3.10+** (Instalado y en el PATH).
-*   **Blender 4.2+** (Detectado automáticamente en Windows en archivos de programa o a través del PATH).
-*   **Ollama** con el modelo `qwen` activo:
-    ```bash
-    ollama run qwen
-    ```
-
-### 2. Levantar el Servidor de Moby Studio
-Navega a la carpeta del servicio central e inicia el backend en tu terminal:
-
-```bash
+```powershell
 cd moby_studio
-python lanzador_ar.py
+.\venv\Scripts\python.exe lanzador_ar.py
 ```
 
-El servidor detectará dinámicamente tu dirección IP de red local (Wi-Fi) y realizará las siguientes tareas automáticamente:
-1.  Generará un **Código QR único** (`qr_presentacion.png`) apuntando a tu servidor local.
-2.  Iniciará el servidor HTTP con soporte para tipos MIME 3D en el puerto `8000`.
-3.  Imprimirá en la consola las direcciones locales y móviles de acceso.
+Luego abre:
 
-> **💡 Consejo Pro (Acceso Móvil HTTPS):** Para habilitar la cámara en tu celular, los navegadores exigen el protocolo HTTPS. Te recomendamos mapear el puerto local exponiéndolo mediante una herramienta segura como **Ngrok** o **Cloudflare Tunnel**:
-> ```bash
-> ngrok http 8000
-> ```
+- Editor: `http://localhost:8000/editor.html`
+- Cliente AR: `http://localhost:8000/index.html`
+- API assets: `http://localhost:8000/api/list-assets`
 
----
+Para probar desde telefono, usa la URL LAN que imprime el servidor. Si el navegador movil bloquea la camara, expone el puerto con HTTPS usando una herramienta como ngrok o Cloudflare Tunnel.
 
-## 🔌 Documentación de la API REST del Servidor
+## Editor 3D
 
-El backend de `lanzador_ar.py` expone los siguientes endpoints REST listos para interactuar con cualquier cliente:
+El editor permite:
 
-| Endpoint | Método | Entrada | Salida | Descripción |
-|---|---|---|---|---|
-| `/api/list-models` | `GET` | Ninguna | `JSON Array` | Lista todos los modelos `.glb` en `output/` con tamaño real en disco y fecha de edición. |
-| `/api/save-layout` | `POST` | `JSON Object` | `JSON Status` | Guarda la escena 3D actual (nombres, posiciones, rotaciones, escalas, disparadores) en `output/layout.json`. |
-| `/api/upload-model` | `POST` | `Binary glb` | `JSON Object` | Sube un archivo `.glb`/`.gltf` externo y lo registra en la mediateca. |
-| `/api/upload-media` | `POST` | `Binary file` | `JSON Object` | Carga genérica de archivos multimedia (MP4, PNG, JPG) y los almacena de forma segura en `output/` para targets. |
-| `/api/delete-model` | `POST` | Query `?name=file.glb` | `JSON Status` | Elimina permanentemente el modelo físico de la carpeta `output/` del servidor. |
-| `/api/generate-model`| `POST` | Query `?script=name.py`| `JSON Object` | Ejecuta a Blender en modo silencioso (`headless`) para compilar un modelo procedural. |
-| `/api/compress-model`| `POST` | Ninguna | `JSON Status` | Comprime el modelo base actual mediante Blender usando el compresor Draco. |
-| `/api/vision` | `POST` | `JSON {image: base64}` | `JSON {response: str}` | Realiza inferencia local YOLOv8 del frame de la cámara y genera analogía Docker vía Ollama. |
+- Crear modelos 3D, imagenes, videos y marcadores AR.
+- Crear experiencias AR rapidas: marcador + imagen, marcador + video y plantillas OIRA.
+- Configurar en un mismo modal el target fisico que se imprime o muestra en la vida real y el contenido que se proyecta encima.
+- Asociar contenido a un marcador mediante `arAnchor`.
+- Pegar una URL directa o subir un archivo local para imagenes, videos y modelos.
+- Editar posicion, rotacion y escala con sliders, inputs numericos y gizmo 3D.
+- Bloquear, ocultar, duplicar y seleccionar objetos desde el outliner.
+- Validar si una escena esta lista para probar en telefono.
+- Guardar por proyecto con versionado.
+- Ver usuarios activos y objetos que otra persona esta editando.
 
----
+## Proyectos Y Colaboracion
 
-## 🐳 Créditos y Comunidad
-Plataforma desarrollada con amor para fusionar la diversión de los videojuegos interactivos 3D con el aprendizaje práctico del ecosistema de contenedores. ¡Dockerizar el mundo nunca fue tan visual y sorprendente! 🚀⚓
+El editor trabaja sobre un proyecto activo. Cada proyecto se guarda en:
+
+```text
+moby_studio/projects/<proyecto>/layout.json
+```
+
+Al guardar, el servidor tambien actualiza `moby_studio/output/layout.json` para mantener compatibilidad con el cliente final y la exportacion.
+
+Funciones actuales:
+
+- Selector de proyecto en la barra superior.
+- Creacion rapida de nuevos proyectos.
+- Version incremental por proyecto.
+- Conflicto `409` si alguien intenta guardar una version vieja.
+- Nombre de usuario local por navegador.
+- Presencia de usuarios activos.
+- Bloqueo temporal del objeto seleccionado por otro usuario.
+- Aviso de version remota disponible.
+- Recarga automatica cuando otra persona guarda y el editor local no tiene cambios sin guardar.
+
+## Disparadores AR
+
+Los marcadores AR son entidades normales con `isMarker: true`. Pueden configurarse con:
+
+- `trackingMode: "qr"` y `recognitionKey` para QR / BarcodeDetector.
+- `trackingMode: "image"` y `mindTargetUrl` para targets MindAR `.mind`.
+- `markerImage` para la textura visual del target dentro del editor.
+
+El contenido asociado guarda `arAnchor` con el UUID del marcador.
+
+Flujo recomendado:
+
+1. Presiona `Marcador + Imagen` o `Marcador + Video`.
+2. En `Target fisico`, sube la imagen/QR/icono que se va a imprimir o mostrar en una tarjeta.
+3. En `Reconocimiento`, usa QR o MindAR.
+4. En `Contenido flotante`, sube un archivo local o pega una URL directa.
+5. Guarda. En telefono, al detectar el target, el contenido aparece encima.
+
+Para video, el link debe apuntar directo al archivo (`.mp4` o `.webm`). Un enlace normal de YouTube/Vimeo no funciona como textura AR directa.
+
+## Cliente Movil
+
+`index.html` carga `output/layout.json` y reconstruye la experiencia AR. En telefono prioriza:
+
+- Interfaz compacta.
+- Dock de acciones.
+- Escaneo de QR si `BarcodeDetector` esta disponible.
+- Soporte para MindAR cuando el marcador tiene `.mind`.
+- Paneles espaciales flotantes para imagenes y videos.
+- Nodos OIRA flotantes generados desde datos del layout.
+- Contenido oculto hasta detectar el target asociado.
+- Ocultar paneles de simulacion de marcadores en telefono, salvo `?debugMarkers=1`.
+
+## Mediateca
+
+La mediateca del editor usa `/api/list-assets` para listar recursos de `output/`:
+
+- Modelos `.glb` / `.gltf`.
+- Imagenes `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif`.
+- Videos `.mp4`, `.webm`, `.mov`.
+- Targets `.mind`.
+- Datos `.json`.
+
+Funciones disponibles:
+
+- Buscar assets.
+- Filtrar por tipo.
+- Filtrar assets sin uso.
+- Ver previews de imagen y video.
+- Ver si un asset esta usado por el layout.
+- Subir nuevos assets.
+- Agregar assets a la escena.
+- Asignar assets al objeto seleccionado.
+- Copiar rutas.
+- Eliminar assets no protegidos.
+
+`layout.json` esta protegido y no se puede eliminar desde la mediateca.
+
+## Autosave Y Undo/Redo
+
+El editor guarda borradores locales en `localStorage` mientras hay cambios sin guardar. Al abrir el editor, si existe un borrador local no publicado, muestra un banner para restaurarlo o descartarlo.
+
+Undo/Redo usa snapshots completos de escena y cubre:
+
+- Crear, borrar y duplicar objetos.
+- Configurar AR.
+- Asignar assets.
+- Cambiar transformaciones.
+- Cambiar anclajes.
+- Ocultar, mostrar, bloquear y desbloquear.
+- Cambiar escenario y rejilla.
+- Restaurar borradores.
+
+Atajos:
+
+- `Ctrl+Z`: deshacer.
+- `Ctrl+Y`: rehacer.
+- `Ctrl+Shift+Z`: rehacer.
+
+## API Principal
+
+| Endpoint | Metodo | Descripcion |
+|---|---:|---|
+| `/api/save-layout?project=...&version=...` | POST | Guarda el proyecto versionado y actualiza `output/layout.json`. |
+| `/api/list-projects` | GET | Lista proyectos guardados, version y cantidad de entidades. |
+| `/api/load-layout?project=...` | GET | Carga el layout de un proyecto. |
+| `/api/collab-heartbeat` | POST | Registra usuario activo, seleccion y lock temporal. |
+| `/api/collab-release` | POST | Libera locks del usuario. |
+| `/api/collab-state?project=...` | GET | Devuelve usuarios, locks y version remota. |
+| `/api/list-assets` | GET | Lista todos los assets de `output/` con tipo, tamano, uso y proteccion. |
+| `/api/delete-asset?name=...` | POST | Elimina un asset no protegido de `output/`. |
+| `/api/export-experience?name=...` | POST | Genera un ZIP con `index.html`, `layout.json`, assets usados, manifiesto y README. |
+| `/api/list-models` | GET | Lista modelos GLB/GLTF para compatibilidad. |
+| `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia permitido. |
+| `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
+| `/api/delete-model?name=...` | POST | Elimina modelos GLB/GLTF. |
+| `/api/generate-qr?text=...&name=...` | POST | Genera un QR PNG en `output/`. |
+| `/api/generate-model?script=...` | POST | Ejecuta Blender headless con un script procedural. |
+| `/api/compress-model` | POST | Ejecuta compresion de modelo con Blender. |
+| `/api/vision` | POST | Analiza un frame base64 con YOLOv8 y Ollama local. |
+
+## Datos De Layout
+
+Formato actual:
+
+```json
+{
+  "project": "default",
+  "version": 2,
+  "updatedAt": "2026-05-29 15:03:57",
+  "stage": {
+    "width": 3,
+    "height": 3,
+    "gridVisible": true
+  },
+  "entities": [
+    {
+      "uuid": "objeto-marcador-1",
+      "nombre": "Target Producto",
+      "isMarker": true,
+      "posicion": { "x": 0, "y": 0.02, "z": -3.5 },
+      "rotacion": { "y": 0 },
+      "escala": 1,
+      "markerImage": "output/qr_presentacion.png",
+      "recognitionKey": "objeto-marcador-1",
+      "trackingMode": "qr",
+      "mindTargetUrl": null,
+      "mindTargetIndex": 0,
+      "arAnchor": "base"
+    },
+    {
+      "uuid": "objeto-panel-2",
+      "nombre": "Panel explicativo",
+      "mediaType": "image",
+      "mediaUrl": "output/panel.png",
+      "posicion": { "x": 0, "y": 0.55, "z": 0.05 },
+      "rotacion": { "y": 0 },
+      "escala": 1,
+      "relativeToAnchor": true,
+      "arAnchor": "objeto-marcador-1"
+    }
+  ]
+}
+```
+
+## Backlog
+
+Las mejoras pendientes estan documentadas en:
+
+`moby_studio/MEJORAS_PENDIENTES.md`
+
+Ese archivo contiene el orden sugerido para continuar: editor guiado de targets MindAR, inspector avanzado de contenido, optimizacion de assets, QA movil, roles/comentarios y sincronizacion mas granular.
