@@ -802,53 +802,7 @@
         <!-- CONTENEDOR PARA CARGA DINÁMICA DEL ESCENARIO -->
         <a-entity id="entities-container"></a-entity>
 
-        <!-- ANCLAJE A (Logo Docker) - SPATIAL UI INTERACTIVA -->
-        <a-entity id="anchor-marcador_a" position="-1.8 0.6 -3.0">
-            <a-plane 
-                billboard-ui 
-                class="clickable" 
-                width="1.1" 
-                height="0.6" 
-                material="shader: flat; color: #0a0f1e; opacity: 0.78; transparent: true; side: double;"
-                onclick="lanzarContenedorEnMarcador('marcador_a')"
-                title="Lanzar contenedor en A">
-                <a-plane width="1.13" height="0.63" position="0 0 -0.005" color="#00f3ff" material="shader: flat; side: double; opacity: 0.6; transparent: true;"></a-plane>
-                <a-text value="MARCADOR A\n(Logo Docker)" align="center" width="2.4" position="0 0.1 0.01" color="#00f3ff" font="mozillavr"></a-text>
-                <a-text value="Clic para lanzar aqui" align="center" width="1.6" position="0 -0.18 0.01" color="#cbd5e1" font="mozillavr"></a-text>
-            </a-plane>
-        </a-entity>
 
-        <!-- ANCLAJE B (Código QR) - SPATIAL UI INTERACTIVA -->
-        <a-entity id="anchor-marcador_b" position="1.8 0.6 -3.0">
-            <a-plane 
-                billboard-ui 
-                class="clickable" 
-                width="1.1" 
-                height="0.6" 
-                material="shader: flat; color: #0a0f1e; opacity: 0.78; transparent: true; side: double;"
-                onclick="lanzarContenedorEnMarcador('marcador_b')"
-                title="Lanzar contenedor en B">
-                <a-plane width="1.13" height="0.63" position="0 0 -0.005" color="#22c55e" material="shader: flat; side: double; opacity: 0.6; transparent: true;"></a-plane>
-                <a-text value="MARCADOR B\n(Codigo QR)" align="center" width="2.4" position="0 0.1 0.01" color="#22c55e" font="mozillavr"></a-text>
-                <a-text value="Clic para lanzar aqui" align="center" width="1.6" position="0 -0.18 0.01" color="#cbd5e1" font="mozillavr"></a-text>
-            </a-plane>
-        </a-entity>
-
-        <!-- ANCLAJE C (Logo Database) - SPATIAL UI INTERACTIVA -->
-        <a-entity id="anchor-marcador_c" position="0 0.6 -5.0">
-            <a-plane 
-                billboard-ui 
-                class="clickable" 
-                width="1.1" 
-                height="0.6" 
-                material="shader: flat; color: #0a0f1e; opacity: 0.78; transparent: true; side: double;"
-                onclick="lanzarContenedorEnMarcador('marcador_c')"
-                title="Lanzar contenedor en C">
-                <a-plane width="1.13" height="0.63" position="0 0 -0.005" color="#ef4444" material="shader: flat; side: double; opacity: 0.6; transparent: true;"></a-plane>
-                <a-text value="MARCADOR C\n(Database)" align="center" width="2.4" position="0 0.1 0.01" color="#ef4444" font="mozillavr"></a-text>
-                <a-text value="Clic para lanzar aqui" align="center" width="1.6" position="0 -0.18 0.01" color="#cbd5e1" font="mozillavr"></a-text>
-            </a-plane>
-        </a-entity>
 
     </a-scene>
 
@@ -1921,6 +1875,8 @@
         async function cargarEscenarioDinamico() {
             // Limpiar entidades interactivas previas en todos los contenedores para evitar duplicados
             document.querySelectorAll('.interactive-entity').forEach(el => el.parentNode.removeChild(el));
+            // Limpiar contenedores de marcadores dinámicos que hayamos creado
+            document.querySelectorAll('.dynamic-marker-container').forEach(el => el.parentNode.removeChild(el));
             
             let datosLienzo = null;
             let stageConfig = { width: 3.0, height: 3.0, gridVisible: true };
@@ -1989,32 +1945,145 @@
                 ];
             }
 
-            // Instanciar físicamente cada objeto en su respectivo contenedor de anclaje A-Frame (Soporte dinámico 3D/Imagen/Video)
+            // 1. Identificar todos los marcadores en los datos del escenario
+            let marcadores = datosLienzo.filter(obj => obj.isMarker === true);
+
+            // Retrocompatibilidad con anclajes antiguos ('marcador_a', 'marcador_b', 'marcador_c')
+            const anclajesAntiguosUsados = new Set(datosLienzo.map(obj => obj.arAnchor).filter(a => ['marcador_a', 'marcador_b', 'marcador_c'].includes(a)));
+            
+            anclajesAntiguosUsados.forEach(anc => {
+                if (!marcadores.some(m => m.uuid === anc)) {
+                    let pos = { x: 0, y: 0.6, z: -3.0 };
+                    let nombre = "Marcador Genérico";
+                    if (anc === 'marcador_a') { pos = { x: -1.8, y: 0.6, z: -3.0 }; nombre = "Marcador A (Logo Docker)"; }
+                    else if (anc === 'marcador_b') { pos = { x: 1.8, y: 0.6, z: -3.0 }; nombre = "Marcador B (Código QR)"; }
+                    else if (anc === 'marcador_c') { pos = { x: 0, y: 0.6, z: -5.0 }; nombre = "Marcador C (Database Target)"; }
+                    
+                    const mLegacy = {
+                        uuid: anc,
+                        nombre: nombre,
+                        isMarker: true,
+                        posicion: pos,
+                        rotacion: { y: 0 },
+                        escala: 1.0,
+                        markerImage: 'output/qr_presentacion.png'
+                    };
+                    marcadores.push(mLegacy);
+                    datosLienzo.push(mLegacy);
+                }
+            });
+
+            // 2. Instanciar dinámicamente cada marcador en la escena
+            const sceneEl = document.querySelector('a-scene');
+            marcadores.forEach(marker => {
+                const markerContainer = document.createElement('a-entity');
+                markerContainer.setAttribute('id', `anchor-${marker.uuid}`);
+                markerContainer.setAttribute('class', 'dynamic-marker-container');
+                markerContainer.setAttribute('position', `${marker.posicion.x} ${marker.posicion.y} ${marker.posicion.z}`);
+                markerContainer.setAttribute('rotation', `0 ${marker.rotacion.y || 0} 0`);
+                markerContainer.setAttribute('scale', `${marker.escala} ${marker.escala} ${marker.escala}`);
+
+                // Plano del marcador físico texturizado
+                const markerPlane = document.createElement('a-plane');
+                markerPlane.setAttribute('width', '0.8');
+                markerPlane.setAttribute('height', '0.8');
+                markerPlane.setAttribute('rotation', '-90 0 0');
+                markerPlane.setAttribute('material', `src: ${marker.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                markerContainer.appendChild(markerPlane);
+
+                // Billboard flotante Glassmorphic de Interfaz Espacial
+                const billboard = document.createElement('a-plane');
+                billboard.setAttribute('billboard-ui', '');
+                billboard.setAttribute('class', 'clickable');
+                billboard.setAttribute('width', '1.2');
+                billboard.setAttribute('height', '0.65');
+                billboard.setAttribute('position', '0 0.5 0');
+                billboard.setAttribute('material', 'shader: flat; color: #0a0f1e; opacity: 0.8; transparent: true; side: double;');
+                
+                const border = document.createElement('a-plane');
+                border.setAttribute('width', '1.23');
+                border.setAttribute('height', '0.68');
+                border.setAttribute('position', '0 0 -0.005');
+                border.setAttribute('color', '#00f3ff');
+                border.setAttribute('material', 'shader: flat; side: double; opacity: 0.65; transparent: true;');
+                billboard.appendChild(border);
+
+                const textTitle = document.createElement('a-text');
+                textTitle.setAttribute('value', marker.nombre.toUpperCase());
+                textTitle.setAttribute('align', 'center');
+                textTitle.setAttribute('width', '2.2');
+                textTitle.setAttribute('position', '0 0.12 0.01');
+                textTitle.setAttribute('color', '#00f3ff');
+                textTitle.setAttribute('font', 'mozillavr');
+                billboard.appendChild(textTitle);
+
+                const textAction = document.createElement('a-text');
+                textAction.setAttribute('value', 'Clic para simular deteccion');
+                textAction.setAttribute('align', 'center');
+                textAction.setAttribute('width', '1.5');
+                textAction.setAttribute('position', '0 -0.18 0.01');
+                textAction.setAttribute('color', '#cbd5e1');
+                textAction.setAttribute('font', 'mozillavr');
+                billboard.appendChild(textAction);
+
+                // Evento de clic interactivo para simular targetFound / targetLost
+                billboard.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isDetected = markerContainer.dataset.detected === "true";
+                    
+                    if (!isDetected) {
+                        markerContainer.dataset.detected = "true";
+                        border.setAttribute('color', '#22c55e'); // Green glow
+                        textAction.setAttribute('value', 'Marcador Detectado');
+                        textAction.setAttribute('color', '#22c55e');
+                        
+                        lanzarContenedorEnMarcador(marker.uuid);
+
+                        // Disparar evento targetFound
+                        markerContainer.dispatchEvent(new CustomEvent('targetFound'));
+                        mostrarNotificacion(`🎯 Target Detectado: ${marker.nombre}`);
+                    } else {
+                        markerContainer.dataset.detected = "false";
+                        border.setAttribute('color', '#00f3ff'); // Blue stand-by
+                        textAction.setAttribute('value', 'Clic para simular deteccion');
+                        textAction.setAttribute('color', '#cbd5e1');
+                        
+                        // Disparar evento targetLost
+                        markerContainer.dispatchEvent(new CustomEvent('targetLost'));
+                        mostrarNotificacion(`❌ Target Perdido: ${marker.nombre}`);
+                    }
+                });
+
+                markerContainer.appendChild(billboard);
+                sceneEl.appendChild(markerContainer);
+            });
+
+            // Resetear entidades de referencias para compatibilidad retrospectiva
+            entities = { defecto: null, caos: null, servidor: null, buque: null };
+
+            // 3. Instanciar físicamente cada objeto en su respectivo contenedor de anclaje
             datosLienzo.forEach(obj => {
+                if (obj.isMarker) return; // Skip markers themselves
+
                 let el;
                 const mediaType = obj.mediaType || '3d';
                 const mediaUrl = obj.mediaUrl || '';
                 
-                // Si el objeto está asociado a un marcador físico, su posición local se ajusta relativa al marcador
                 const anchor = obj.arAnchor || 'base';
                 let targetContainer = document.getElementById("entities-container");
                 let posX = obj.posicion.x;
                 let posY = obj.posicion.y;
                 let posZ = obj.posicion.z;
                 
-                if (anchor === 'marcador_a') {
-                    targetContainer = document.getElementById("anchor-marcador_a");
-                    posX = 0; posY = 0.2; posZ = 0.1;
-                } else if (anchor === 'marcador_b') {
-                    targetContainer = document.getElementById("anchor-marcador_b");
-                    posX = 0; posY = 0.2; posZ = 0.1;
-                } else if (anchor === 'marcador_c') {
-                    targetContainer = document.getElementById("anchor-marcador_c");
-                    posX = 0; posY = 0.2; posZ = 0.1;
+                if (anchor !== 'base') {
+                    const markerContainer = document.getElementById(`anchor-${anchor}`);
+                    if (markerContainer) {
+                        targetContainer = markerContainer;
+                        posX = 0; posY = 0.25; posZ = 0.1;
+                    }
                 }
                 
                 if (mediaType === 'video' && mediaUrl) {
-                    // 1. Crear el elemento <video> invisible en el HTML
                     const videoId = `video-resource-${obj.uuid}`;
                     let videoEl = document.getElementById(videoId);
                     if (!videoEl) {
@@ -2030,14 +2099,12 @@
                         document.body.appendChild(videoEl);
                     }
                     
-                    // 2. Crear plano interactivo para proyectar la textura de video
                     el = document.createElement('a-video');
                     el.setAttribute('id', obj.uuid);
                     el.setAttribute('src', `#${videoId}`);
                     el.setAttribute('width', '1.6');
                     el.setAttribute('height', '0.9');
                     
-                    // 3. Enlazar eventos de Visión Real (targetFound/targetLost) y simulador clic de escritorio
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => {
                             console.log(`🎯 targetFound: Reproduciendo video ${videoId}`);
@@ -2047,33 +2114,18 @@
                             console.log(`❌ targetLost: Pausando video ${videoId}`);
                             videoEl.pause();
                         });
-                        
-                        // Permitir click en el marcador virtual para simular play/pause en Computadoras
-                        targetContainer.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (videoEl.paused) {
-                                videoEl.play().catch(e => console.warn(e));
-                                mostrarNotificacion("▶️ Video en Reproducción");
-                            } else {
-                                videoEl.pause();
-                                mostrarNotificacion("⏸️ Video en Pausa");
-                            }
-                        });
                     }
                 } else if (mediaType === 'image' && mediaUrl) {
-                    // Crear un plano de imagen estática
                     el = document.createElement('a-image');
                     el.setAttribute('id', obj.uuid);
                     el.setAttribute('src', mediaUrl);
                     el.setAttribute('width', '1.0');
                     el.setAttribute('height', '1.0');
                 } else {
-                    // Contenido por defecto: Modelo 3D GLB
                     el = document.createElement('a-entity');
                     el.setAttribute('id', obj.uuid);
                     el.setAttribute('gltf-model', mediaUrl || `#${obj.modelId}`);
                     
-                    // Si es Moby (ballena) por defecto en base, añadirle animación suave de flotación
                     if (obj.modelId === "modelo-ballena" && anchor === 'base') {
                         el.setAttribute('animation__float', `property: position; to: ${posX} ${posY + 0.15} ${posZ}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);
                         el.setAttribute('animation__rotate', "property: rotation; to: 0 540 0; dur: 30000; easing: linear; loop: true");
@@ -2090,7 +2142,7 @@
                     targetContainer.appendChild(el);
                 }
 
-                // Asignar referencias globales para compatibilidad retrospectiva (primera entidad de cada tipo)
+                // Asignar referencias globales
                 if (obj.modelId === "modelo-ballena" && !entities.defecto) {
                     entities.defecto = el;
                     defaultScales.defecto = `${obj.escala} ${obj.escala} ${obj.escala}`;
@@ -2106,7 +2158,6 @@
                 }
             });
 
-            // Enlazar los eventos de clic interactivos
             inicializarEventosInteractivos();
         }
 

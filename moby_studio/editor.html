@@ -1102,6 +1102,10 @@
                         <div class="asset-card-title">🚢 Buque de Carga</div>
                         <div class="asset-card-desc">Carguero industrial de contenedores.</div>
                     </div>
+                    <div class="asset-card" style="border: 1px dashed var(--color-docker); background: rgba(0, 243, 255, 0.03);" onclick="crearMarcadorAR()">
+                        <div class="asset-card-title" style="color: var(--color-docker);">🎯 Añadir Marcador AR</div>
+                        <div class="asset-card-desc">Crea un anclaje físico con imagen/QR editable.</div>
+                    </div>
                 </div>
 
                 <div style="border-top: 1px solid var(--color-border-glass); padding-top: 14px; margin-top: 4px;">
@@ -1250,6 +1254,14 @@
                 </div>
                 <div class="selected-badge" id="selected-entity-badge">Laptop_Caos #1</div>
                 
+                <!-- NOMBRE DE LA ENTIDAD -->
+                <div class="control-group" style="margin-bottom: 8px;">
+                    <div class="control-label">
+                        <span>Nombre del Objeto</span>
+                    </div>
+                    <input type="text" class="control-input" id="input-entity-name" oninput="actualizarNombreEntidad()" style="background: rgba(10, 15, 30, 0.95); border: 1px solid var(--color-border-glass); border-radius: 8px; padding: 10px; color: #cbd5e1; font-weight: 600; font-size: 11px; outline: none; transition: border-color 0.3s ease; pointer-events: auto;">
+                </div>
+                
                 <!-- POSITION X -->
                 <div class="control-group">
                     <div class="control-label">
@@ -1296,16 +1308,23 @@
                 </div>
 
                 <!-- ANCLAJE FÍSICO AR (TARGET) -->
-                <div class="control-group" style="margin-bottom: 8px;">
+                <div class="control-group" id="group-ar-anchor" style="margin-bottom: 8px;">
                     <div class="control-label">
                         <span>Anclaje Físico AR (Target)</span>
                     </div>
                     <select class="control-input" id="select-ar-anchor" onchange="actualizarAnclajeAR()" style="background: rgba(10, 15, 30, 0.95); border: 1px solid var(--color-border-glass); border-radius: 8px; padding: 10px; color: #cbd5e1; font-weight: 600; cursor: pointer; font-size: 11px; outline: none; transition: border-color 0.3s ease; pointer-events: auto;">
                         <option value="base">📍 Mesa / Escenario Base (Hit Test)</option>
-                        <option value="marcador_a">🐳 Marcador A (Logo Docker)</option>
-                        <option value="marcador_b">📱 Marcador B (Código QR)</option>
-                        <option value="marcador_c">🖥️ Marcador C (Database Target)</option>
                     </select>
+                </div>
+
+                <!-- CONFIGURAR TARGET DEL MARCADOR -->
+                <div class="control-group" id="group-marker-config" style="margin-bottom: 8px; display: none;">
+                    <div class="control-label">
+                        <span>Imagen del Marcador</span>
+                    </div>
+                    <button class="btn btn-save" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto; margin-top: 5px; background: var(--color-docker-blue);" onclick="abrirModalAR(entidadSeleccionada)">
+                        🎯 Configurar Imagen/QR
+                    </button>
                 </div>
 
                 <button class="btn btn-delete" onclick="eliminarEntidadSeleccionada()">
@@ -2076,11 +2095,37 @@
         function abrirModalAR(objeto) {
             objetoEnConfiguracionAR = objeto;
             
+            // Adaptar dinámicamente el título del modal
+            const titleSpan = document.querySelector('.ar-modal-title');
+            if (titleSpan) {
+                if (objeto.isMarker) {
+                    titleSpan.innerHTML = '<span>🎯</span> Configurar Marcador AR';
+                } else {
+                    titleSpan.innerHTML = '<span>🎯</span> Configurar Disparador AR';
+                }
+            }
+
+            // Rellenar valores de los campos
             document.getElementById('ar-marker-image').value = objeto.markerImage || '';
             document.getElementById('ar-media-type').value = objeto.mediaType || '3d';
             document.getElementById('ar-media-url').value = objeto.mediaUrl || '';
 
-            toggleInputsMediaAR();
+            // Mostrar/Ocultar campos según sea un marcador o un modelo a asociar
+            const markerImageInput = document.getElementById('ar-marker-image');
+            const markerImageGroup = markerImageInput ? markerImageInput.closest('.control-group') : null;
+            const mediaTypeGroup = document.getElementById('ar-media-type').closest('.control-group');
+            const contentUrlGroup = document.getElementById('ar-content-url-group');
+
+            if (objeto.isMarker) {
+                if (markerImageGroup) markerImageGroup.style.display = 'block';
+                if (mediaTypeGroup) mediaTypeGroup.style.display = 'none';
+                if (contentUrlGroup) contentUrlGroup.style.display = 'none';
+            } else {
+                if (markerImageGroup) markerImageGroup.style.display = 'none';
+                if (mediaTypeGroup) mediaTypeGroup.style.display = 'block';
+                if (contentUrlGroup) contentUrlGroup.style.display = 'block';
+                toggleInputsMediaAR();
+            }
 
             // Mostrar el modal
             document.getElementById('ar-trigger-modal-overlay').style.display = 'flex';
@@ -2106,7 +2151,7 @@
                 fileInput.accept = ".glb,.gltf";
             } else if (mediaType === 'image') {
                 contentLabel.innerText = "Imagen estática a desplegar (.png, .jpg)";
-                contentInput.placeholder = "Selecciona o sube una imagen estática...";
+                contentInput.placeholder = "Selecciona o sube un imagen estática...";
                 fileInput.accept = "image/*";
             } else if (mediaType === 'video') {
                 contentLabel.innerText = "Video inmersivo a desplegar (.mp4)";
@@ -2174,13 +2219,26 @@
             const mediaUrl = document.getElementById('ar-media-url').value.trim();
 
             objetoEnConfiguracionAR.markerImage = markerImage || null;
-            objetoEnConfiguracionAR.mediaType = mediaType;
-            objetoEnConfiguracionAR.mediaUrl = mediaUrl || null;
+            
+            if (!objetoEnConfiguracionAR.isMarker) {
+                objetoEnConfiguracionAR.mediaType = mediaType;
+                objetoEnConfiguracionAR.mediaUrl = mediaUrl || null;
+            } else {
+                // Si es un marcador, actualizar su textura física en A-Frame inmediatamente
+                const el = document.getElementById(objetoEnConfiguracionAR.uuid);
+                if (el) {
+                    const plane = el.querySelector('a-plane');
+                    if (plane) {
+                        plane.setAttribute('material', `src: ${objetoEnConfiguracionAR.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                    }
+                }
+                actualizarOpcionesAnclaje(); // Refrescar los selects para que muestren la nueva imagen
+            }
 
             // Registrar en el historial de deshacer/rehacer (Undo/Redo)
             registrarTransformacion(objetoEnConfiguracionAR);
 
-            mostrarNotificacion(`¡Disparador AR configurado para ${objetoEnConfiguracionAR.nombre}!`);
+            mostrarNotificacion(`¡Configuración guardada para ${objetoEnConfiguracionAR.nombre}!`, "success");
             document.getElementById('ar-trigger-modal-overlay').style.display = 'none';
             objetoEnConfiguracionAR = null;
         }
@@ -2245,6 +2303,71 @@
             mostrarNotificacion(`¡Añadido: ${nuevoObjeto.nombre}!`);
         }
 
+        // Crear un nuevo Marcador AR dinámico en el escenario
+        function crearMarcadorAR() {
+            contadorIds++;
+            const uuid = `objeto-marcador-${contadorIds}`;
+            const nuevoObjeto = {
+                uuid: uuid,
+                nombre: `Marcador AR #${contadorIds}`,
+                isMarker: true,
+                posicion: { x: 0, y: 0.02, z: -3.5 }, // floats slightly above ground grid
+                rotacion: { y: 0 },
+                escala: 1.0,
+                markerImage: 'output/qr_presentacion.png', // Imagen de target por defecto
+                arAnchor: 'base'
+            };
+            escenaObjetos.push(nuevoObjeto);
+            renderizarEntidad3D(nuevoObjeto);
+            actualizarOpcionesAnclaje(); // Refrescar los selects de anclajes
+            seleccionarObjeto(nuevoObjeto);
+            mostrarNotificacion(`🎯 ¡Añadido: ${nuevoObjeto.nombre}!`);
+        }
+
+        // Población dinámica del selector de anclajes en el inspector
+        function actualizarOpcionesAnclaje() {
+            const select = document.getElementById('select-ar-anchor');
+            if (!select) return;
+
+            // Guardar valor seleccionado actual
+            const currentVal = select.value;
+            select.innerHTML = '<option value="base">📍 Mesa / Escenario Base (Hit Test)</option>';
+
+            // Recorrer escenaObjetos buscando marcadores
+            escenaObjetos.forEach(obj => {
+                if (obj.isMarker) {
+                    const opt = document.createElement('option');
+                    opt.value = obj.uuid;
+                    opt.innerText = `🎯 ${obj.nombre} (${obj.markerImage ? obj.markerImage.replace('output/', '') : 'Sin imagen'})`;
+                    select.appendChild(opt);
+                }
+            });
+
+            // Restaurar valor anterior si existe
+            select.value = currentVal;
+            // Si el valor ya no es válido, volver a base
+            if (select.value === '') {
+                select.value = 'base';
+                if (entidadSeleccionada) {
+                    entidadSeleccionada.arAnchor = 'base';
+                }
+            }
+        }
+
+        // Actualizar el nombre de la entidad seleccionada en tiempo real
+        function actualizarNombreEntidad() {
+            if (!entidadSeleccionada) return;
+            const nuevoNombre = document.getElementById('input-entity-name').value.trim();
+            if (nuevoNombre) {
+                entidadSeleccionada.nombre = nuevoNombre;
+                document.getElementById('selected-entity-badge').innerText = nuevoNombre;
+                // Si es un marcador, refrescar los textos en el select de anclajes
+                if (entidadSeleccionada.isMarker) {
+                    actualizarOpcionesAnclaje();
+                }
+            }
+        }
+
         // Renderizar dinámicamente en A-Frame la entidad del lienzo
         function renderizarEntidad3D(obj) {
             const container = document.getElementById('entities-container');
@@ -2253,11 +2376,21 @@
             const el = document.createElement('a-entity');
             el.setAttribute('id', obj.uuid);
 
-            // Si hay URL directa (ej. Poly Pizza CDN), usarla directamente
-            if (obj.glbUrl) {
-                el.setAttribute('gltf-model', obj.glbUrl);
+            if (obj.isMarker) {
+                // Si es un marcador, creamos un plano horizontal en el centro que muestra el QR / Target
+                const plane = document.createElement('a-plane');
+                plane.setAttribute('width', '1.0');
+                plane.setAttribute('height', '1.0');
+                plane.setAttribute('rotation', '-90 0 0');
+                plane.setAttribute('material', `src: ${obj.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                el.appendChild(plane);
             } else {
-                el.setAttribute('gltf-model', `#${obj.modelId}`);
+                // Si hay URL directa (ej. Poly Pizza CDN), usarla directamente
+                if (obj.glbUrl) {
+                    el.setAttribute('gltf-model', obj.glbUrl);
+                } else {
+                    el.setAttribute('gltf-model', `#${obj.modelId}`);
+                }
             }
 
             el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
@@ -2296,6 +2429,9 @@
             // Rellenar badge de título y modo de control
             document.getElementById('selected-entity-badge').innerText = obj.nombre;
             document.getElementById('inspector-mode-val').innerText = getModeLabel(activeEditMode);
+            
+            // Rellenar input de nombre
+            document.getElementById('input-entity-name').value = obj.nombre || '';
 
             // Rellenar sliders de transformación
             document.getElementById('slide-pos-x').value = obj.posicion.x;
@@ -2304,8 +2440,20 @@
             document.getElementById('slide-rot-y').value = obj.rotacion.y;
             document.getElementById('slide-scale').value = obj.escala;
 
-            // Rellenar anclaje AR configurable
+            // Rellenar anclaje AR configurable dinámicamente
+            actualizarOpcionesAnclaje();
             document.getElementById('select-ar-anchor').value = obj.arAnchor || 'base';
+
+            // Alternar controles según sea marcador o modelo
+            const anchorGroup = document.getElementById('group-ar-anchor');
+            const markerConfigGroup = document.getElementById('group-marker-config');
+            if (obj.isMarker) {
+                if (anchorGroup) anchorGroup.style.display = 'none';
+                if (markerConfigGroup) markerConfigGroup.style.display = 'block';
+            } else {
+                if (anchorGroup) anchorGroup.style.display = 'block';
+                if (markerConfigGroup) markerConfigGroup.style.display = 'none';
+            }
 
             // Actualizar textos numéricos en el HUD
             document.getElementById('val-pos-x').innerText = Number(obj.posicion.x).toFixed(2);
@@ -2395,14 +2543,17 @@
             const nuevoAnclaje = document.getElementById('select-ar-anchor').value;
             entidadSeleccionada.arAnchor = nuevoAnclaje;
             
-            const nombresAnclajes = {
-                'base': '📍 Mesa / Escenario Base (Hit Test)',
-                'marcador_a': '🐳 Marcador A (Logo Docker)',
-                'marcador_b': '📱 Marcador B (Código QR)',
-                'marcador_c': '🖥️ Marcador C (Database Target)'
-            };
+            let nombreAnclaje = '📍 Mesa / Escenario Base (Hit Test)';
+            if (nuevoAnclaje !== 'base') {
+                const marker = escenaObjetos.find(o => o.uuid === nuevoAnclaje);
+                if (marker) {
+                    nombreAnclaje = `🎯 ${marker.nombre}`;
+                } else {
+                    nombreAnclaje = nuevoAnclaje;
+                }
+            }
             
-            mostrarNotificacion(`🔗 Anclaje AR actualizado: ${nombresAnclajes[nuevoAnclaje]}`, "success");
+            mostrarNotificacion(`🔗 Anclaje AR actualizado: ${nombreAnclaje}`, "success");
             
             // Registrar en el historial para Undo/Redo
             registrarTransformacion(entidadSeleccionada);
@@ -2413,6 +2564,9 @@
         function eliminarEntidadSeleccionada() {
             if (!entidadSeleccionada) return;
 
+            const idEliminado = entidadSeleccionada.uuid;
+            const eraMarcador = entidadSeleccionada.isMarker;
+
             // Eliminar elemento de A-Frame del DOM
             const el = document.getElementById(entidadSeleccionada.uuid);
             if (el) {
@@ -2422,7 +2576,18 @@
             mostrarNotificacion(`🗑️ Eliminado: ${entidadSeleccionada.nombre}`);
 
             // Eliminar de nuestro array local
-            escenaObjetos = escenaObjetos.filter(obj => obj.uuid !== entidadSeleccionada.uuid);
+            escenaObjetos = escenaObjetos.filter(obj => obj.uuid !== idEliminado);
+
+            // Si era un marcador, limpiar referencias en otras entidades
+            if (eraMarcador) {
+                escenaObjetos.forEach(obj => {
+                    if (obj.arAnchor === idEliminado) {
+                        obj.arAnchor = 'base';
+                    }
+                });
+                actualizarOpcionesAnclaje();
+            }
+
             entidadSeleccionada = null;
 
             // Resetear HUD del inspector
@@ -2517,6 +2682,7 @@
                         }
                     });
                     
+                    actualizarOpcionesAnclaje();
                     mostrarNotificacion("✨ Diseño anterior cargado de forma exitosa.", "success");
                 }
             } catch (err) {
