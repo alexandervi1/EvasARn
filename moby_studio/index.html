@@ -654,8 +654,37 @@
         <!-- CÁMARA PRINCIPAL -->
         <a-entity camera position="0 1.6 0" look-controls></a-entity>
 
+        <!-- ESCENARIO AJUSTABLE HOLOGRÁFICO (REJILLA DE TRABAJO EN RA) -->
+        <a-plane id="workspace-grid" 
+                 position="0 0.01 -3.0" 
+                 rotation="-90 0 0" 
+                 width="3" 
+                 height="3" 
+                 color="#0284c7"
+                 material="shader: flat; wireframe: true; transparent: true; opacity: 0.4; side: double;" 
+                 visible="true">
+        </a-plane>
+
         <!-- CONTENEDOR PARA CARGA DINÁMICA DEL ESCENARIO -->
         <a-entity id="entities-container"></a-entity>
+
+        <!-- ANCLAJE A (Logo Docker) -->
+        <a-entity id="anchor-marcador_a" position="-1.8 0 -3.0">
+            <a-ring color="#00f3ff" radius-inner="0.38" radius-outer="0.4" rotation="-90 0 0" material="opacity: 0.25; transparent: true;"></a-ring>
+            <a-text value="MARCADOR A" align="center" position="0 0.1 0" scale="0.4 0.4 0.4" color="#00f3ff" material="shader: flat;"></a-text>
+        </a-entity>
+
+        <!-- ANCLAJE B (Código QR) -->
+        <a-entity id="anchor-marcador_b" position="1.8 0 -3.0">
+            <a-ring color="#22c55e" radius-inner="0.38" radius-outer="0.4" rotation="-90 0 0" material="opacity: 0.25; transparent: true;"></a-ring>
+            <a-text value="MARCADOR B" align="center" position="0 0.1 0" scale="0.4 0.4 0.4" color="#22c55e" material="shader: flat;"></a-text>
+        </a-entity>
+
+        <!-- ANCLAJE C (Logo Database) -->
+        <a-entity id="anchor-marcador_c" position="0 0 -5.0">
+            <a-ring color="#ef4444" radius-inner="0.38" radius-outer="0.4" rotation="-90 0 0" material="opacity: 0.25; transparent: true;"></a-ring>
+            <a-text value="MARCADOR C" align="center" position="0 0.1 0" scale="0.4 0.4 0.4" color="#ef4444" material="shader: flat;"></a-text>
+        </a-entity>
 
     </a-scene>
 
@@ -1581,18 +1610,36 @@
 
         // Cargar escenario de forma dinámica desde output/layout.json o escenario panorámico por defecto
         async function cargarEscenarioDinamico() {
-            const container = document.getElementById("entities-container");
-            if (!container) return;
-            container.innerHTML = ""; // Limpiar cualquier elemento previo
+            // Limpiar entidades interactivas previas en todos los contenedores para evitar duplicados
+            document.querySelectorAll('.interactive-entity').forEach(el => el.parentNode.removeChild(el));
             
             let datosLienzo = null;
+            let stageConfig = { width: 3.0, height: 3.0, gridVisible: true };
+            
             try {
                 const response = await fetch('output/layout.json', { cache: 'no-store' });
                 if (response.ok) {
-                    datosLienzo = await response.json();
+                    const rawData = await response.json();
+                    
+                    // Soporte para el nuevo formato estructurado { stage, entities }
+                    if (rawData && rawData.stage) {
+                        stageConfig = rawData.stage;
+                        datosLienzo = rawData.entities;
+                    } else if (Array.isArray(rawData)) {
+                        // Formato de compatibilidad antiguo
+                        datosLienzo = rawData;
+                    }
                 }
             } catch (err) {
                 console.warn("No se pudo descargar layout.json. Usando escenario por defecto panorámico.", err);
+            }
+
+            // Aplicar configuración de la rejilla de trabajo a escala real
+            const grid = document.getElementById('workspace-grid');
+            if (grid) {
+                grid.setAttribute('width', stageConfig.width);
+                grid.setAttribute('height', stageConfig.height);
+                grid.setAttribute('visible', stageConfig.gridVisible);
             }
 
             // Si no hay datos guardados o está vacío, usar el escenario panorámico por defecto
@@ -1603,50 +1650,76 @@
                         modelId: "modelo-ballena",
                         posicion: { x: 0, y: 1.1, z: -3.0 },
                         rotacion: { y: 180 },
-                        escala: 2.2
+                        escala: 2.2,
+                        arAnchor: "base"
                     },
                     {
                         uuid: "entidad-laptop",
                         modelId: "modelo-laptop",
                         posicion: { x: -2.0, y: 1.1, z: -3.5 },
                         rotacion: { y: 180 },
-                        escala: 1.0
+                        escala: 1.0,
+                        arAnchor: "base"
                     },
                     {
                         uuid: "entidad-rack",
                         modelId: "modelo-rack",
                         posicion: { x: 2.0, y: 0.8, z: -3.5 },
                         rotacion: { y: 45 },
-                        escala: 0.8
+                        escala: 0.8,
+                        arAnchor: "base"
                     },
                     {
                         uuid: "entidad-buque",
                         modelId: "modelo-buque",
                         posicion: { x: 0, y: 1.0, z: -5.5 },
                         rotacion: { y: 45 },
-                        escala: 0.6
+                        escala: 0.6,
+                        arAnchor: "base"
                     }
                 ];
             }
 
-            // Instanciar físicamente cada objeto en A-Frame
+            // Instanciar físicamente cada objeto en su respectivo contenedor de anclaje A-Frame
             datosLienzo.forEach(obj => {
                 const el = document.createElement('a-entity');
                 el.setAttribute('id', obj.uuid);
                 el.setAttribute('gltf-model', `#${obj.modelId}`);
-                el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
+                
+                // Si el objeto está asociado a un marcador físico, su posición local se ajusta relativa al marcador
+                const anchor = obj.arAnchor || 'base';
+                let targetContainer = document.getElementById("entities-container");
+                let posX = obj.posicion.x;
+                let posY = obj.posicion.y;
+                let posZ = obj.posicion.z;
+                
+                if (anchor === 'marcador_a') {
+                    targetContainer = document.getElementById("anchor-marcador_a");
+                    // Posicionamiento relativo centrado sobre el marcador físico
+                    posX = 0; posY = 0.2; posZ = 0;
+                } else if (anchor === 'marcador_b') {
+                    targetContainer = document.getElementById("anchor-marcador_b");
+                    posX = 0; posY = 0.2; posZ = 0;
+                } else if (anchor === 'marcador_c') {
+                    targetContainer = document.getElementById("anchor-marcador_c");
+                    posX = 0; posY = 0.2; posZ = 0;
+                }
+                
+                el.setAttribute('position', `${posX} ${posY} ${posZ}`);
                 el.setAttribute('rotation', `0 ${obj.rotacion.y || 0} 0`);
                 el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
                 el.setAttribute('class', 'interactive-entity');
                 el.setAttribute('visible', 'true');
 
-                // Si es Moby (ballena), añadirle animación suave de flotación y rotación suave
+                // Si es Moby (ballena), añadirle animación suave de flotación
                 if (obj.modelId === "modelo-ballena") {
-                    el.setAttribute('animation__float', `property: position; to: ${obj.posicion.x} ${obj.posicion.y + 0.2} ${obj.posicion.z}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);
+                    el.setAttribute('animation__float', `property: position; to: ${posX} ${posY + 0.15} ${posZ}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);
                     el.setAttribute('animation__rotate', "property: rotation; to: 0 540 0; dur: 30000; easing: linear; loop: true");
                 }
                 
-                container.appendChild(el);
+                if (targetContainer) {
+                    targetContainer.appendChild(el);
+                }
 
                 // Asignar referencias globales para compatibilidad retrospectiva (primera entidad de cada tipo)
                 if (obj.modelId === "modelo-ballena" && !entities.defecto) {

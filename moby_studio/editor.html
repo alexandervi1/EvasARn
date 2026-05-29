@@ -895,6 +895,37 @@
 
             <!-- === PANEL 1: MODELOS INTEGRADOS === -->
             <div class="sidebar-panel active" id="panel-models">
+                <!-- SECCIÓN ESCENARIO AJUSTABLE (MESA) -->
+                <div class="api-key-section" style="margin-bottom: 16px; border-bottom: 1px solid var(--color-border-glass); padding-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
+                    <div class="panel-section-title" style="margin-bottom: 2px;">
+                        <span style="color: var(--color-docker);">📐</span> Escenario AR (Mesa)
+                    </div>
+                    
+                    <!-- ANCHO DE MESA -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Ancho de Mesa (X)</span>
+                            <span class="control-val" id="val-stage-w">3.00m</span>
+                        </div>
+                        <input type="range" class="control-input" id="slide-stage-w" min="1" max="8" step="0.2" value="3" oninput="actualizarTamanoEscenario()">
+                    </div>
+
+                    <!-- LARGO DE MESA -->
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Largo de Mesa (Z)</span>
+                            <span class="control-val" id="val-stage-h">3.00m</span>
+                        </div>
+                        <input type="range" class="control-input" id="slide-stage-h" min="1" max="8" step="0.2" value="3" oninput="actualizarTamanoEscenario()">
+                    </div>
+                    
+                    <!-- VISIBILIDAD DE REJILLA -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #cbd5e1; margin-top: 4px;">
+                        <span>Ver Rejilla Neón</span>
+                        <input type="checkbox" id="check-stage-grid" checked onchange="toggleRejillaEscenario()" style="accent-color: var(--color-docker); width: 15px; height: 15px; cursor: pointer; pointer-events: auto;">
+                    </div>
+                </div>
+
                 <div class="panel-section-title" style="margin-bottom: 4px;">
                     <span style="color: var(--color-docker);">📦</span> Modelos Base
                 </div>
@@ -1108,6 +1139,19 @@
                     <input type="range" class="control-input" id="slide-scale" min="0.1" max="4.0" step="0.05" oninput="actualizarTransformacion()">
                 </div>
 
+                <!-- ANCLAJE FÍSICO AR (TARGET) -->
+                <div class="control-group" style="margin-bottom: 8px;">
+                    <div class="control-label">
+                        <span>Anclaje Físico AR (Target)</span>
+                    </div>
+                    <select class="control-input" id="select-ar-anchor" onchange="actualizarAnclajeAR()" style="background: rgba(10, 15, 30, 0.95); border: 1px solid var(--color-border-glass); border-radius: 8px; padding: 10px; color: #cbd5e1; font-weight: 600; cursor: pointer; font-size: 11px; outline: none; transition: border-color 0.3s ease; pointer-events: auto;">
+                        <option value="base">📍 Mesa / Escenario Base (Hit Test)</option>
+                        <option value="marcador_a">🐳 Marcador A (Logo Docker)</option>
+                        <option value="marcador_b">📱 Marcador B (Código QR)</option>
+                        <option value="marcador_c">🖥️ Marcador C (Database Target)</option>
+                    </select>
+                </div>
+
                 <button class="btn btn-delete" onclick="eliminarEntidadSeleccionada()">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     Eliminar Objeto
@@ -1157,6 +1201,17 @@
             <a-plane width="0.02" height="10" color="#ef4444" material="opacity: 0.4; transparent: true;"></a-plane>
             <a-plane width="10" height="0.02" color="#00f3ff" material="opacity: 0.4; transparent: true;"></a-plane>
         </a-entity>
+
+        <!-- ESCENARIO AJUSTABLE HOLOGRÁFICO (REJILLA DE TRABAJO) -->
+        <a-plane id="workspace-grid" 
+                 position="0 0.01 -4" 
+                 rotation="-90 0 0" 
+                 width="3" 
+                 height="3" 
+                 color="#0284c7"
+                 material="shader: flat; wireframe: true; transparent: true; opacity: 0.45; side: double;" 
+                 visible="true">
+        </a-plane>
 
         <!-- CONTENEDOR DE ENTIDADES EDITADAS (Se cargarán y agregarán dinámicamente aquí) -->
         <a-entity id="entities-container"></a-entity>
@@ -1314,7 +1369,8 @@
                 posicion: { x: 0, y: 1.1, z: -3.5 },
                 rotacion: { y: 180 },
                 escala: 0.85,
-                glbUrl: glbUrl   // URL directa para modelos externos (ej. Poly Pizza)
+                glbUrl: glbUrl,   // URL directa para modelos externos (ej. Poly Pizza)
+                arAnchor: 'base'  // Anclaje AR por defecto
             };
 
             // Ajustar escala y rotación por defecto según el tipo de objeto para una mejor presentación inicial
@@ -1394,6 +1450,9 @@
             document.getElementById('slide-rot-y').value = obj.rotacion.y;
             document.getElementById('slide-scale').value = obj.escala;
 
+            // Rellenar anclaje AR configurable
+            document.getElementById('select-ar-anchor').value = obj.arAnchor || 'base';
+
             // Actualizar textos numéricos en el HUD
             document.getElementById('val-pos-x').innerText = Number(obj.posicion.x).toFixed(2);
             document.getElementById('val-pos-y').innerText = Number(obj.posicion.y).toFixed(2);
@@ -1443,6 +1502,58 @@
             registrarTransformacion(entidadSeleccionada);
         }
 
+        // --- ESCENARIO: Actualizar dinámicamente las dimensiones de la mesa de trabajo ---
+        let stageSize = { width: 3.0, height: 3.0, gridVisible: true };
+
+        function actualizarTamanoEscenario() {
+            const w = parseFloat(document.getElementById('slide-stage-w').value);
+            const h = parseFloat(document.getElementById('slide-stage-h').value);
+            
+            stageSize.width = w;
+            stageSize.height = h;
+            
+            // Actualizar interfaz HUD
+            document.getElementById('val-stage-w').innerText = `${w.toFixed(2)}m`;
+            document.getElementById('val-stage-h').innerText = `${h.toFixed(2)}m`;
+            
+            // Reflejar en A-Frame
+            const grid = document.getElementById('workspace-grid');
+            if (grid) {
+                grid.setAttribute('width', w);
+                grid.setAttribute('height', h);
+            }
+        }
+
+        // --- ESCENARIO: Activar/desactivar la rejilla neón del escenario ---
+        function toggleRejillaEscenario() {
+            const visible = document.getElementById('check-stage-grid').checked;
+            stageSize.gridVisible = visible;
+            
+            const grid = document.getElementById('workspace-grid');
+            if (grid) {
+                grid.setAttribute('visible', visible);
+            }
+        }
+
+        // --- ANCLAJES: Actualizar el tipo de anclaje físico AR asignado al objeto seleccionado ---
+        function actualizarAnclajeAR() {
+            if (!entidadSeleccionada) return;
+            const nuevoAnclaje = document.getElementById('select-ar-anchor').value;
+            entidadSeleccionada.arAnchor = nuevoAnclaje;
+            
+            const nombresAnclajes = {
+                'base': '📍 Mesa / Escenario Base (Hit Test)',
+                'marcador_a': '🐳 Marcador A (Logo Docker)',
+                'marcador_b': '📱 Marcador B (Código QR)',
+                'marcador_c': '🖥️ Marcador C (Database Target)'
+            };
+            
+            mostrarNotificacion(`🔗 Anclaje AR actualizado: ${nombresAnclajes[nuevoAnclaje]}`, "success");
+            
+            // Registrar en el historial para Undo/Redo
+            registrarTransformacion(entidadSeleccionada);
+        }
+
 
         // Eliminar el objeto seleccionado tanto del lienzo 3D como de la memoria local
         function eliminarEntidadSeleccionada() {
@@ -1473,12 +1584,18 @@
             try {
                 mostrarNotificacion("Enviando cambios del lienzo al servidor... 📤");
                 
+                // Estructura unificada que contiene la configuración del escenario y todas las entidades
+                const layoutCompleto = {
+                    stage: stageSize,
+                    entities: escenaObjetos
+                };
+                
                 const response = await fetch('/api/save-layout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(escenaObjetos)
+                    body: JSON.stringify(layoutCompleto)
                 });
 
                 const data = await response.json();
@@ -1504,10 +1621,37 @@
                 }
 
                 const data = await response.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    escenaObjetos = data;
+                let entidadesACargar = [];
+                
+                // 1. Cargar configuración de límites del escenario si existe (formato unificado nuevo)
+                if (data && data.stage) {
+                    stageSize = data.stage;
+                    entidadesACargar = data.entities || [];
                     
-                    // Renderizar cada objeto en 3D
+                    // Actualizar sliders y labels del escenario en la UI
+                    document.getElementById('slide-stage-w').value = stageSize.width;
+                    document.getElementById('slide-stage-h').value = stageSize.height;
+                    document.getElementById('check-stage-grid').checked = stageSize.gridVisible;
+                    
+                    document.getElementById('val-stage-w').innerText = `${Number(stageSize.width).toFixed(2)}m`;
+                    document.getElementById('val-stage-h').innerText = `${Number(stageSize.height).toFixed(2)}m`;
+                    
+                    // Actualizar plano visual de A-Frame
+                    const grid = document.getElementById('workspace-grid');
+                    if (grid) {
+                        grid.setAttribute('width', stageSize.width);
+                        grid.setAttribute('height', stageSize.height);
+                        grid.setAttribute('visible', stageSize.gridVisible);
+                    }
+                } else if (Array.isArray(data)) {
+                    // Formato de compatibilidad antiguo (solo array de objetos)
+                    entidadesACargar = data;
+                }
+                
+                // 2. Renderizar cada objeto en 3D
+                if (entidadesACargar.length > 0) {
+                    escenaObjetos = entidadesACargar;
+                    
                     escenaObjetos.forEach(obj => {
                         renderizarEntidad3D(obj);
                         
@@ -2064,7 +2208,8 @@
                 uuid: objeto.uuid,
                 posicion: { ...objeto.posicion },
                 rotacion: { ...objeto.rotacion },
-                escala: objeto.escala
+                escala: objeto.escala,
+                arAnchor: objeto.arAnchor // registrar anclaje AR
             };
             // Si estamos en medio del historial, cortar el futuro
             if (historialIndice < historialTransformaciones.length - 1) {
@@ -2099,6 +2244,7 @@
             obj.posicion = { ...estado.posicion };
             obj.rotacion = { ...estado.rotacion };
             obj.escala = estado.escala;
+            obj.arAnchor = estado.arAnchor; // aplicar anclaje AR
 
             const el = document.getElementById(obj.uuid);
             if (el) {
