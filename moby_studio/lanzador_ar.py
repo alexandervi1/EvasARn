@@ -15,6 +15,44 @@ import shutil
 import glob
 import time
 import zipfile
+import hashlib
+
+USERS_FILE = os.path.join("projects", "users.json")
+
+def load_users():
+    os.makedirs("projects", exist_ok=True)
+    if not os.path.exists(USERS_FILE):
+        admin_hash = hashlib.sha256("admin123".encode("utf-8")).hexdigest()
+        viewer_hash = hashlib.sha256("viewer123".encode("utf-8")).hexdigest()
+        default_users = {
+            "admin": {
+                "username": "admin",
+                "password_hash": admin_hash,
+                "role": "owner",
+                "color": "#22d3ee",
+                "userId": "user-admin"
+            },
+            "viewer": {
+                "username": "viewer",
+                "password_hash": viewer_hash,
+                "role": "cliente",
+                "color": "#a78bfa",
+                "userId": "user-viewer"
+            }
+        }
+        with open(USERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_users, f, indent=4, ensure_ascii=False)
+        return default_users
+        
+    with open(USERS_FILE, "r", encoding="utf-8") as f:
+        try:
+            return json.load(f)
+        except Exception:
+            return {}
+
+def save_users(users):
+    with open(USERS_FILE, "w", encoding="utf-8") as f:
+        json.dump(users, f, indent=4, ensure_ascii=False)
 
 try:
     import qrcode
@@ -44,6 +82,7 @@ ASSET_EXTENSIONS = {
 
 PROTECTED_OUTPUT_FILES = {"layout.json"}
 PROJECTS_DIR = "projects"
+ARCHIVE_DIR = "_archive"
 COLLAB_TTL_SECONDS = 18
 COLLAB_STATE = {}
 
@@ -84,6 +123,28 @@ def list_projects():
     projects = []
     for name in os.listdir(PROJECTS_DIR):
         path = project_layout_path(name)
+        if not os.path.isfile(path):
+            continue
+        try:
+            data = read_layout_file(path)
+        except Exception:
+            data = {}
+        stat_info = os.stat(path)
+        projects.append({
+            "name": name,
+            "version": int(data.get("version", 0)) if isinstance(data, dict) else 0,
+            "updatedAt": data.get("updatedAt") if isinstance(data, dict) else None,
+            "entities": len(data.get("entities", [])) if isinstance(data, dict) and isinstance(data.get("entities"), list) else 0,
+            "date": stat_info.st_mtime
+        })
+    projects.sort(key=lambda item: item["date"], reverse=True)
+    return projects
+
+def list_archived_projects():
+    os.makedirs(ARCHIVE_DIR, exist_ok=True)
+    projects = []
+    for name in os.listdir(ARCHIVE_DIR):
+        path = os.path.join(ARCHIVE_DIR, name, "layout.json")
         if not os.path.isfile(path):
             continue
         try:
@@ -954,14 +1015,20 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(response_body.encode('utf-8'))
         elif self.path.startswith('/api/compress-model'):
             try:
+                # Obtener el nombre del archivo del parámetro 'name'
+                query = urllib.parse.urlparse(self.path).query
+                params = urllib.parse.parse_qs(query)
+                model_name = params.get('name', ['blue whale 3d model.glb'])[0]
+                model_name = os.path.basename(model_name) # Sanitizar
+
                 # Buscar blender
                 blender_path = find_blender()
-                print("[COMPRESSION ENGINE] Ejecutando compresión Draco con Blender...")
+                print(f"[COMPRESSION ENGINE] Ejecutando compresión Draco con Blender para: {model_name}...")
                 
                 script_path = os.path.join("scripts", "compress_model.py")
-                cmd = [blender_path, "--background", "--python", script_path]
+                cmd = [blender_path, "--background", "--python", script_path, "--", model_name]
                 result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-                print("[COMPRESSION ENGINE] Compresión Draco completada con éxito.")
+                print(f"[COMPRESSION ENGINE] Compresión Draco de {model_name} completada con éxito.")
                 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
@@ -969,13 +1036,13 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 
                 # Obtener el nuevo tamaño de archivo
-                ruta_ballena = os.path.join("output", "blue whale 3d model.glb")
-                size_bytes = os.path.getsize(ruta_ballena)
+                ruta_modelo = os.path.join("output", model_name)
+                size_bytes = os.path.getsize(ruta_modelo)
                 size_str = f"{size_bytes / (1024 * 1024):.2f} MB" if size_bytes >= 1024 * 1024 else f"{size_bytes / 1024:.1f} KB"
                 
                 response_body = json.dumps({
                     "status": "success",
-                    "message": "Modelo comprimido exitosamente por Blender con Draco.",
+                    "message": f"Modelo {model_name} comprimido exitosamente por Blender con Draco.",
                     "newSize": size_str
                 })
                 self.wfile.write(response_body.encode('utf-8'))
@@ -996,6 +1063,200 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 response_body = json.dumps({"error": f"Falla en el motor de compresión: {str(e)}"})
                 self.wfile.write(response_body.encode('utf-8'))
+        elif self.path.startswith('/api/duplicate-project'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project"))
+                new_project = safe_project_name(data.get("newProject"))
+                
+                src_dir = os.path.join(PROJECTS_DIR, project)
+                dst_dir = os.path.join(PROJECTS_DIR, new_project)
+                
+                if not os.path.exists(src_dir):
+                    send_json(self, 404, {"error": f"El proyecto origen '{project}' no existe."})
+                    return
+                if os.path.exists(dst_dir):
+                    send_json(self, 400, {"error": f"El proyecto destino '{new_project}' ya existe."})
+                    return
+                
+                shutil.copytree(src_dir, dst_dir)
+                
+                # Modificar el layout.json en el destino
+                dst_layout = os.path.join(dst_dir, "layout.json")
+                if os.path.exists(dst_layout):
+                    layout_data = read_layout_file(dst_layout)
+                    if isinstance(layout_data, dict):
+                        layout_data["project"] = new_project
+                        layout_data["version"] = 1
+                        layout_data["updatedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                        with open(dst_layout, "w", encoding="utf-8") as f:
+                            json.dump(layout_data, f, indent=4, ensure_ascii=False)
+                
+                send_json(self, 200, {"status": "success", "message": f"Proyecto duplicado como '{new_project}'."})
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/rename-project'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project"))
+                new_project = safe_project_name(data.get("newProject"))
+                
+                src_dir = os.path.join(PROJECTS_DIR, project)
+                dst_dir = os.path.join(PROJECTS_DIR, new_project)
+                
+                if not os.path.exists(src_dir):
+                    send_json(self, 404, {"error": f"El proyecto '{project}' no existe."})
+                    return
+                if os.path.exists(dst_dir):
+                    send_json(self, 400, {"error": f"El proyecto '{new_project}' ya existe."})
+                    return
+                
+                os.rename(src_dir, dst_dir)
+                
+                # Modificar el layout.json en el destino
+                dst_layout = os.path.join(dst_dir, "layout.json")
+                if os.path.exists(dst_layout):
+                    layout_data = read_layout_file(dst_layout)
+                    if isinstance(layout_data, dict):
+                        layout_data["project"] = new_project
+                        layout_data["updatedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                        with open(dst_layout, "w", encoding="utf-8") as f:
+                            json.dump(layout_data, f, indent=4, ensure_ascii=False)
+                
+                send_json(self, 200, {"status": "success", "message": f"Proyecto renombrado a '{new_project}'."})
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/archive-project'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project"))
+                
+                src_dir = os.path.join(PROJECTS_DIR, project)
+                archive_project_dir = os.path.join(ARCHIVE_DIR, project)
+                
+                if not os.path.exists(src_dir):
+                    send_json(self, 404, {"error": f"El proyecto '{project}' no existe."})
+                    return
+                
+                os.makedirs(ARCHIVE_DIR, exist_ok=True)
+                if os.path.exists(archive_project_dir):
+                    shutil.rmtree(archive_project_dir)
+                
+                shutil.move(src_dir, archive_project_dir)
+                send_json(self, 200, {"status": "success", "message": f"Proyecto '{project}' archivado con éxito."})
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/restore-project'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project"))
+                
+                src_dir = os.path.join(ARCHIVE_DIR, project)
+                dst_dir = os.path.join(PROJECTS_DIR, project)
+                
+                if not os.path.exists(src_dir):
+                    send_json(self, 404, {"error": f"El proyecto '{project}' no se encuentra en el archivo."})
+                    return
+                
+                if os.path.exists(dst_dir):
+                    send_json(self, 400, {"error": f"El proyecto activo '{project}' ya existe. Renómbralo o elíminalo antes de restaurar."})
+                    return
+                
+                shutil.move(src_dir, dst_dir)
+                send_json(self, 200, {"status": "success", "message": f"Proyecto '{project}' restaurado con éxito."})
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/login'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                username = str(data.get("username") or "").strip().lower()
+                password = str(data.get("password") or "")
+                
+                if not username or not password:
+                    send_json(self, 400, {"error": "Usuario y contraseña requeridos."})
+                    return
+                
+                users = load_users()
+                if username not in users:
+                    send_json(self, 404, {"error": "Usuario no encontrado."})
+                    return
+                
+                user = users[username]
+                password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+                
+                if user["password_hash"] != password_hash:
+                    send_json(self, 401, {"error": "Contraseña incorrecta."})
+                    return
+                
+                send_json(self, 200, {
+                    "status": "success",
+                    "message": "Inicio de sesión exitoso.",
+                    "user": {
+                        "username": user["username"],
+                        "role": user["role"],
+                        "color": user["color"],
+                        "userId": user["userId"]
+                    }
+                })
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/register'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                username = str(data.get("username") or "").strip().lower()
+                password = str(data.get("password") or "")
+                role = str(data.get("role") or "editor")
+                color = str(data.get("color") or "#22d3ee")
+                
+                if not username or not password:
+                    send_json(self, 400, {"error": "Usuario y contraseña requeridos."})
+                    return
+                
+                if len(username) < 3 or len(password) < 4:
+                    send_json(self, 400, {"error": "El usuario debe tener al menos 3 caracteres y la contraseña al menos 4."})
+                    return
+                
+                users = load_users()
+                if username in users:
+                    send_json(self, 400, {"error": "El nombre de usuario ya está registrado."})
+                    return
+                
+                user_id = f"user-{int(time.time())}-{username}"
+                password_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+                
+                users[username] = {
+                    "username": username,
+                    "password_hash": password_hash,
+                    "role": role,
+                    "color": color,
+                    "userId": user_id
+                }
+                save_users(users)
+                
+                send_json(self, 200, {
+                    "status": "success",
+                    "message": "Registro completado con éxito.",
+                    "user": {
+                        "username": username,
+                        "role": role,
+                        "color": color,
+                        "userId": user_id
+                    }
+                })
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
         else:
             self.send_response(404)
             self.end_headers()
@@ -1007,6 +1268,23 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 print(f"[PROJECTS ERROR] Error al enlistar proyectos: {str(e)}")
                 send_json(self, 500, {"error": str(e)})
+            return
+
+        if self.path.startswith('/api/list-archived-projects'):
+            try:
+                send_json(self, 200, {"projects": list_archived_projects()})
+            except Exception as e:
+                print(f"[PROJECTS ERROR] Error al enlistar proyectos archivados: {str(e)}")
+                send_json(self, 500, {"error": str(e)})
+            return
+
+        if self.path.startswith('/api/connection-info'):
+            client_ip = self.client_address[0]
+            is_local = client_ip in ('127.0.0.1', '::1', 'localhost')
+            send_json(self, 200, {
+                "clientIp": client_ip,
+                "isLocal": is_local
+            })
             return
 
         if self.path.startswith('/api/load-layout'):
@@ -1072,18 +1350,10 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     })
 
                 assets.sort(key=lambda x: x["date"], reverse=True)
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps(assets).encode('utf-8'))
+                send_json(self, 200, assets)
             except Exception as e:
                 print(f"[ASSETS ERROR] Error al enlistar assets: {str(e)}")
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+                send_json(self, 500, {"error": str(e)})
             return
 
         if self.path == '/api/list-models':

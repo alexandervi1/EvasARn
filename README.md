@@ -6,6 +6,11 @@ Moby Studio es una aplicacion local para crear, editar y probar experiencias AR 
 
 La aplicacion ya incluye:
 
+- **Estilo Inmersivo Vision Pro**: Interfaz de usuario con estética visionOS oscura, glassmorphic y moderna, incluyendo combo boxes personalizados con flechas chevron de alto contraste y animaciones de resplandor.
+- **Iconografía Vectorial SVG (Editor PC)**: Reemplazo completo de emojis y caracteres unicode en outliner, listas de escena, validaciones e inspectores por SVGs lineales integrados (`stroke="currentColor"`) consistentes y dinámicos para una visualización ultra-nítida.
+- **Tarjetas Stacked en Mediateca ("Mis Medios")**: Rediseño de tarjetas de assets a un diseño estructurado de dos filas (superior para miniatura e info; inferior para badges y botones de acción) que previene el amontonamiento horizontal. Utilidad `.no-scrollbar` para ocultar barras de scroll grises.
+- **Optimización Draco al Click**: Compresión de mallas Draco para modelos 3D integrada en el editor y accesible con un botón vectorial rápido en la mediateca.
+- **Iconografía Móvil SVG (Cliente Teléfono)**: Visor móvil (`index.html`) con botones de acciones rápidas, dock inferior y controles AR actualizados a SVGs nativos para un tacto premium.
 - Editor 3D en `moby_studio/editor.html`.
 - Cliente AR/movil en `moby_studio/index.html`.
 - Backend local en `moby_studio/lanzador_ar.py`.

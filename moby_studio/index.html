@@ -984,6 +984,18 @@
 </head>
 <body>
 
+    <!-- CONSOLA DE LOGS VISIBLE EN EL CLIENTE MÓVIL (DEBUG QA) -->
+    <div id="mobile-debug-console-container" style="position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100000; font-family: monospace; box-sizing: border-box;">
+        <!-- Toggle button -->
+        <button type="button" id="btn-toggle-debug-console" onclick="toggleDebugConsole()" style="position: absolute; bottom: 100%; right: 12px; margin-bottom: 8px; background: rgba(15, 23, 42, 0.95); border: 1.5px solid rgba(0, 243, 255, 0.45); color: #00f3ff; border-radius: 20px; padding: 6px 14px; font-size: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 4px; pointer-events: auto;">
+            <span>📂</span> Logs de Consola (<span id="debug-log-count">0</span>)
+        </button>
+        <!-- Console list wrapper -->
+        <div id="mobile-debug-console-loglist" style="display: none; height: 180px; background: rgba(5, 7, 15, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 2px solid rgba(0, 243, 255, 0.35); overflow-y: scroll; padding: 8px 12px; box-sizing: border-box; flex-direction: column; gap: 4px; pointer-events: auto; max-width: 100%;">
+            <!-- Log rows will render here -->
+        </div>
+    </div>
+
     <!-- LÁSER DE ESCANEO DE VISIÓN MÁQUINA -->
     <div id="scanner-laser" class="scanner-laser"></div>
     <div id="ar-detection-pill" class="ar-detection-pill">Target AR detectado</div>
@@ -1060,13 +1072,16 @@
                 <!-- Acciones Rápidas Estilo Pokémon Go -->
                 <div class="quick-actions">
                     <button type="button" class="btn-action" onclick="lanzarContenedor()" title="Lanzar un contenedor Docker a Moby">
-                        📦 Lanzar Contenedor
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        Lanzar Contenedor
                     </button>
                     <button type="button" class="btn-action" onclick="hacerSaltarMoby()" title="Hacer saltar o dar un giro a Moby">
-                        🐳 Hacer Truco
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 5.2l-1.4 1.4M7.2 15.8l-1.4 1.4M22 22l-5-5M9.5 4.5L13 8 8 13 4.5 9.5z"/></svg>
+                        Hacer Truco
                     </button>
                     <button type="button" class="btn-action" id="btn-scan" onclick="escanearEntorno()" title="Escanear tu pantalla o Docker Desktop con el Sonar de Moby">
-                        🔍 Escanear Pantalla
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Escanear Pantalla
                     </button>
                 </div>
 
@@ -1106,17 +1121,33 @@
     </div>
 
     <div class="mobile-action-dock" aria-label="Acciones AR">
-        <button type="button" class="dock-btn" onclick="lanzarContenedor()" title="Lanzar contenedor">📦</button>
-        <button type="button" class="dock-btn primary" onclick="escanearEntorno()" title="Escanear entorno">⌕</button>
-        <button type="button" class="dock-btn" onclick="hacerSaltarMoby()" title="Animar Moby">↺</button>
-        <button type="button" class="dock-btn" onclick="togglePresentationMode()" title="Modo presentación">▣</button>
+        <button type="button" class="dock-btn" onclick="lanzarContenedor()" title="Lanzar contenedor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </button>
+        <button type="button" class="dock-btn primary" onclick="escanearEntorno()" title="Escanear entorno">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4 12h4M16 12h4"/></svg>
+        </button>
+        <button type="button" class="dock-btn" onclick="hacerSaltarMoby()" title="Animar Moby">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        </button>
+        <button type="button" class="dock-btn" onclick="togglePresentationMode()" title="Modo presentación">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
     </div>
 
     <div class="ar-control-sheet" aria-label="Controles del contenido AR">
-        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 1.12)" title="Aumentar contenido">＋</button>
-        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 0.9)" title="Reducir contenido">－</button>
-        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', -0.12)" title="Acercar contenido">↥</button>
-        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', 0.12)" title="Alejar contenido">↧</button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 1.12)" title="Aumentar contenido">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 0.9)" title="Reducir contenido">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', -0.12)" title="Acercar contenido">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        </button>
+        <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', 0.12)" title="Alejar contenido">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        </button>
     </div>
 
     <!-- Cámara de video en segundo plano para Realidad Aumentada Real -->
@@ -1230,6 +1261,78 @@
 
     <!-- Script de Interactividad, STT, Ollama (Docker Only) y Metáforas Visuales -->
     <script>
+        // --- EVOLUCIÓN: CONSOLA DE LOGS VISIBLE EN EL MOVIL (DEBUG QA) ---
+        (function() {
+            let logCount = 0;
+            const originalLog = console.log;
+            const originalWarn = console.warn;
+            const originalError = console.error;
+            
+            function addLogToOverlay(type, args) {
+                const logList = document.getElementById('mobile-debug-console-loglist');
+                const countBadge = document.getElementById('debug-log-count');
+                
+                const message = Array.from(args).map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ');
+                
+                logCount++;
+                if (countBadge) countBadge.innerText = logCount;
+                
+                if (!logList) return;
+                
+                const row = document.createElement('div');
+                row.style.fontSize = '9px';
+                row.style.fontFamily = 'monospace';
+                row.style.lineHeight = '1.3';
+                row.style.borderBottom = '1px solid rgba(255,255,255,0.03)';
+                row.style.paddingBottom = '2px';
+                
+                const now = new Date();
+                const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+                
+                let typeColor = '#86efac'; // log
+                let typePrefix = 'LOG';
+                if (type === 'warn') {
+                    typeColor = '#fef08a';
+                    typePrefix = 'WRN';
+                } else if (type === 'error') {
+                    typeColor = '#fca5a5';
+                    typePrefix = 'ERR';
+                }
+                
+                row.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> <span style="color: ${typeColor}; font-weight: bold;">[${typePrefix}]</span> <span style="color: #e2e8f0;">${message}</span>`;
+                
+                logList.appendChild(row);
+                logList.scrollTop = logList.scrollHeight;
+            }
+            
+            console.log = function() {
+                originalLog.apply(console, arguments);
+                addLogToOverlay('log', arguments);
+            };
+            console.warn = function() {
+                originalWarn.apply(console, arguments);
+                addLogToOverlay('warn', arguments);
+            };
+            console.error = function() {
+                originalError.apply(console, arguments);
+                addLogToOverlay('error', arguments);
+            };
+            
+            window.toggleDebugConsole = function() {
+                const list = document.getElementById('mobile-debug-console-loglist');
+                const btn = document.getElementById('btn-toggle-debug-console');
+                if (list.style.display === 'none') {
+                    list.style.display = 'flex';
+                    btn.style.background = 'rgba(0, 243, 255, 0.1)';
+                    btn.style.borderColor = '#00f3ff';
+                } else {
+                    list.style.display = 'none';
+                    btn.style.background = 'rgba(15, 23, 42, 0.95)';
+                    btn.style.borderColor = 'rgba(0, 243, 255, 0.45)';
+                }
+            };
+        })();
+
         // Componente A-Frame de Rotación Espacial (Billboarding interactivo)
         AFRAME.registerComponent('billboard-ui', {
             init: function () {
@@ -2763,25 +2866,51 @@
                         videoEl.setAttribute('src', mediaUrl);
                         videoEl.setAttribute('playsinline', '');
                         videoEl.setAttribute('webkit-playsinline', '');
-                        videoEl.setAttribute('loop', 'true');
-                        videoEl.setAttribute('muted', 'true');
+                        if (obj.loop !== false) {
+                            videoEl.setAttribute('loop', '');
+                        }
+                        if (obj.mute !== false) {
+                            videoEl.setAttribute('muted', '');
+                            videoEl.muted = true;
+                        } else {
+                            videoEl.removeAttribute('muted');
+                            videoEl.muted = false;
+                        }
                         videoEl.setAttribute('crossorigin', 'anonymous');
                         videoEl.style.display = 'none';
                         document.body.appendChild(videoEl);
+                    } else {
+                        if (obj.loop !== false) {
+                            videoEl.setAttribute('loop', '');
+                        } else {
+                            videoEl.removeAttribute('loop');
+                        }
+                        if (obj.mute !== false) {
+                            videoEl.setAttribute('muted', '');
+                            videoEl.muted = true;
+                        } else {
+                            videoEl.removeAttribute('muted');
+                            videoEl.muted = false;
+                        }
                     }
                     
+                    const pWidth = Number(obj.panelWidth) || 1.6;
+                    const pHeight = Number(obj.panelHeight) || 0.9;
+
                     const videoPanel = document.createElement('a-video');
                     videoPanel.setAttribute('id', `${obj.uuid}-media`);
                     videoPanel.setAttribute('src', `#${videoId}`);
-                    videoPanel.setAttribute('width', '1.6');
-                    videoPanel.setAttribute('height', '0.9');
-                    el = crearMarcoEspacial(obj, videoPanel, { width: 1.6, height: 0.9, title: obj.nombre || 'Video AR' });
+                    videoPanel.setAttribute('width', pWidth);
+                    videoPanel.setAttribute('height', pHeight);
+                    el = crearMarcoEspacial(obj, videoPanel, { width: pWidth, height: pHeight, title: obj.nombre || 'Video AR' });
                     
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => {
                             console.log(`🎯 targetFound: Reproduciendo video ${videoId}`);
                             el.setAttribute('visible', 'true');
-                            videoEl.play().catch(e => console.warn(e));
+                            if (obj.autoplay !== false) {
+                                videoEl.play().catch(e => console.warn(e));
+                            }
                         });
                         targetContainer.addEventListener('targetLost', () => {
                             console.log(`❌ targetLost: Pausando video ${videoId}`);
@@ -2790,12 +2919,15 @@
                         });
                     }
                 } else if (mediaType === 'image' && mediaUrl) {
+                    const pWidth = Number(obj.panelWidth) || 1.35;
+                    const pHeight = Number(obj.panelHeight) || 0.9;
+
                     const imagePanel = document.createElement('a-image');
                     imagePanel.setAttribute('id', `${obj.uuid}-media`);
                     imagePanel.setAttribute('src', mediaUrl);
-                    imagePanel.setAttribute('width', '1.35');
-                    imagePanel.setAttribute('height', '0.9');
-                    el = crearMarcoEspacial(obj, imagePanel, { width: 1.35, height: 0.9, title: obj.nombre || 'Imagen AR' });
+                    imagePanel.setAttribute('width', pWidth);
+                    imagePanel.setAttribute('height', pHeight);
+                    el = crearMarcoEspacial(obj, imagePanel, { width: pWidth, height: pHeight, title: obj.nombre || 'Imagen AR' });
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
                         targetContainer.addEventListener('targetLost', () => {

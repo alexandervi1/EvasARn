@@ -4,6 +4,11 @@ Este backlog queda ordenado por utilidad real despues de implementar el flujo AR
 
 ## Implementado recientemente
 
+- Colaboración profesional (Roles: owner, editor, revisor, cliente solo lectura; comentarios o notas flotantes e interactivos por objeto en A-Frame y el inspector; estados de flujo de trabajo: borrador, revisión, listo, publicado con historial y logs; y APIs de duplicado, renombrado, archivado y restauración de proyectos).
+- QA Móvil y Consola de Depuración (Simulador de iPhone X con Dynamic Island integrado en el editor, consola flotante de logs transparente en tiempo real en index.html, checklists automáticos de compatibilidad LAN/HTTPS, y estimador de rendimiento de FPS y peso en bytes).
+- Optimización de assets 3D (Detección de peso de modelos GLB, insignias visuales dinámicas de advertencia "⚠️ Pesado" o "✓ Ligero", y botón de compresión Draco con Blender optimizado para cualquier modelo en el servidor).
+- Editor guiado de targets MindAR (Asistente visual de estado, radar láser de escaneo, visor de cámara web y escáner jsQR integrado).
+- Inspector profesional de contenido AR (Ajustes de ancho/alto dinámicos, presets estilo Vision Pro, estimación métrica física de escala real, y propiedades Loop, Autoplay y Mute de video).
 - Exportacion ZIP con `index.html`, `layout.json`, assets usados, `manifest.json` y README.
 - Modal AR con target fisico + contenido proyectado en un solo flujo.
 - Contenido por subida local o URL directa para imagen, video y modelo.
@@ -18,37 +23,6 @@ Este backlog queda ordenado por utilidad real despues de implementar el flujo AR
 - Sincronizacion por version: recarga si no hay cambios locales, aviso si hay cambios sin guardar.
 
 ## Siguientes mejoras por utilidad
-
-1. Editor guiado de targets MindAR
-   - Subir imagen target y explicar que debe entrenarse a `.mind`.
-   - Asistente visual de estado: imagen fisica, QR, `.mind`, contenido asociado.
-   - Previsualizacion del target dentro del modal.
-   - Prueba rapida de camara con resultado claro: detectado/no detectado.
-
-2. Inspector profesional de contenido AR
-   - Ajustar ancho/alto de paneles de imagen y video.
-   - Controles de autoplay, loop, volumen, orientacion y distancia al target.
-   - Presets de panel flotante tipo Vision Pro: ficha, reproductor, galeria, CTA.
-   - Vista de escala real aproximada sobre el target.
-
-3. Optimizacion de assets 3D
-   - Deteccion de modelos pesados.
-   - Advertencias por texturas demasiado grandes.
-   - Accion para comprimir GLB.
-   - Recomendaciones de escala, poligonos y peso para telefono.
-
-4. QA movil
-   - Vista de simulacion iPhone dentro del editor.
-   - Checklist separado para permisos de camara, HTTPS/LAN, MindAR y QR.
-   - Logs visibles del cliente movil para depurar pruebas.
-   - Prueba de performance: FPS aproximado, peso de escena y assets faltantes.
-
-5. Colaboracion profesional
-   - Roles: owner, editor, revisor, cliente solo lectura.
-   - Comentarios o notas por objeto.
-   - Estados: borrador, revision, listo para publicar, publicado.
-   - Historial de publicaciones por fecha.
-   - Duplicar, renombrar, archivar y restaurar proyectos.
 
 6. Sincronizacion granular en vivo
    - Enviar patches de crear/mover/borrar/asignar sin esperar guardado completo.

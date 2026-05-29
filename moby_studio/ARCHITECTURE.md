@@ -40,6 +40,9 @@ Es la herramienta de autoria. El JavaScript activo esta embebido en el propio HT
 
 Responsabilidades:
 
+- Presentar una interfaz premium de estilo glassmorphic visionOS con combo boxes customizados, glows reactivos y transiciones fluidas.
+- Renderizar e inyectar dinámicamente iconos vectoriales SVG (`stroke="currentColor"`) en jerarquías, outliner, validaciones e inspectores, garantizando nitidez e independencia de emojis.
+- Mostrar una mediateca profesional con un diseño de tarjetas en dos filas (Thumbnail/Metadatos arriba y Badges/Botones abajo) para evitar la compresión en paneles estrechos, libre de scrollbars grises gracias a la utilidad `.no-scrollbar`.
 - Mantener el estado local en `escenaObjetos`.
 - Renderizar entidades A-Frame dentro de `#entities-container`.
 - Editar transformaciones, nombres, anclajes y configuracion AR.

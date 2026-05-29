@@ -1,0 +1,236 @@
+{
+    "project": "default",
+    "version": 2,
+    "stage": {
+        "width": 3,
+        "height": 3,
+        "gridVisible": false
+    },
+    "entities": [
+        {
+            "uuid": "objeto-marcador-3",
+            "nombre": "Marcador AR #3",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1.7,
+            "markerImage": "output/qr_presentacion.png",
+            "arAnchor": "base"
+        },
+        {
+            "uuid": "objeto-marcador-5",
+            "nombre": "Target Reproductor AR",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "objeto-marcador-5",
+            "arAnchor": "base",
+            "trackingMode": "qr"
+        },
+        {
+            "uuid": "objeto-marcador-7",
+            "nombre": "Target Reproductor AR",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "objeto-marcador-7",
+            "arAnchor": "base",
+            "trackingMode": "qr"
+        },
+        {
+            "uuid": "objeto-marcador-9",
+            "nombre": "Target Panel de Imagen AR",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "objeto-marcador-9",
+            "arAnchor": "base",
+            "trackingMode": "qr"
+        },
+        {
+            "uuid": "objeto-marcador-11",
+            "nombre": "OIRA1 Voz Docker",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "OIRA1",
+            "arAnchor": "base",
+            "trackingMode": "qr",
+            "oiraType": "oira1",
+            "oiraIntro": "OIRA uno activo. Puedes hacer consultas por voz sobre Docker y recibir respuesta en texto y audio dentro de la experiencia."
+        },
+        {
+            "uuid": "objeto-marcador-13",
+            "nombre": "OIRA2 Docker Desktop",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "OIRA2",
+            "arAnchor": "base",
+            "trackingMode": "qr",
+            "oiraType": "oira2",
+            "oiraIntro": "OIRA dos activo. Explora los objetos de la interfaz para escuchar definiciones de Docker Desktop."
+        },
+        {
+            "uuid": "objeto-marcador-17",
+            "nombre": "OIRA2 Docker Desktop",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "OIRA2",
+            "arAnchor": "base",
+            "trackingMode": "qr",
+            "oiraType": "oira2",
+            "oiraIntro": "OIRA dos activo. Explora los objetos de la interfaz para escuchar definiciones de Docker Desktop."
+        },
+        {
+            "uuid": "objeto-marcador-21",
+            "nombre": "OIRA2 Docker Desktop",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "OIRA2",
+            "arAnchor": "base",
+            "trackingMode": "qr",
+            "oiraType": "oira2",
+            "oiraIntro": "OIRA dos activo. Explora los objetos de la interfaz para escuchar definiciones de Docker Desktop."
+        },
+        {
+            "uuid": "objeto-marcador-25",
+            "nombre": "Target Panel de Imagen AR",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/objeto-marcador-25.png",
+            "recognitionKey": "objeto-marcador-25",
+            "arAnchor": "base",
+            "trackingMode": "qr",
+            "mindTargetUrl": null,
+            "mindTargetIndex": 0
+        },
+        {
+            "uuid": "objeto-panel-de-imagen-ar-26",
+            "modelId": null,
+            "nombre": "Panel de Imagen AR #26",
+            "posicion": {
+                "x": 0.05,
+                "y": 1.1,
+                "z": -3.45
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1.55,
+            "glbUrl": null,
+            "arAnchor": "objeto-marcador-25",
+            "mediaType": "image",
+            "mediaUrl": "output/Captura de pantalla_20260520_204947.png",
+            "markerImage": null
+        },
+        {
+            "uuid": "objeto-marcador-27",
+            "nombre": "Marcador AR #27",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "objeto-marcador-27",
+            "arAnchor": "base"
+        },
+        {
+            "uuid": "objeto-marcador-28",
+            "nombre": "Target Panel de Imagen AR",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/qr_presentacion.png",
+            "recognitionKey": "objeto-marcador-28",
+            "arAnchor": "base",
+            "trackingMode": "qr"
+        }
+    ],
+    "updatedAt": "2026-05-29 15:03:57"
+}
