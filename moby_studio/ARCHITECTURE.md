@@ -152,75 +152,96 @@ La interacción del "Sonar Visual" de Moby sigue un flujo asíncrono estricto de
 
 ---
 
-## 5. Estructura de Datos
+## 5. Estructura de Datos (layout.json)
 
-El estado espacial completo del escenario tridimensional interactivo de Moby Studio se serializa, almacena y transmite a través de un archivo plano plano en formato JSON denominado `layout.json`, guardado en el subdirectorio de salida `output/`.
+El estado espacial completo del escenario tridimensional interactivo de Moby Studio se serializa, almacena y transmite a través de un archivo en formato JSON denominado `layout.json`, guardado en el subdirectorio de salida `output/`.
 
 ### Estructura de Datos de `layout.json`
 
-La jerarquía del diseño se compone de un arreglo estructurado de objetos de entidad. Cada objeto expone estrictamente las siguientes propiedades de tipo primitivo y espacial:
+La jerarquía del diseño se compone de un objeto estructurado que unifica la configuración del escenario (`stage`) y el listado de entidades lógicas (`entities`). Cada objeto de entidad expone las siguientes propiedades espaciales y de anclaje:
 
 ```json
-[
-    {
-        "uuid": "string",
-        "nombre": "string",
-        "modelId": "string",
-        "posicion": {
-            "x": "number",
-            "y": "number",
-            "z": "number"
-        },
-        "rotacion": {
-            "x": "number",
-            "y": "number",
-            "z": "number"
-        },
-        "escala": "number"
-    }
-]
-```
-
-### Ejemplo de Datos de Producción Real
-
-```json
-[
-    {
-        "uuid": "entidad-laptop-1",
-        "nombre": "Laptop Docker",
-        "modelId": "laptop_caos",
-        "posicion": {
-            "x": 1.5,
-            "y": 0.5,
-            "z": -3.0
-        },
-        "rotacion": {
-            "x": 0.0,
-            "y": 45.0,
-            "z": 0.0
-        },
-        "escala": 1.2
+{
+    "stage": {
+        "width": 3.0,
+        "height": 3.0,
+        "gridVisible": true
     },
-    {
-        "uuid": "entidad-ballena-2",
-        "nombre": "Ballena Docker Procedural",
-        "modelId": "ballena_docker",
-        "posicion": {
-            "x": 0.0,
-            "y": 2.0,
-            "z": -5.5
-        },
-        "rotacion": {
-            "x": 0.0,
-            "y": 180.0,
-            "z": 0.0
-        },
-        "escala": 2.5
-    }
-]
+    "entities": [
+        {
+            "uuid": "string (Identificador único)",
+            "nombre": "string (Nombre amigable del objeto)",
+            "modelId": "string (ID del modelo GLB base o null si es marcador)",
+            "posicion": { "x": 0.0, "y": 0.0, "z": 0.0 },
+            "rotacion": { "y": 0.0 },
+            "escala": 1.0,
+            "isMarker": "boolean (true si actúa como marcador AR físico)",
+            "markerImage": "string (Ruta de textura del target, ej: output/target.png)",
+            "arAnchor": "string (UUID del marcador al que está anclado, o 'base')",
+            "mediaType": "string ('3d' | 'image' | 'video' para disparadores multimedia)",
+            "mediaUrl": "string (Ruta del recurso a reproducir)"
+        }
+    ]
+}
 ```
 
-### Flujo de Sincronización de Datos
+### Ejemplo de Datos de Producción Real con Anclajes Dinámicos
 
-- **Persistencia**: Al presionar **Guardar Escenario** en el panel, el cliente captura el estado activo de `escenaObjetos` y realiza una petición POST con los datos serializados a `/api/save-layout`, escribiendo físicamente el archivo `output/layout.json`.
-- **Hidratación**: Al cargar el visor (`editor.html` o `index.html`), se efectúa un fetch GET a `output/layout.json`. Si el archivo existe, itera la colección, crea los elementos dinámicamente (`document.createElement('a-entity')`), inyecta los atributos espaciales correspondientes e hidrata el estado local.
+```json
+{
+    "stage": {
+        "width": 3.0,
+        "height": 3.0,
+        "gridVisible": true
+    },
+    "entities": [
+        {
+            "uuid": "objeto-marcador-1",
+            "nombre": "Marcador Tarjeta Presentación",
+            "isMarker": true,
+            "posicion": { "x": -1.5, "y": 0.02, "z": -3.5 },
+            "rotacion": { "y": 0.0 },
+            "escala": 1.0,
+            "markerImage": "output/mi_tarjeta.png",
+            "arAnchor": "base"
+        },
+        {
+            "uuid": "objeto-laptop-caos-2",
+            "nombre": "Laptop Desarrollo Caos",
+            "modelId": "modelo-laptop",
+            "posicion": { "x": 0.0, "y": 0.25, "z": 0.1 },
+            "rotacion": { "y": 180.0 },
+            "escala": 0.85,
+            "arAnchor": "objeto-marcador-1",
+            "mediaType": "video",
+            "mediaUrl": "output/demo_docker.mp4"
+        }
+    ]
+}
+```
+
+---
+
+## 6. Sistema de Image Tracking Dinámico y Marcadores AR Ilimitados
+
+Hemos evolucionado el Image Tracking estático a una arquitectura matricial y dinámica que funciona de la siguiente manera:
+
+### A. Gestión de Marcadores como Entidades de Primer Orden
+* En `editor.html`, los marcadores AR se crean y gestionan como objetos interactivos en 3D (`isMarker: true`). Se representan visualmente mediante planos horizontales texturizados con su imagen de target física asignada.
+* Cuentan con soporte completo para transformaciones espaciales en los ejes X, Y, Z (Mover, Rotar, Escalar) usando Gizmos de arrastre profesionales, registrándose limpiamente en el historial de deshacer/rehacer (`Undo/Redo`).
+
+### B. Mapeo y Relación Padre-Hijo (Anchor Pipeline)
+* Al seleccionar un modelo normal en el lienzo, el sistema barre todas las entidades marcadoras activas y reconstruye en tiempo real las opciones del selector **"Anclaje Físico AR (Target)"** en el inspector.
+* Cuando el usuario asigna un marcador, el objeto guarda el UUID de dicho marcador en su atributo `arAnchor`.
+* Al salvar, `/api/save-layout` almacena el layout unificado de forma plana.
+
+### C. Reconstrucción de Escena e Interacción de Canales
+* Al cargar la experiencia WebXR (`index.html`), el lector analiza la colección de entidades.
+* **Fase 1 (Instanciación de Contenedores):** Para cada marcador (`isMarker: true`), crea dinámicamente un canal de rastreo virtual `<a-entity id="anchor-markerUUID">` y le acopla un billboard Glassmorphic interactivo.
+* **Fase 2 (Nidificación):** Para cada modelo cuyo `arAnchor` coincide con el UUID de un marcador, calcula su desplazamiento relativo flotante `(0, 0.25, 0.1)` y lo añade físicamente como hijo dentro de su respectivo contenedor de anclaje A-Frame.
+* **Fase 3 (Retrocompatibilidad):** Si el diseño antiguo de `layout.json` tiene referencias estáticas (`marcador_a`, `marcador_b`, `marcador_c`), el sistema detecta que faltan en la escena y autogenera marcadores dinámicos equivalentes en sus coordenadas métricas originales.
+* **Fase 4 (Simulación por Clic):** En navegadores de PC, hacer clic en la interfaz espacial del marcador dispara el lanzamiento del contenedor Docker flotante, emite eventos de visión (`targetFound`/`targetLost`) y activa/pausa el video o recurso multimedia asociado de sus hijos de forma reactiva por canal.
+
+### D. Flujo de Sincronización de Datos
+* **Persistencia**: Al presionar **Guardar Escenario** en el panel, el cliente captura el estado activo de `escenaObjetos` y realiza una petición POST con los datos serializados a `/api/save-layout`, escribiendo físicamente el archivo `output/layout.json`.
+* **Hidratación**: Al cargar el visor (`editor.html` o `index.html`), se efectúa un fetch GET a `output/layout.json`. Si el archivo existe, itera la colección, crea los elementos dinámicamente (`document.createElement('a-entity')`), inyecta los atributos espaciales correspondientes e hidrata el estado local.
