@@ -472,9 +472,124 @@
             .radar-arrow span { display: none; } /* En celulares ocultar texto para no estorbar la vista */
             .radar-arrow { padding: 10px; border-radius: 50%; }
         }
+
+        /* ESTILO HUD COLAPSABLE (SPATIAL UX) */
+        .btn-collapse {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--color-bg-glass);
+            border: 1px solid var(--color-border-glass);
+            color: #00f3ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            pointer-events: auto;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-collapse:hover {
+            background: rgba(0, 243, 255, 0.15);
+            border-color: #00f3ff;
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .chevron-icon {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: transform 0.3s ease;
+        }
+
+        .chat-panel {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
+        }
+
+        .chat-panel.collapsed {
+            transform: translate(-50%, calc(100% - 68px)) !important;
+            padding-top: 20px !important;
+        }
+
+        .chat-panel.collapsed .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        .chat-panel.collapsed .dialogue-box,
+        .chat-panel.collapsed .btn-action,
+        .chat-panel.collapsed .chat-input,
+        .chat-panel.collapsed .btn-send,
+        .chat-panel.collapsed .voice-control {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            display: none !important;
+        }
+
+        .chat-panel.collapsed .chat-form {
+            justify-content: center;
+            border: none;
+            background: transparent;
+            padding: 0;
+        }
+
+        /* MÁQUINA DE ESTADOS VISUAL & EFECTO PULSO */
+        .hud-thinking {
+            animation: pulseHUD 1.5s infinite alternate;
+        }
+
+        @keyframes pulseHUD {
+            0% { border-color: rgba(255, 255, 255, 0.12); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); }
+            100% { border-color: #00f3ff; box-shadow: 0 8px 32px rgba(0, 243, 255, 0.25); }
+        }
+
+        .scanner-laser {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .scanner-laser.active {
+            opacity: 1;
+            background: linear-gradient(to bottom, rgba(0, 243, 255, 0) 0%, rgba(0, 243, 255, 0.22) 50%, rgba(0, 243, 255, 0) 100%);
+            animation: scanOverlay 2.2s infinite linear;
+        }
+
+        @keyframes scanOverlay {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        /* Animación micro interactiva */
+        .mic-active-glow {
+            animation: pulseMic 1.2s infinite alternate !important;
+        }
+
+        @keyframes pulseMic {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4); }
+            100% { transform: scale(1.15); box-shadow: 0 0 15px 5px rgba(0, 243, 255, 0.6); }
+        }
     </style>
 </head>
 <body>
+
+    <!-- LÁSER DE ESCANEO DE VISIÓN MÁQUINA -->
+    <div id="scanner-laser" class="scanner-laser"></div>
 
     <!-- Animación de Escáner de Radar Holográfico -->
     <div id="scanner-overlay" class="scanner-overlay" style="display: none;"></div>
@@ -514,7 +629,14 @@
         </header>
 
         <!-- Panel de control de Chat inferior -->
-        <div class="chat-panel">
+        <div class="chat-panel" id="chat-panel">
+            <!-- Botón de Colapso Flotante -->
+            <button type="button" class="btn-collapse" id="btn-collapse-panel" onclick="toggleChatPanel()" title="Minimizar panel">
+                <svg viewBox="0 0 24 24" class="chevron-icon">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
             <!-- Ventana de Diálogo -->
             <div class="dialogue-box">
                 <span class="speaker-tag" id="speaker-label">Moby (Ballena)</span>
@@ -602,9 +724,21 @@
             <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
         </a-assets>
 
-        <!-- Iluminación Optimizada -->
-        <a-entity light="type: ambient; color: #555555; intensity: 1.6"></a-entity>
-        <a-entity light="type: directional; color: #ffffff; intensity: 1.4" position="-1.5 5 3"></a-entity>
+        <!-- Iluminación PBR Premium -->
+        <a-entity light="type: ambient; color: #cbd5e1; intensity: 0.8"></a-entity>
+        <a-entity 
+            light="type: directional; 
+                   castShadow: true; 
+                   intensity: 1.6; 
+                   color: #ffffff; 
+                   shadowMapHeight: 1024; 
+                   shadowMapWidth: 1024; 
+                   shadowCameraTop: 4; 
+                   shadowCameraBottom: -4; 
+                   shadowCameraLeft: -4; 
+                   shadowCameraRight: 4;" 
+            position="1 3.5 2">
+        </a-entity>
         
         <!-- Luz Puntual Neón debajo del Holograma -->
         <a-entity id="neon-light" light="type: point; color: #00f3ff; intensity: 2.5; distance: 4.5; decay: 1.2;" position="0 0.15 -3.0"></a-entity>
@@ -668,28 +802,71 @@
         <!-- CONTENEDOR PARA CARGA DINÁMICA DEL ESCENARIO -->
         <a-entity id="entities-container"></a-entity>
 
-        <!-- ANCLAJE A (Logo Docker) -->
-        <a-entity id="anchor-marcador_a" position="-1.8 0 -3.0">
-            <a-ring color="#00f3ff" radius-inner="0.38" radius-outer="0.4" rotation="-90 0 0" material="opacity: 0.25; transparent: true;"></a-ring>
-            <a-text value="MARCADOR A" align="center" position="0 0.1 0" scale="0.4 0.4 0.4" color="#00f3ff" material="shader: flat;"></a-text>
+        <!-- ANCLAJE A (Logo Docker) - SPATIAL UI INTERACTIVA -->
+        <a-entity id="anchor-marcador_a" position="-1.8 0.6 -3.0">
+            <a-plane 
+                billboard-ui 
+                class="clickable" 
+                width="1.1" 
+                height="0.6" 
+                material="shader: flat; color: #0a0f1e; opacity: 0.78; transparent: true; side: double;"
+                onclick="lanzarContenedorEnMarcador('marcador_a')"
+                title="Lanzar contenedor en A">
+                <a-plane width="1.13" height="0.63" position="0 0 -0.005" color="#00f3ff" material="shader: flat; side: double; opacity: 0.6; transparent: true;"></a-plane>
+                <a-text value="MARCADOR A\n(Logo Docker)" align="center" width="2.4" position="0 0.1 0.01" color="#00f3ff" font="mozillavr"></a-text>
+                <a-text value="Clic para lanzar aqui" align="center" width="1.6" position="0 -0.18 0.01" color="#cbd5e1" font="mozillavr"></a-text>
+            </a-plane>
         </a-entity>
 
-        <!-- ANCLAJE B (Código QR) -->
-        <a-entity id="anchor-marcador_b" position="1.8 0 -3.0">
-            <a-ring color="#22c55e" radius-inner="0.38" radius-outer="0.4" rotation="-90 0 0" material="opacity: 0.25; transparent: true;"></a-ring>
-            <a-text value="MARCADOR B" align="center" position="0 0.1 0" scale="0.4 0.4 0.4" color="#22c55e" material="shader: flat;"></a-text>
+        <!-- ANCLAJE B (Código QR) - SPATIAL UI INTERACTIVA -->
+        <a-entity id="anchor-marcador_b" position="1.8 0.6 -3.0">
+            <a-plane 
+                billboard-ui 
+                class="clickable" 
+                width="1.1" 
+                height="0.6" 
+                material="shader: flat; color: #0a0f1e; opacity: 0.78; transparent: true; side: double;"
+                onclick="lanzarContenedorEnMarcador('marcador_b')"
+                title="Lanzar contenedor en B">
+                <a-plane width="1.13" height="0.63" position="0 0 -0.005" color="#22c55e" material="shader: flat; side: double; opacity: 0.6; transparent: true;"></a-plane>
+                <a-text value="MARCADOR B\n(Codigo QR)" align="center" width="2.4" position="0 0.1 0.01" color="#22c55e" font="mozillavr"></a-text>
+                <a-text value="Clic para lanzar aqui" align="center" width="1.6" position="0 -0.18 0.01" color="#cbd5e1" font="mozillavr"></a-text>
+            </a-plane>
         </a-entity>
 
-        <!-- ANCLAJE C (Logo Database) -->
-        <a-entity id="anchor-marcador_c" position="0 0 -5.0">
-            <a-ring color="#ef4444" radius-inner="0.38" radius-outer="0.4" rotation="-90 0 0" material="opacity: 0.25; transparent: true;"></a-ring>
-            <a-text value="MARCADOR C" align="center" position="0 0.1 0" scale="0.4 0.4 0.4" color="#ef4444" material="shader: flat;"></a-text>
+        <!-- ANCLAJE C (Logo Database) - SPATIAL UI INTERACTIVA -->
+        <a-entity id="anchor-marcador_c" position="0 0.6 -5.0">
+            <a-plane 
+                billboard-ui 
+                class="clickable" 
+                width="1.1" 
+                height="0.6" 
+                material="shader: flat; color: #0a0f1e; opacity: 0.78; transparent: true; side: double;"
+                onclick="lanzarContenedorEnMarcador('marcador_c')"
+                title="Lanzar contenedor en C">
+                <a-plane width="1.13" height="0.63" position="0 0 -0.005" color="#ef4444" material="shader: flat; side: double; opacity: 0.6; transparent: true;"></a-plane>
+                <a-text value="MARCADOR C\n(Database)" align="center" width="2.4" position="0 0.1 0.01" color="#ef4444" font="mozillavr"></a-text>
+                <a-text value="Clic para lanzar aqui" align="center" width="1.6" position="0 -0.18 0.01" color="#cbd5e1" font="mozillavr"></a-text>
+            </a-plane>
         </a-entity>
 
     </a-scene>
 
     <!-- Script de Interactividad, STT, Ollama (Docker Only) y Metáforas Visuales -->
     <script>
+        // Componente A-Frame de Rotación Espacial (Billboarding interactivo)
+        AFRAME.registerComponent('billboard-ui', {
+            init: function () {
+                this.cameraWorldPos = new THREE.Vector3();
+            },
+            tick: function () {
+                const camera = this.el.sceneEl.camera;
+                if (!camera) return;
+                this.cameraWorldPos.setFromMatrixPosition(camera.matrixWorld);
+                this.el.object3D.lookAt(this.cameraWorldPos);
+            }
+        });
+
         // API Local de Ollama
         const isProd = window.location.hostname.includes("alexandervillalva.uk");
         const OLLAMA_API_URL = isProd 
@@ -739,6 +916,125 @@
         }
         document.addEventListener("click", unlockAudioContext);
         document.addEventListener("touchstart", unlockAudioContext);
+
+        // --- SPATIAL UX: Alternar HUD colapsable ---
+        function toggleChatPanel() {
+            const panel = document.getElementById('chat-panel');
+            if (panel) {
+                panel.classList.toggle('collapsed');
+                const isCollapsed = panel.classList.contains('collapsed');
+                mostrarNotificacion(isCollapsed ? "HUD colapsado" : "HUD ampliado");
+            }
+        }
+
+        // --- SPATIAL UX: Máquina de Estados de Inferencia ---
+        function setInferenceState(state) {
+            const dialogueDisplay = document.getElementById('dialogue-display');
+            const speakerLabel = document.getElementById('speaker-label');
+            const laser = document.getElementById('scanner-laser');
+            const panel = document.getElementById('chat-panel');
+            const micBtn = document.getElementById('btn-mic');
+            
+            // Limpieza
+            panel.classList.remove('hud-thinking');
+            laser.classList.remove('active');
+            if (micBtn) micBtn.classList.remove('mic-active-glow');
+
+            switch (state) {
+                case 'idle':
+                    speakerLabel.innerText = "Moby (Ballena)";
+                    break;
+                case 'capturing':
+                    speakerLabel.innerText = "📸 Capturando";
+                    dialogueDisplay.innerHTML = `<span style="color: #00f3ff;">[Captura]</span> Enfocando visor y tomando captura de pantalla real...`;
+                    break;
+                case 'yolo_vision':
+                    speakerLabel.innerText = "👁️ Visión YOLOv8";
+                    dialogueDisplay.innerHTML = `<span style="color: #ef4444; font-weight: bold;">[YOLOv8]</span> Analizando entorno y localizando contenedores...`;
+                    laser.classList.add('active');
+                    panel.classList.add('hud-thinking');
+                    break;
+                case 'ollama_reasoning':
+                    speakerLabel.innerText = "🧠 Razonamiento LLM";
+                    dialogueDisplay.innerHTML = `<span style="color: #eab308; font-weight: bold;">[Ollama]</span> Pensando respuesta Docker en el servidor local...`;
+                    panel.classList.add('hud-thinking');
+                    break;
+                case 'speaking':
+                    speakerLabel.innerText = "🐳 Moby (Hablando)";
+                    if (micBtn) micBtn.classList.add('mic-active-glow');
+                    break;
+            }
+        }
+
+        // --- SPATIAL UX: Lanzar Contenedores a Marcadores Específicos ---
+        function lanzarContenedorEnMarcador(marcadorId) {
+            const scene = document.querySelector("a-scene");
+            const anchorEl = document.getElementById("anchor-" + marcadorId);
+            if (!anchorEl) return;
+            
+            const targetPos = anchorEl.getAttribute("position");
+            const color = containerColors[containerCount % containerColors.length];
+            containerCount++;
+            
+            const box = document.createElement("a-box");
+            box.setAttribute("color", color);
+            box.setAttribute("width", "0.22");
+            box.setAttribute("height", "0.14");
+            box.setAttribute("depth", "0.14");
+            box.setAttribute("material", "roughness: 0.2; metalness: 0.8; emissive: " + color + "; emissiveIntensity: 0.6;");
+            box.setAttribute("position", "0 0.8 -1.0");
+            
+            scene.appendChild(box);
+            
+            box.setAttribute("animation__fly", {
+                property: 'position',
+                from: '0 0.8 -1.0',
+                to: `${targetPos.x} ${targetPos.y + 0.2} ${targetPos.z}`,
+                dur: 700,
+                easing: 'easeOutBack'
+            });
+            
+            box.setAttribute("animation__spin", {
+                property: 'rotation',
+                from: '0 0 0',
+                to: '360 180 360',
+                dur: 700,
+                easing: 'linear'
+            });
+            
+            setTimeout(() => {
+                scene.removeChild(box);
+                
+                // Efecto de colisión
+                const ring = document.createElement("a-ring");
+                ring.setAttribute("color", color);
+                ring.setAttribute("radius-inner", "0.01");
+                ring.setAttribute("radius-outer", "0.02");
+                ring.setAttribute("position", `${targetPos.x} ${targetPos.y + 0.2} ${targetPos.z}`);
+                ring.setAttribute("rotation", "-90 0 0");
+                ring.setAttribute("material", "side: double; transparent: true; opacity: 0.95;");
+                ring.setAttribute("animation__expand", {
+                    property: 'radius-outer',
+                    to: '1.0',
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+                ring.setAttribute("animation__fade", {
+                    property: 'material.opacity',
+                    to: '0',
+                    dur: 500,
+                    easing: 'easeOutQuad'
+                });
+                scene.appendChild(ring);
+                
+                setTimeout(() => scene.removeChild(ring), 550);
+                
+                const msgs = containerDeployMessages;
+                const msg = msgs[Math.floor(Math.random() * msgs.length)];
+                escribirTexto(msg.replace("¡", `¡[${marcadorId.replace("_"," ").toUpperCase()}] `), 15);
+                hablar("Desplegado.");
+            }, 700);
+        }
 
         // Inicializar Reconocimiento de Voz (STT) de alta fidelidad
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -1218,6 +1514,9 @@
             elSubmitBtn.disabled = true;
             elInput.value = "";
             
+            // Estado: Capturando / Iniciando
+            setInferenceState('ollama_reasoning');
+            
             // --- VALIDAR TEMA STRICTLY DOCKER ---
             if (!esTematicaDockerValida(pregunta)) {
                 const declinacion = "¡Ups! Como la ballena mascota de Docker, mi cerebro solo tiene espacio para contenedores y barcos de carga. 🐳💙 ¡Pregúntame lo que quieras sobre Docker, imágenes, volúmenes o Kubernetes!";
@@ -1284,11 +1583,13 @@
                 respuestaMoby = limpiarMarkdown(respuestaMoby);
                 
                 // Mostrar respuesta y hablarla en voz alta
+                setInferenceState('speaking');
                 escribirTexto(respuestaMoby, 15);
                 hablar(respuestaMoby);
 
             } catch (error) {
                 console.error(error);
+                setInferenceState('idle');
                 const msgError = "¡Oh no! Parece que tengo problemas para conectarme a mi motor local de Inteligencia Artificial (Ollama). Por favor, asegúrate de tener Ollama activo en el puerto 11434 con CORS habilitado. 🐳🔌";
                 escribirTexto(msgError, 15);
                 hablar("Oh no, tengo un error de conexión.");
@@ -1297,6 +1598,14 @@
                 elInput.disabled = false;
                 elSubmitBtn.disabled = false;
                 elInput.focus();
+                
+                // Retornar a idle después de un tiempo
+                setTimeout(() => {
+                    const speakerLbl = document.getElementById('speaker-label');
+                    if (speakerLbl && speakerLbl.innerText.includes("Hablando")) {
+                        setInferenceState('idle');
+                    }
+                }, 8000);
             }
         }
 
@@ -1763,10 +2072,10 @@
 
             // Deshabilitar botón durante el procesamiento
             btnScan.disabled = true;
-            mostrarEscanerAnimacion(true);
             
-            escribirTexto("Lanzando pulso de sonar holográfico... Analizando tu Docker Desktop u objeto con Gemini 1.5 Flash 🐳📡💭", 20);
-            hablar("Analizando tu pantalla.");
+            // Establecer estados de inferencia en orden
+            setInferenceState('capturing');
+            mostrarEscanerAnimacion(true);
 
             try {
                 // 1. Capturar fotograma en canvas oculto
@@ -1781,7 +2090,9 @@
                 // Convertir a base64
                 const base64Image = canvas.toDataURL("image/jpeg", 0.85);
 
-                // 2. Enviar fotograma al servidor
+                // 2. Enviar fotograma al servidor (Inicia Visión YOLO + Gemini/Ollama)
+                setInferenceState('yolo_vision');
+                
                 const response = await fetch("/api/vision", {
                     method: "POST",
                     headers: {
@@ -1798,21 +2109,32 @@
                 btnScan.disabled = false;
 
                 if (data.error) {
+                    setInferenceState('idle');
                     escribirTexto(data.error, 15);
                     hablar("Falla de sonar.");
                 } else if (data.response) {
                     // Moby reacciona con alegría
                     hacerSaltarMoby();
                     const respuestaLimpia = limpiarMarkdown(data.response);
+                    setInferenceState('speaking');
                     escribirTexto(respuestaLimpia, 15);
                     hablar(respuestaLimpia);
                 }
             } catch (err) {
                 console.error("Error en el sonar visual:", err);
+                setInferenceState('idle');
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
                 escribirTexto("¡Bzzzt! El sonar perdió la señal. Asegúrate de configurar 'gemini_key.txt' en la raíz y ejecutar el servidor python. 🐳🔌", 15);
                 hablar("El sonar perdió la señal.");
+            } finally {
+                // Retornar a idle
+                setTimeout(() => {
+                    const speakerLbl = document.getElementById('speaker-label');
+                    if (speakerLbl && speakerLbl.innerText.includes("Hablando")) {
+                        setInferenceState('idle');
+                    }
+                }, 8000);
             }
         }
 
