@@ -49,12 +49,13 @@
             height: 100%;
             pointer-events: none;
             display: grid;
-            grid-template-columns: 280px 1fr 320px;
+            grid-template-columns: var(--sidebar-width, 280px) 1fr var(--inspector-width, 320px);
             grid-template-rows: 70px 1fr;
             grid-template-areas: 
                 "header header header"
                 "sidebar main inspector";
             z-index: 10;
+            transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* HEADER SUPERIOR */
@@ -146,7 +147,6 @@
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
         }
 
-        /* SIDEBAR DE ASSETS (IZQUIERDA) */
         .sidebar {
             grid-area: sidebar;
             background: var(--color-bg-glass);
@@ -159,6 +159,13 @@
             gap: 20px;
             pointer-events: auto;
             overflow-y: auto;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+            transform-origin: left;
+        }
+        .sidebar.collapsed {
+            transform: translateX(-100%);
+            opacity: 0;
+            pointer-events: none !important;
         }
 
         .panel-section-title {
@@ -211,7 +218,6 @@
             line-height: 1.3;
         }
 
-        /* INSPECTOR DE PROPIEDADES (DERECHA) */
         .inspector {
             grid-area: inspector;
             background: var(--color-bg-glass);
@@ -224,6 +230,13 @@
             gap: 25px;
             pointer-events: auto;
             overflow-y: auto;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+            transform-origin: right;
+        }
+        .inspector.collapsed {
+            transform: translateX(100%);
+            opacity: 0;
+            pointer-events: none !important;
         }
 
         .empty-inspector {
@@ -353,7 +366,7 @@
         .viewport-instructions {
             position: absolute;
             bottom: 20px;
-            left: 300px;
+            left: calc(var(--sidebar-width, 280px) + 20px);
             background: rgba(5, 7, 15, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 10px 18px;
@@ -363,6 +376,7 @@
             backdrop-filter: blur(5px);
             display: flex;
             gap: 15px;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .inst-item {
@@ -861,7 +875,7 @@
         #viewport-navigation-star {
             position: absolute;
             top: 90px;
-            right: 340px;
+            right: calc(var(--inspector-width, 320px) + 20px);
             width: 100px;
             height: 100px;
             z-index: 100;
@@ -1009,8 +1023,141 @@
             justify-content: flex-end;
             gap: 12px;
             border-top: 1px solid var(--color-border-glass);
-            padding-top: 15px;
-            margin-top: 10px;
+        /* === RESPONSIVE UTILITIES AND TOGGLE BUTTONS === */
+        .floating-toggle-btn {
+            position: absolute;
+            top: 85px;
+            width: 36px;
+            height: 36px;
+            background: rgba(10, 15, 30, 0.85);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 8px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.2s ease, left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .floating-toggle-btn:hover {
+            border-color: var(--color-docker);
+            color: var(--color-docker);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        #btn-toggle-sidebar {
+            left: calc(var(--sidebar-width, 280px) + 12px);
+        }
+        #btn-toggle-inspector {
+            right: calc(var(--inspector-width, 320px) + 12px);
+        }
+
+        #hud-editor.sidebar-collapsed {
+            --sidebar-width: 0px;
+        }
+        #hud-editor.inspector-collapsed {
+            --inspector-width: 0px;
+        }
+
+        /* Responsive adaptations for tablets and mobiles */
+        @media (max-width: 900px) {
+            .btn-label {
+                display: none; /* Only show icons in transform toolbar */
+            }
+            .toolbar-btn {
+                padding: 8px;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+            }
+            #transform-toolbar {
+                padding: 4px 6px;
+                border-radius: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #hud-editor {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "main";
+                --sidebar-width: 0px;
+                --inspector-width: 0px;
+            }
+            .sidebar {
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 280px;
+                height: calc(100% - 70px);
+                z-index: 50;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+                transform: translateX(-100%);
+                opacity: 0;
+                transition: transform 0.3s ease, opacity 0.3s;
+            }
+            .sidebar.active-mobile {
+                transform: translateX(0);
+                opacity: 1;
+                pointer-events: auto !important;
+            }
+            .inspector {
+                position: absolute;
+                top: 70px;
+                right: 0;
+                width: 280px;
+                height: calc(100% - 70px);
+                z-index: 50;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+                transform: translateX(100%);
+                opacity: 0;
+                transition: transform 0.3s ease, opacity 0.3s;
+            }
+            .inspector.active-mobile {
+                transform: translateX(0);
+                opacity: 1;
+                pointer-events: auto !important;
+            }
+            #btn-toggle-sidebar {
+                left: 12px;
+            }
+            #btn-toggle-inspector {
+                right: 12px;
+            }
+            .viewport-instructions {
+                display: none;
+            }
+            #viewport-navigation-star {
+                right: 20px;
+                top: 80px;
+                width: 70px;
+                height: 70px;
+            }
+            #navigation-star-canvas {
+                width: 70px !important;
+                height: 70px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-title {
+                font-size: 14px;
+            }
+            .logo-badge {
+                display: none;
+            }
+            .btn {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+            header {
+                padding: 0 10px;
+            }
         }
     </style>
 </head>
@@ -1038,6 +1185,14 @@
                 </button>
             </div>
         </header>
+
+        <!-- BUTTONS TO COLLAPSE/EXPAND SIDEBARS -->
+        <button id="btn-toggle-sidebar" class="floating-toggle-btn" onclick="toggleSidebar()" title="Ocultar/Mostrar Barra Lateral">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button id="btn-toggle-inspector" class="floating-toggle-btn" onclick="toggleInspector()" title="Ocultar/Mostrar Inspector">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
 
         <!-- SIDEBAR CON PESTAÑAS -->
         <div class="sidebar" style="padding: 16px 16px 16px; gap: 0;">
@@ -2262,10 +2417,59 @@
             }
         });
 
+        // Collapsible HUD Sidebar and Inspector Panel logic
+        function toggleSidebar() {
+            const hud = document.getElementById('hud-editor');
+            const sidebar = document.querySelector('.sidebar');
+            const btn = document.getElementById('btn-toggle-sidebar');
+            
+            const isCollapsed = hud.classList.toggle('sidebar-collapsed');
+            sidebar.classList.toggle('collapsed', isCollapsed);
+            
+            // For mobile overlay drawer compatibility
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active-mobile');
+            }
+
+            // Update button arrow direction icon dynamically
+            if (btn) {
+                btn.innerHTML = isCollapsed ? 
+                    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>` : 
+                    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+            }
+        }
+
+        function toggleInspector() {
+            const hud = document.getElementById('hud-editor');
+            const inspector = document.querySelector('.inspector');
+            const btn = document.getElementById('btn-toggle-inspector');
+            
+            const isCollapsed = hud.classList.toggle('inspector-collapsed');
+            inspector.classList.toggle('collapsed', isCollapsed);
+            
+            // For mobile overlay drawer compatibility
+            if (window.innerWidth <= 768) {
+                inspector.classList.toggle('active-mobile');
+            }
+
+            // Update button arrow direction icon dynamically
+            if (btn) {
+                btn.innerHTML = isCollapsed ? 
+                    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>` : 
+                    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+            }
+        }
+
         // Al cargar la página, descargar el diseño existente en el servidor si existe
         window.addEventListener('DOMContentLoaded', () => {
             cargarDisenoDesdeServidor();
             initNavigationStar();
+            
+            // Si la pantalla es pequeña (Móvil / Tablet), colapsar paneles por defecto para optimizar espacio del Viewport 3D
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+                toggleInspector();
+            }
         });
 
         // Crear una nueva entidad 3D en el lienzo
