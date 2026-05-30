@@ -556,49 +556,69 @@
         }
 
         /* Tarjeta de estado visible durante el análisis */
-        .vision-status-card {
+        /* Flash de cámara */
+        .camera-flash {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.05s;
+        }
+        .camera-flash.fire {
+            opacity: 1;
+        }
+
+        /* Panel de preview de foto capturada */
+        .photo-preview-panel {
             position: absolute;
-            bottom: 90px;
+            bottom: 85px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.82);
-            border: 1px solid rgba(0,243,255,0.5);
-            border-radius: 16px;
-            padding: 12px 20px;
-            z-index: 60;
+            z-index: 80;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .photo-preview-img {
+            width: 160px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2px solid rgba(0,243,255,0.7);
+            box-shadow: 0 0 18px rgba(0,243,255,0.4), 0 4px 20px rgba(0,0,0,0.6);
+        }
+        .photo-preview-label {
+            background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(0,243,255,0.4);
+            border-radius: 20px;
+            padding: 5px 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(12px);
-            animation: status-pulse 1.5s ease-in-out infinite;
-            pointer-events: none;
-            white-space: nowrap;
+            gap: 7px;
+            backdrop-filter: blur(8px);
         }
-        .vision-status-card .vsc-dot {
-            width: 10px; height: 10px;
+        .photo-preview-dot {
+            width: 8px; height: 8px;
             border-radius: 50%;
             background: #00f3ff;
-            box-shadow: 0 0 8px #00f3ff;
-            animation: dot-blink 1s ease-in-out infinite;
+            box-shadow: 0 0 6px #00f3ff;
+            animation: dot-blink 0.9s ease-in-out infinite;
         }
-        .vision-status-card .vsc-text {
+        .photo-preview-text {
             color: #e0f2fe;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-        .vision-status-card .vsc-sub {
-            color: rgba(148,210,255,0.7);
-            font-size: 11px;
-            display: block;
-            margin-top: 1px;
-        }
-        @keyframes status-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(0,243,255,0.2); }
-            50% { box-shadow: 0 0 0 6px rgba(0,243,255,0); }
         }
         @keyframes dot-blink {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
+            0%, 100% { opacity: 1; } 50% { opacity: 0.15; }
+        }
+        @keyframes preview-in {
+            from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+            to   { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         @keyframes scan-sweep {
             0% { top: 0%; opacity: 0.3; }
@@ -1045,14 +1065,16 @@
     <div id="scanner-laser" class="scanner-laser"></div>
     <div id="ar-detection-pill" class="ar-detection-pill">Target AR detectado</div>
 
+    <!-- Flash de cámara -->
+    <div id="camera-flash" class="camera-flash"></div>
     <!-- Animación de Escáner de Radar Holográfico -->
     <div id="scanner-overlay" class="scanner-overlay" style="display: none;"></div>
-    <!-- Tarjeta de estado visible durante análisis Gemma4 -->
-    <div id="vision-status-card" class="vision-status-card" style="display:none;">
-        <div class="vsc-dot"></div>
-        <div>
-            <span class="vsc-text" id="vsc-title">Analizando imagen...</span>
-            <span class="vsc-sub" id="vsc-sub">Gemma4:e2b Vision · IA local</span>
+    <!-- Preview de foto capturada + estado de envío a Gemma4 -->
+    <div id="photo-preview-panel" class="photo-preview-panel">
+        <img id="photo-preview-img" class="photo-preview-img" src="" alt="Foto capturada" />
+        <div class="photo-preview-label">
+            <div class="photo-preview-dot"></div>
+            <span class="photo-preview-text" id="photo-preview-text">Enviando a Gemma4...</span>
         </div>
     </div>
 
@@ -3076,61 +3098,76 @@
         }
 
         // --- FUNCIÓN DE ESCANEO DE VISIÓN COMPUTACIONAL (GEMINI VISION) ---
-        function mostrarEscanerAnimacion(active, titulo, subtitulo) {
-            const scanner = document.getElementById("scanner-overlay");
-            const card    = document.getElementById("vision-status-card");
-            const vscTitle = document.getElementById("vsc-title");
-            const vscSub   = document.getElementById("vsc-sub");
-            if (active) {
-                scanner.style.display = "block";
-                card.style.display    = "flex";
-                if (vscTitle) vscTitle.textContent = titulo  || "Analizando imagen...";
-                if (vscSub)   vscSub.textContent   = subtitulo || "Gemma4:e2b Vision · IA local";
+        function mostrarEscanerAnimacion(active) {
+            const scanner = document.getElementById('scanner-overlay');
+            scanner.style.display = active ? 'block' : 'none';
+        }
+
+        // Muestra/oculta el panel de preview con la foto capturada
+        function mostrarFotoPreview(base64, label) {
+            const panel = document.getElementById('photo-preview-panel');
+            const img   = document.getElementById('photo-preview-img');
+            const txt   = document.getElementById('photo-preview-text');
+            if (base64) {
+                img.src = base64;
+                if (txt) txt.textContent = label || 'Enviando a Gemma4...';
+                panel.style.display = 'flex';
+                panel.style.animation = 'preview-in 0.3s ease';
             } else {
-                scanner.style.display = "none";
-                card.style.display    = "none";
+                panel.style.display = 'none';
+                img.src = '';
             }
+        }
+
+        // Dispara el flash blanco de cámara
+        function dispararFlash() {
+            const flash = document.getElementById('camera-flash');
+            flash.classList.add('fire');
+            setTimeout(() => flash.classList.remove('fire'), 180);
         }
 
         async function escanearEntorno() {
             feedbackMovil(24);
-            const video = document.getElementById("camera-stream");
-            const btnScan = document.getElementById("btn-scan");
+            const video   = document.getElementById('camera-stream');
+            const btnScan = document.getElementById('btn-scan');
 
             if (!cameraStream) {
-                escribirTexto("¡Activa primero la Cámara RA para usar la Visión IA! 🐳📸", 15);
-                hablar("Activa primero la cámara.");
+                escribirTexto('¡Activa primero la Cámara RA para usar la Visión IA! 🐳📸', 15);
+                hablar('Activa primero la cámara.');
                 return;
             }
 
             btnScan.disabled = true;
-
-            // PASO 1: Capturando frame
             setInferenceState('capturing');
-            mostrarEscanerAnimacion(true, "📸 Capturando imagen...", "Tomando foto del entorno actual");
 
+            // ── PASO 1: Tomar la foto ──────────────────────────────────
+            dispararFlash();                          // flash blanco visual
+            mostrarEscanerAnimacion(true);             // barra de scan
+
+            const canvas = document.createElement('canvas');
+            canvas.width  = video.videoWidth  || 1280;
+            canvas.height = video.videoHeight || 720;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64Image = canvas.toDataURL('image/jpeg', 0.90);
+
+            // Mostrar preview de la foto al usuario
+            mostrarFotoPreview(base64Image, '📤 Enviando a Gemma4 Vision...');
+            mostrarEscanerAnimacion(false);
+            setInferenceState('yolo_vision');
+
+            // ── PASO 2: Enviar foto a Gemma4 ──────────────────────────
             try {
-                const canvas = document.createElement("canvas");
-                canvas.width  = video.videoWidth  || 1280;
-                canvas.height = video.videoHeight || 720;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const base64Image = canvas.toDataURL("image/jpeg", 0.90);
-
-                // PASO 2: Enviando a Gemma4
-                setInferenceState('yolo_vision');
-                mostrarEscanerAnimacion(true, "🧠 Gemma4 analizando...", "Leyendo la imagen · ~15-20 s");
-
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 90000);
+                const timeoutId  = setTimeout(() => controller.abort(), 90000);
 
                 let response;
                 try {
-                    response = await fetch("/api/vision", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ image: base64Image }),
-                        signal: controller.signal
+                    response = await fetch('/api/vision', {
+                        method:  'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body:    JSON.stringify({ image: base64Image }),
+                        signal:  controller.signal
                     });
                 } finally {
                     clearTimeout(timeoutId);
@@ -3138,14 +3175,14 @@
 
                 const data = await response.json();
 
-                // PASO 3: Resultado
-                mostrarEscanerAnimacion(false);
+                // ── PASO 3: Mostrar resultado ──────────────────────────
+                mostrarFotoPreview(null);              // ocultar preview
                 btnScan.disabled = false;
 
                 if (data.error) {
                     setInferenceState('idle');
                     escribirTexto(data.error, 15);
-                    hablar("No pude analizar la imagen.");
+                    hablar('No pude analizar la imagen.');
                 } else if (data.response) {
                     hacerSaltarMoby();
                     const respuestaLimpia = limpiarMarkdown(data.response);
@@ -3155,20 +3192,21 @@
                 }
 
             } catch (err) {
-                console.error("Error en visión IA:", err);
+                console.error('Error en visión IA:', err);
                 setInferenceState('idle');
+                mostrarFotoPreview(null);
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
                 if (err.name === 'AbortError') {
-                    escribirTexto("⏱️ Tiempo agotado. Asegúrate de que Ollama esté corriendo con gemma4:e2b. 🐳", 15);
+                    escribirTexto('⏱️ Tiempo agotado. Verifica que Ollama esté corriendo con gemma4:e2b. 🐳', 15);
                 } else {
-                    escribirTexto("¡Bzzzt! Sin conexión al servidor. Asegúrate de que Python esté corriendo. 🐳🔌", 15);
+                    escribirTexto('¡Sin conexión al servidor! Asegúrate de que Python esté corriendo. 🐳🔌', 15);
                 }
-                hablar("El sonar perdió la señal.");
+                hablar('El sonar perdió la señal.');
             } finally {
                 setTimeout(() => {
                     const speakerLbl = document.getElementById('speaker-label');
-                    if (speakerLbl && speakerLbl.innerText.includes("Hablando")) {
+                    if (speakerLbl && speakerLbl.innerText.includes('Hablando')) {
                         setInferenceState('idle');
                     }
                 }, 8000);
