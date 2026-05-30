@@ -541,7 +541,7 @@
             transform: translateY(0);
         }
 
-        /* Animación de Escáner de Radar Holográfico */
+        /* Animación de Escáner con tarjeta de estado */
         .scanner-overlay {
             position: absolute;
             top: 0;
@@ -555,6 +555,51 @@
             animation: scan-sweep 2.2s ease-in-out infinite;
         }
 
+        /* Tarjeta de estado visible durante el análisis */
+        .vision-status-card {
+            position: absolute;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.82);
+            border: 1px solid rgba(0,243,255,0.5);
+            border-radius: 16px;
+            padding: 12px 20px;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(12px);
+            animation: status-pulse 1.5s ease-in-out infinite;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .vision-status-card .vsc-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #00f3ff;
+            box-shadow: 0 0 8px #00f3ff;
+            animation: dot-blink 1s ease-in-out infinite;
+        }
+        .vision-status-card .vsc-text {
+            color: #e0f2fe;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .vision-status-card .vsc-sub {
+            color: rgba(148,210,255,0.7);
+            font-size: 11px;
+            display: block;
+            margin-top: 1px;
+        }
+        @keyframes status-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,243,255,0.2); }
+            50% { box-shadow: 0 0 0 6px rgba(0,243,255,0); }
+        }
+        @keyframes dot-blink {
+            0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
+        }
         @keyframes scan-sweep {
             0% { top: 0%; opacity: 0.3; }
             50% { top: 100%; opacity: 1; }
@@ -1002,6 +1047,14 @@
 
     <!-- Animación de Escáner de Radar Holográfico -->
     <div id="scanner-overlay" class="scanner-overlay" style="display: none;"></div>
+    <!-- Tarjeta de estado visible durante análisis Gemma4 -->
+    <div id="vision-status-card" class="vision-status-card" style="display:none;">
+        <div class="vsc-dot"></div>
+        <div>
+            <span class="vsc-text" id="vsc-title">Analizando imagen...</span>
+            <span class="vsc-sub" id="vsc-sub">Gemma4:e2b Vision · IA local</span>
+        </div>
+    </div>
 
     <!-- Indicadores de Radar Estilo Pokémon Go (Para orientar al usuario hacia Moby) -->
     <div id="radar-left" class="radar-arrow radar-left" style="display: none;">
@@ -1490,9 +1543,9 @@
                     dialogueDisplay.innerHTML = `<span style="color: #00f3ff;">[Captura]</span> Enfocando visor y tomando captura de pantalla real...`;
                     break;
                 case 'yolo_vision':
-                    speakerLabel.innerText = "👁️ Visión YOLOv8";
-                    setMobileClientState("Analizando");
-                    dialogueDisplay.innerHTML = `<span style="color: #ef4444; font-weight: bold;">[YOLOv8]</span> Analizando entorno y localizando contenedores...`;
+                    speakerLabel.innerText = "🧠 Gemma4 Vision";
+                    setMobileClientState("Analizando con IA");
+                    dialogueDisplay.innerHTML = `<span style="color: #00f3ff; font-weight: bold;">[Gemma4:e2b]</span> Analizando la imagen con visión IA local... puede tardar unos segundos.`;
                     laser.classList.add('active');
                     panel.classList.add('hud-thinking');
                     break;
@@ -3023,12 +3076,19 @@
         }
 
         // --- FUNCIÓN DE ESCANEO DE VISIÓN COMPUTACIONAL (GEMINI VISION) ---
-        function mostrarEscanerAnimacion(active) {
+        function mostrarEscanerAnimacion(active, titulo, subtitulo) {
             const scanner = document.getElementById("scanner-overlay");
+            const card    = document.getElementById("vision-status-card");
+            const vscTitle = document.getElementById("vsc-title");
+            const vscSub   = document.getElementById("vsc-sub");
             if (active) {
                 scanner.style.display = "block";
+                card.style.display    = "flex";
+                if (vscTitle) vscTitle.textContent = titulo  || "Analizando imagen...";
+                if (vscSub)   vscSub.textContent   = subtitulo || "Gemma4:e2b Vision · IA local";
             } else {
                 scanner.style.display = "none";
+                card.style.display    = "none";
             }
         }
 
@@ -3038,35 +3098,29 @@
             const btnScan = document.getElementById("btn-scan");
 
             if (!cameraStream) {
-                escribirTexto("¡Debes activar primero la Cámara RA para usar mi Visión con IA! 🐳📸", 15);
+                escribirTexto("¡Activa primero la Cámara RA para usar la Visión IA! 🐳📸", 15);
                 hablar("Activa primero la cámara.");
                 return;
             }
 
-            // Deshabilitar botón durante el procesamiento
             btnScan.disabled = true;
 
-            // Capturando...
+            // PASO 1: Capturando frame
             setInferenceState('capturing');
-            mostrarEscanerAnimacion(true);
-            escribirTexto("📸 Capturando imagen del entorno...", 20);
+            mostrarEscanerAnimacion(true, "📸 Capturando imagen...", "Tomando foto del entorno actual");
 
             try {
-                // 1. Capturar fotograma — resolución mayor para Gemma3 (necesita más detalle)
                 const canvas = document.createElement("canvas");
                 canvas.width  = video.videoWidth  || 1280;
                 canvas.height = video.videoHeight || 720;
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                // Calidad JPEG 0.90 para que Gemma3 lea texto e interfaces correctamente
                 const base64Image = canvas.toDataURL("image/jpeg", 0.90);
 
-                // 2. Enviar al pipeline de visión (Gemma3 → YOLO fallback)
+                // PASO 2: Enviando a Gemma4
                 setInferenceState('yolo_vision');
-                escribirTexto("🧠 Analizando con Gemma4 Vision E2B... (puede tardar hasta 20 s)", 20);
+                mostrarEscanerAnimacion(true, "🧠 Gemma4 analizando...", "Leyendo la imagen · ~15-20 s");
 
-                // AbortController para timeout manual de 90 segundos
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 90000);
 
@@ -3084,6 +3138,7 @@
 
                 const data = await response.json();
 
+                // PASO 3: Resultado
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
 
@@ -3098,15 +3153,16 @@
                     escribirTexto(respuestaLimpia, 15);
                     hablar(respuestaLimpia);
                 }
+
             } catch (err) {
                 console.error("Error en visión IA:", err);
                 setInferenceState('idle');
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
                 if (err.name === 'AbortError') {
-                    escribirTexto("⏱️ El análisis tardó demasiado. Asegúrate de que Ollama esté corriendo con gemma4:e2b activo. 🐳", 15);
+                    escribirTexto("⏱️ Tiempo agotado. Asegúrate de que Ollama esté corriendo con gemma4:e2b. 🐳", 15);
                 } else {
-                    escribirTexto("¡Bzzzt! El sonar perdió la señal. Asegúrate de que el servidor Python esté corriendo. 🐳🔌", 15);
+                    escribirTexto("¡Bzzzt! Sin conexión al servidor. Asegúrate de que Python esté corriendo. 🐳🔌", 15);
                 }
                 hablar("El sonar perdió la señal.");
             } finally {
