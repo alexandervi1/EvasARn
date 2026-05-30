@@ -390,119 +390,188 @@ def get_local_ip():
 
 yolo_model = None
 
-def query_yolo_and_ollama(base64_image_data):
-    """
-    Procesa un fotograma en Base64 de forma 100% local ejecutando YOLOv8
-    en la computadora del usuario y alimentando las etiquetas detectadas
-    a Ollama local (qwen) para armar una respuesta didáctica divertida.
-    """
-    global yolo_model
-    
-    # Lazy loading para evitar que falle el servidor si ultralytics sigue instalándose
-    try:
-        from ultralytics import YOLO
-    except ImportError:
-        return "¡Procesador de visión instalándose! La librería 'ultralytics' (YOLOv8) se está configurando en segundo plano en tu PC. Por favor, espera un minuto e inténtalo de nuevo. 🐳⏳"
+# ─────────────────────────────────────────────────────────────────────────────
+# PIPELINE DE VISIÓN PRINCIPAL: Gemma3 Multimodal (ve la imagen directamente)
+# ─────────────────────────────────────────────────────────────────────────────
 
-    if yolo_model is None:
-        custom_path = os.path.join("vision", "yolov8_docker_custom.pt")
-        nano_path = os.path.join("vision", "yolov8n.pt")
-        if os.path.exists(custom_path):
-            print(f"[YOLO LOCAL] Inicializando Modelo Personalizado ({custom_path}) en memoria...")
-            yolo_model = YOLO(custom_path)
-        else:
-            print(f"[YOLO LOCAL] Inicializando YOLOv8 Nano por defecto ({nano_path}) en memoria...")
-            yolo_model = YOLO(nano_path)
-        print("[YOLO LOCAL] Modelo YOLOv8 inicializado con éxito.")
+SYSTEM_PROMPT_DOCKER = """Eres Moby, la mascota oficial de Docker — una ballena simpática, didáctica y entusiasta.
+Tu misión es analizar imágenes del entorno real o de pantallas de computadora y explicar Docker de forma pedagógica.
 
-    # 1. Decodificar la imagen Base64 y guardarla temporalmente
+Reglas:
+- Responde SIEMPRE en español.
+- Máximo 3 oraciones cortas y claras.
+- Si ves objetos físicos (laptop, teclado, ratón, taza, cables, pantalla, teléfono): haz una analogía Docker creativa con cada objeto.
+- Si ves interfaces de software (Docker Desktop, terminal, dashboard, código, navegador, contenedores corriendo): explica lo que ves de forma educativa y menciona conceptos Docker relevantes (imagen, contenedor, volumen, red, compose, registry, Dockerfile).
+- Si ves una terminal con comandos docker: lee los comandos visibles y explica qué hacen.
+- Si ves Docker Desktop: describe el estado de los contenedores visibles y explica qué significa cada sección.
+- Si la imagen está borrosa o vacía: invita al usuario a enfocar la cámara hacia algo relacionado con Docker o computación.
+- Nunca menciones que eres una IA o un modelo de lenguaje. Eres Moby, la ballena.
+- Usa 1 emoji por respuesta máximo. Preferir 🐳."""
+
+def query_gemma_vision(base64_image_data: str) -> str:
+    """
+    Pipeline PRINCIPAL de visión: envía la imagen directamente a Gemma3:12b
+    (modelo multimodal local via Ollama) para análisis visual completo.
+    Funciona con objetos físicos E interfaces de computadora.
+    """
+    # Limpiar prefijo data URI si existe
     if "," in base64_image_data:
         base64_image_data = base64_image_data.split(",")[1]
-    
-    # Asegurar que tenga el relleno (padding) correcto para evitar binascii.Error
+
+    # Asegurar padding correcto
     missing_padding = len(base64_image_data) % 4
     if missing_padding:
         base64_image_data += '=' * (4 - missing_padding)
-    
-    img_data = base64.b64decode(base64_image_data)
-    temp_path = "temp_capture.jpg"
-    with open(temp_path, "wb") as f:
-        f.write(img_data)
-        
-    detecciones = []
+
+    print("[GEMMA VISION] Enviando imagen a gemma3:12b para análisis multimodal...")
+
     try:
-        # 2. Correr inferencia local con YOLOv8
-        results = yolo_model(temp_path, verbose=False)
-        
-        # 3. Filtrar detecciones con confianza > 50%
-        for box in results[0].boxes:
-            conf = float(box.conf[0])
-            if conf >= 0.50:
-                cls_id = int(box.cls[0])
-                label = results[0].names[cls_id]
-                detecciones.append(f"{label} ({int(conf * 100)}% de confianza)")
-    except Exception as e:
-        print(f"[YOLO LOCAL] Falla en la inferencia de la imagen: {str(e)}")
-    finally:
-        # Garantizar limpieza del archivo temporal
-        if os.path.exists(temp_path):
-            try:
-                os.remove(temp_path)
-            except Exception:
-                pass
-        
-    # 4. Crear el Prompt dinámico para Ollama
-    if not detecciones:
-        prompt_ollama = (
-            "Eres Moby, la ballena mascota oficial de Docker. El sensor de mi cámara no detectó ningún objeto "
-            "claro en el entorno inmediato. Genera una respuesta alegre de 2 oraciones en español saludando al usuario "
-            "e invitándolo a colocar una laptop, teclado, ratón o taza de café frente a la cámara para analizarlos "
-            "y explicar su relación con contenedores."
-        )
-    else:
-        objetos_detectados = ", ".join(detecciones)
-        print(f"[YOLO LOCAL] Radar detectó en el entorno real: {objetos_detectados}")
-        
-        prompt_ollama = (
-            f"Eres Moby, la ballena mascota oficial de Docker. Responde de manera alegre, didáctica y en máximo "
-            f"2 oraciones en español. El sensor de mi cámara acaba de escanear mi entorno real y detectó "
-            f"los siguientes objetos físicos: {objetos_detectados}. "
-            f"Describe brevemente qué objetos viste y haz una analogía didáctica y divertida de cómo se relacionan "
-            f"con Docker (por ejemplo, que la laptop representa portabilidad, que la taza de café es un volumen persistente, "
-            f"que el teclado es para escribir Dockerfiles o que el mouse ayuda a orquestar contenedores)."
-        )
-        
-    # 5. Consultar a tu Ollama local (qwen)
-    try:
-        url_ollama = "http://localhost:11434/api/generate"
+        url_ollama = "http://localhost:11434/api/chat"
         payload = {
-            "model": "qwen",
-            "prompt": prompt_ollama,
-            "stream": False
+            "model": "gemma3:12b",
+            "stream": False,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": SYSTEM_PROMPT_DOCKER + "\n\nAnaliza esta imagen y responde como Moby:",
+                    "images": [base64_image_data]
+                }
+            ],
+            "options": {
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "num_predict": 200
+            }
         }
-        
+
         req = urllib.request.Request(
             url_ollama,
             data=json.dumps(payload).encode("utf-8"),
             headers={"Content-Type": "application/json"},
             method="POST"
         )
-        
-        with urllib.request.urlopen(req, timeout=8) as response:
+
+        with urllib.request.urlopen(req, timeout=60) as response:
             res_data = json.loads(response.read().decode("utf-8"))
-            return res_data.get("response", "¡Ups! No pude procesar los datos de mi radar.")
-            
+            message = res_data.get("message", {})
+            content = message.get("content", "").strip()
+            if content:
+                print(f"[GEMMA VISION] Análisis completado: {len(content)} caracteres.")
+                return content
+            return None
+
     except Exception as e:
-        print(f"[OLLAMA ERROR] Error al conectar al servicio local Ollama: {str(e)}")
-        # Fallback elegante si Ollama está caído
-        if detecciones:
-            return (
-                f"¡Hola! Mi sonar local detectó: {', '.join(detecciones)}. "
-                "Lamentablemente no pude conectar con mi cerebro de Ollama en el puerto 11434, "
-                "¡pero sé que esos objetos son claves para tu estación de trabajo Docker! 🐳🔌"
-            )
+        print(f"[GEMMA VISION] Error: {str(e)}")
+        return None
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PIPELINE DE VISIÓN FALLBACK: YOLO + Ollama (texto sin imagen)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def query_yolo_and_ollama(base64_image_data: str) -> str:
+    """
+    Pipeline FALLBACK de visión: usa YOLOv8 para detectar objetos en la imagen
+    y alimenta las etiquetas detectadas a Ollama (qwen) para generar
+    una respuesta Docker educativa. Se usa solo si Gemma3 no está disponible.
+    """
+    global yolo_model
+
+    try:
+        from ultralytics import YOLO
+    except ImportError:
+        return "¡Procesador de visión instalándose! La librería ultralytics se está configurando. Por favor, espera un momento e inténtalo de nuevo. 🐳"
+
+    if yolo_model is None:
+        custom_path = os.path.join("vision", "yolov8_docker_custom.pt")
+        nano_path = os.path.join("vision", "yolov8n.pt")
+        if os.path.exists(custom_path):
+            print(f"[YOLO FALLBACK] Cargando modelo personalizado ({custom_path})...")
+            yolo_model = YOLO(custom_path)
         else:
-            return "¡Sonar activo! No detecté objetos claros, pero asegúrate de tener Ollama activo en el puerto 11434 para que pueda hablar contigo sobre tu entorno. 🐳📡"
+            print(f"[YOLO FALLBACK] Cargando YOLOv8 Nano ({nano_path})...")
+            yolo_model = YOLO(nano_path)
+        print("[YOLO FALLBACK] Modelo listo.")
+
+    # Decodificar imagen
+    raw = base64_image_data
+    if "," in raw:
+        raw = raw.split(",")[1]
+    missing_padding = len(raw) % 4
+    if missing_padding:
+        raw += '=' * (4 - missing_padding)
+
+    img_data = base64.b64decode(raw)
+    temp_path = "temp_capture.jpg"
+    with open(temp_path, "wb") as f:
+        f.write(img_data)
+
+    detecciones = []
+    try:
+        results = yolo_model(temp_path, verbose=False)
+        for box in results[0].boxes:
+            conf = float(box.conf[0])
+            if conf >= 0.45:
+                cls_id = int(box.cls[0])
+                label = results[0].names[cls_id]
+                detecciones.append(f"{label} ({int(conf * 100)}%)")
+    except Exception as e:
+        print(f"[YOLO FALLBACK] Error en inferencia: {str(e)}")
+    finally:
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
+    # Construir prompt hacia Ollama
+    if not detecciones:
+        prompt = (
+            "Eres Moby, la ballena de Docker. No detecté objetos claros en el entorno. "
+            "En 2 oraciones en español, saluda al usuario e invítalo a mostrar su laptop, "
+            "teclado o pantalla con Docker para analizar."
+        )
+    else:
+        objetos = ", ".join(detecciones)
+        print(f"[YOLO FALLBACK] Detectados: {objetos}")
+        prompt = (
+            f"Eres Moby, la ballena de Docker. En máximo 2 oraciones en español, "
+            f"comenta de forma alegre y educativa los siguientes objetos detectados en el entorno del usuario: {objetos}. "
+            f"Haz analogías creativas con conceptos de Docker: contenedores, imágenes, volúmenes, redes o Dockerfiles."
+        )
+
+    try:
+        url_ollama = "http://localhost:11434/api/generate"
+        payload = {"model": "qwen", "prompt": prompt, "stream": False}
+        req = urllib.request.Request(
+            url_ollama,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as response:
+            res_data = json.loads(response.read().decode("utf-8"))
+            return res_data.get("response", "¡Mi sonar no pudo procesar la imagen en este momento!")
+    except Exception as e:
+        print(f"[QWEN FALLBACK] Error Ollama: {str(e)}")
+        if detecciones:
+            return f"🐳 Detecté: {', '.join(detecciones)}. ¡Cada uno de esos objetos puede ser un contenedor Docker en tu estación de trabajo!"
+        return "🐳 ¡Activa Ollama en el puerto 11434 para que pueda analizar tu entorno con IA local!"
+
+
+def analizar_vision(base64_image_data: str) -> str:
+    """
+    Orquestador principal del pipeline de visión.
+    Intenta primero con Gemma3 (multimodal). Si falla, usa YOLO + Ollama (fallback).
+    """
+    # Intento 1: Gemma3 multimodal (ve la imagen directamente)
+    resultado = query_gemma_vision(base64_image_data)
+    if resultado:
+        return resultado
+
+    # Intento 2: YOLO + Ollama (fallback)
+    print("[VISION] Gemma3 no disponible, usando fallback YOLO + Ollama...")
+    return query_yolo_and_ollama(base64_image_data)
 
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -531,10 +600,10 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(response_body.encode('utf-8'))
                     return
 
-                # 2. Ejecutar Inferencia de YOLOv8 local + Ollama local
-                print("[VISION LOCAL] Procesando fotograma mediante YOLOv8 + Ollama...")
-                analisis = query_yolo_and_ollama(image_base64)
-                print("[VISION LOCAL] Análisis de radar completado con éxito.")
+                # 2. Ejecutar pipeline de visión: Gemma3 multimodal → fallback YOLO+Ollama
+                print("[VISION] Iniciando pipeline de visión inteligente...")
+                analisis = analizar_vision(image_base64)
+                print("[VISION] Análisis completado.")
 
                 # 3. Enviar Respuesta
                 self.send_response(200)

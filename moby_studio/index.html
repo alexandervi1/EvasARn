@@ -3038,55 +3038,60 @@
             const btnScan = document.getElementById("btn-scan");
 
             if (!cameraStream) {
-                escribirTexto("¡Debes activar primero la Cámara RA para usar mi Sonar de Reconocimiento Visual! 🐳📸", 15);
+                escribirTexto("¡Debes activar primero la Cámara RA para usar mi Visión con IA! 🐳📸", 15);
                 hablar("Activa primero la cámara.");
                 return;
             }
 
             // Deshabilitar botón durante el procesamiento
             btnScan.disabled = true;
-            
-            // Establecer estados de inferencia en orden
+
+            // Capturando...
             setInferenceState('capturing');
             mostrarEscanerAnimacion(true);
+            escribirTexto("📸 Capturando imagen del entorno...", 20);
 
             try {
-                // 1. Capturar fotograma en canvas oculto
+                // 1. Capturar fotograma — resolución mayor para Gemma3 (necesita más detalle)
                 const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
+                canvas.width  = video.videoWidth  || 1280;
+                canvas.height = video.videoHeight || 720;
                 const ctx = canvas.getContext("2d");
-                
-                // Dibujar el feed de video actual
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // Convertir a base64
-                const base64Image = canvas.toDataURL("image/jpeg", 0.85);
 
-                // 2. Enviar fotograma al servidor (Inicia Visión YOLO + Gemini/Ollama)
+                // Calidad JPEG 0.90 para que Gemma3 lea texto e interfaces correctamente
+                const base64Image = canvas.toDataURL("image/jpeg", 0.90);
+
+                // 2. Enviar al pipeline de visión (Gemma3 → YOLO fallback)
                 setInferenceState('yolo_vision');
-                
-                const response = await fetch("/api/vision", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        image: base64Image
-                    })
-                });
+                escribirTexto("🧠 Analizando con Gemma3 Vision... (puede tardar hasta 30 s)", 20);
+
+                // AbortController para timeout manual de 90 segundos
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+                let response;
+                try {
+                    response = await fetch("/api/vision", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ image: base64Image }),
+                        signal: controller.signal
+                    });
+                } finally {
+                    clearTimeout(timeoutId);
+                }
 
                 const data = await response.json();
-                
+
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
 
                 if (data.error) {
                     setInferenceState('idle');
                     escribirTexto(data.error, 15);
-                    hablar("Falla de sonar.");
+                    hablar("No pude analizar la imagen.");
                 } else if (data.response) {
-                    // Moby reacciona con alegría
                     hacerSaltarMoby();
                     const respuestaLimpia = limpiarMarkdown(data.response);
                     setInferenceState('speaking');
@@ -3094,14 +3099,17 @@
                     hablar(respuestaLimpia);
                 }
             } catch (err) {
-                console.error("Error en el sonar visual:", err);
+                console.error("Error en visión IA:", err);
                 setInferenceState('idle');
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
-                escribirTexto("¡Bzzzt! El sonar perdió la señal. Asegúrate de configurar 'gemini_key.txt' en la raíz y ejecutar el servidor python. 🐳🔌", 15);
+                if (err.name === 'AbortError') {
+                    escribirTexto("⏱️ El análisis tardó demasiado. Asegúrate de que Ollama esté corriendo con gemma3:12b activo. 🐳", 15);
+                } else {
+                    escribirTexto("¡Bzzzt! El sonar perdió la señal. Asegúrate de que el servidor Python esté corriendo. 🐳🔌", 15);
+                }
                 hablar("El sonar perdió la señal.");
             } finally {
-                // Retornar a idle
                 setTimeout(() => {
                     const speakerLbl = document.getElementById('speaker-label');
                     if (speakerLbl && speakerLbl.innerText.includes("Hablando")) {
