@@ -3064,7 +3064,7 @@
 
                 // 2. Enviar al pipeline de visión (Gemma3 → YOLO fallback)
                 setInferenceState('yolo_vision');
-                escribirTexto("🧠 Analizando con Gemma3 Vision... (puede tardar hasta 30 s)", 20);
+                escribirTexto("🧠 Analizando con Gemma4 Vision E2B... (puede tardar hasta 20 s)", 20);
 
                 // AbortController para timeout manual de 90 segundos
                 const controller = new AbortController();
@@ -3104,7 +3104,7 @@
                 mostrarEscanerAnimacion(false);
                 btnScan.disabled = false;
                 if (err.name === 'AbortError') {
-                    escribirTexto("⏱️ El análisis tardó demasiado. Asegúrate de que Ollama esté corriendo con gemma3:12b activo. 🐳", 15);
+                    escribirTexto("⏱️ El análisis tardó demasiado. Asegúrate de que Ollama esté corriendo con gemma4:e2b activo. 🐳", 15);
                 } else {
                     escribirTexto("¡Bzzzt! El sonar perdió la señal. Asegúrate de que el servidor Python esté corriendo. 🐳🔌", 15);
                 }

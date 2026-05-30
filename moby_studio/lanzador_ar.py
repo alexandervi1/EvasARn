@@ -423,12 +423,12 @@ def query_gemma_vision(base64_image_data: str) -> str:
     if missing_padding:
         base64_image_data += '=' * (4 - missing_padding)
 
-    print("[GEMMA VISION] Enviando imagen a gemma3:12b para análisis multimodal...")
+    print("[GEMMA VISION] Enviando imagen a gemma4:e2b para análisis multimodal...")
 
     try:
         url_ollama = "http://localhost:11434/api/chat"
         payload = {
-            "model": "gemma3:12b",
+            "model": "gemma4:e2b",
             "stream": False,
             "messages": [
                 {
