@@ -44,6 +44,10 @@ secrets.json
 *.log
 moby_studio/output/*.log
 
+# Debug / reference image folders (local only, not for the repo)
+medios/
+imagenes_para_debugear/
+
 # YOLO and ML artifacts
 *.pt
 yolov8_docker_custom.pt

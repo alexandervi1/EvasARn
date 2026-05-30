@@ -109,7 +109,7 @@ def main():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             
-        ruta_exportacion = os.path.abspath(os.path.join(output_dir, "laptop_caos.glb"))
+        ruta_exportacion = os.path.abspath(os.path.join(output_dir, "modelo_apoyo.glb"))
         print(f"Exportando a {ruta_exportacion}...")
         
         bpy.ops.export_scene.gltf(
@@ -119,7 +119,7 @@ def main():
             export_apply=True
         )
 
-        print(f"=== ÉXITO: Modelo laptop_caos.glb generado en {ruta_exportacion} ===")
+        print(f"=== ÉXITO: Modelo modelo_apoyo.glb generado en {ruta_exportacion} ===")
         sys.exit(0)
 
     except Exception as e:

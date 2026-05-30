@@ -8,6 +8,7 @@ import socketserver
 import json
 import urllib.request
 import urllib.parse
+import urllib.error
 
 import base64
 import subprocess
@@ -223,7 +224,6 @@ def friendly_asset_name(file_name):
         "blue whale 3d model.glb": "Ballena Azul (Original)",
         "ballena_docker.glb": "Ballena Docker (Procedural)",
         "contenedor_docker.glb": "Contenedor Estandar (Procedural)",
-        "laptop_caos.glb": "Laptop de Caos (Procedural)",
         "servidor_rack.glb": "Servidor Rack (Procedural)",
         "buque_carga.glb": "Buque de Carga (Procedural)",
         "qr_presentacion.png": "QR de Presentacion"
@@ -234,7 +234,6 @@ def collect_layout_asset_usage():
     usage = {}
     model_id_to_file = {
         "modelo-ballena": "blue whale 3d model.glb",
-        "modelo-laptop": "laptop_caos.glb",
         "modelo-rack": "servidor_rack.glb",
         "modelo-buque": "buque_carga.glb"
     }
@@ -433,6 +432,7 @@ def query_gemma_vision(base64_image_data: str) -> str:
         payload = {
             "model": "gemma4:e2b",
             "stream": False,
+            "think": False,
             "messages": [
                 {
                     "role": "user",
@@ -443,7 +443,7 @@ def query_gemma_vision(base64_image_data: str) -> str:
             "options": {
                 "temperature": 0.7,
                 "top_p": 0.9,
-                "num_predict": 200
+                "num_predict": 700
             }
         }
 
@@ -454,15 +454,26 @@ def query_gemma_vision(base64_image_data: str) -> str:
             method="POST"
         )
 
-        with urllib.request.urlopen(req, timeout=60) as response:
+        with urllib.request.urlopen(req, timeout=180) as response:
             res_data = json.loads(response.read().decode("utf-8"))
             message = res_data.get("message", {})
-            content = message.get("content", "").strip()
+            content = (
+                message.get("content", "")
+                or res_data.get("response", "")
+                or message.get("thinking", "")
+            ).strip()
             if content:
                 print(f"[GEMMA VISION] Análisis completado: {len(content)} caracteres.")
                 return content
             return None
 
+    except urllib.error.HTTPError as e:
+        try:
+            detail = e.read().decode("utf-8", errors="replace")
+        except Exception:
+            detail = str(e)
+        print(f"[GEMMA VISION] HTTP {e.code}: {detail}")
+        return None
     except Exception as e:
         print(f"[GEMMA VISION] Error: {str(e)}")
         return None
@@ -513,7 +524,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(response_body.encode('utf-8'))
                     return
 
-                # 2. Ejecutar pipeline de visión: Gemma3 multimodal → fallback YOLO+Ollama
+                # 2. Ejecutar pipeline de visión: Gemma4:e2b multimodal via Ollama
                 print("[VISION] Iniciando pipeline de visión inteligente...")
                 analisis = analizar_vision(image_base64)
                 print("[VISION] Análisis completado.")
@@ -958,7 +969,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 mapa_modelos = {
                     "gen_ballena.py": {"file": "ballena_docker.glb", "id": "modelo-ballena_docker"},
                     "gen_buque.py": {"file": "buque_carga.glb", "id": "modelo-buque_carga"},
-                    "gen_laptop.py": {"file": "laptop_caos.glb", "id": "modelo-laptop_caos"},
+                    "gen_laptop.py": {"file": "modelo_apoyo.glb", "id": "modelo-modelo_apoyo"},
                     "gen_server.py": {"file": "servidor_rack.glb", "id": "modelo-servidor_rack"},
                     "generar_contenedor.py": {"file": "contenedor_docker.glb", "id": "modelo-contenedor_docker"}
                 }
@@ -1366,8 +1377,6 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                             nombre_amigable = "🐳 Ballena Docker (Procedural)"
                         elif file_name == "contenedor_docker.glb":
                             nombre_amigable = "📦 Contenedor Estándar (Procedural)"
-                        elif file_name == "laptop_caos.glb":
-                            nombre_amigable = "💻 Laptop de Caos (Procedural)"
                         elif file_name == "servidor_rack.glb":
                             nombre_amigable = "🖥️ Servidor Rack (Procedural)"
                         elif file_name == "buque_carga.glb":

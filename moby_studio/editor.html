@@ -8,8 +8,6 @@
     <!-- Librería A-Frame para WebXR y renderizado 3D -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     
-    <!-- jsQR para escaneo de códigos QR en tiempo real en la prueba de cámara -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     
     <!-- Fuentes de Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2365,7 +2363,7 @@
                 <button class="header-btn" id="btn-toggle-iphone-sim" onclick="toggleIphoneSimulator()" title="Simulador iPhone (375x812)">
                     📱 Vista Móvil
                 </button>
-                <a href="index.html" class="header-btn" style="text-decoration: none;">
+                <a href="index.html" class="header-btn" style="text-decoration: none;" onclick="return abrirVistaFinalSiLista(event)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     Vista Final Play
                 </a>
@@ -2547,7 +2545,7 @@
                         <div class="ar-recognition-note" style="font-size: 9.5px; line-height: 1.45; border-color: rgba(56, 189, 248, 0.22); background: rgba(56, 189, 248, 0.05); padding: 8px 10px; width: 100%; box-sizing: border-box; color: #cbd5e1;">
                             1. Asegúrate de que el teléfono y la PC estén en la <strong>misma red WiFi</strong>.<br>
                             2. El visor requiere <strong>HTTPS o localhost</strong>. Expón el servidor usando ngrok o abre el visor con la URL LAN segura.<br>
-                            3. Haz clic en <strong>Publicar</strong> para escanear el QR final.
+                            3. Haz clic en <strong>Publicar</strong> para probar el target MindAR final.
                         </div>
                     </div>
                 </div>
@@ -2696,7 +2694,7 @@
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                                 Añadir Marcador AR
                             </div>
-                            <div class="asset-card-desc" style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Crea un anclaje físico con imagen/QR editable.</div>
+                            <div class="asset-card-desc" style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Crea un anclaje físico con imagen entrenada MindAR.</div>
                         </div>
                     </div>
 
@@ -2748,9 +2746,9 @@
                             class="search-input"
                             placeholder="Buscar laptop, car, robot..."
                             style="flex: 1; font-size: 11px; padding: 6px 10px; background: rgba(10, 15, 30, 0.95); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #fff;"
-                            onkeydown="if(event.key==='Enter') buscarModelosPoly()"
+                            onkeydown="if(event.key==='Enter') buscarEnPolyPizza()"
                         >
-                        <button class="btn btn-view" onclick="buscarModelosPoly()" style="margin: 0; padding: 0 12px; font-size: 11px; border-radius: 6px;">Buscar</button>
+                        <button class="btn btn-view" id="btn-poly-search" onclick="buscarEnPolyPizza()" style="margin: 0; padding: 0 12px; font-size: 11px; border-radius: 6px;">Buscar</button>
                     </div>
 
                     <div id="poly-results" class="search-results-grid" style="max-height: 250px; overflow-y: auto;">
@@ -2782,6 +2780,7 @@
                             <button class="header-btn media-filter" data-filter="image" onclick="setMediaFilter('image')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Imágenes</button>
                             <button class="header-btn media-filter" data-filter="video" onclick="setMediaFilter('video')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Videos</button>
                             <button class="header-btn media-filter" data-filter="model" onclick="setMediaFilter('model')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Modelos</button>
+                            <button class="header-btn media-filter" data-filter="target" onclick="setMediaFilter('target')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Targets</button>
                         </div>
                     </div>
 
@@ -2991,7 +2990,7 @@
                             <span>Imagen del Marcador</span>
                         </div>
                         <button class="btn btn-save" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto; background: var(--color-docker-blue); border-radius: 8px; min-height: 36px; font-size: 11px; margin: 0;" onclick="abrirModalAR(entidadSeleccionada)">
-                            🎯 Configurar Imagen/QR
+                            🎯 Configurar Target MindAR
                         </button>
                     </div>
 
@@ -3125,7 +3124,7 @@
                     <p style="color: #94a3b8; font-size: 13px; line-height: 1.6; margin: 0;">El Editor 3D de Moby Studio requiere controles de teclado, mouse y una pantalla grande para la manipulación de mallas y coordenadas en tiempo real.</p>
                 </div>
                 
-                <a href="index.html" class="btn btn-save" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 10px; background: linear-gradient(90deg, #f59e0b, #d97706); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); display: flex; align-items: center;">
+                <a href="index.html" class="btn btn-save" onclick="return abrirVistaFinalSiLista(event)" style="width: 100%; justify-content: center; min-height: 44px; font-size: 13px; font-weight: 700; text-decoration: none; border-radius: 10px; background: linear-gradient(90deg, #f59e0b, #d97706); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25); display: flex; align-items: center;">
                     📱 Ir al Visor WebAR (Play)
                 </a>
                 
@@ -3310,7 +3309,7 @@
                             <div class="ar-section-head">
                                 <div>
                                     <div class="ar-section-title">Target físico</div>
-                                    <div class="ar-section-desc">Imagen o QR que el usuario apunta con la cámara.</div>
+                                    <div class="ar-section-desc">Imagen física que el usuario apunta con la cámara.</div>
                                 </div>
                                 <div class="ar-step-badge">1</div>
                             </div>
@@ -3319,7 +3318,7 @@
                                     <span>Imagen del target</span>
                                 </div>
                                 <div class="ar-field-row">
-                                    <input type="text" class="control-input" id="ar-marker-image" placeholder="Ruta al QR o imagen de target..." style="flex: 1;">
+                                    <input type="text" class="control-input" id="ar-marker-image" placeholder="Ruta a la imagen física del target..." style="flex: 1;">
                                     <button type="button" class="btn ar-mini-btn" onclick="document.getElementById('upload-marker-input').click()">Subir</button>
                                     <input type="file" id="upload-marker-input" accept="image/*" style="display: none;" onchange="subirImagenMarcador(this.files[0])">
                                 </div>
@@ -3330,7 +3329,7 @@
                             <div class="ar-section-head">
                                 <div>
                                     <div class="ar-section-title">Reconocimiento</div>
-                                    <div class="ar-section-desc">Elige QR para móviles modernos o MindAR para imagen entrenada.</div>
+                                    <div class="ar-section-desc">Tracking real tipo Vuforia mediante imagen entrenada MindAR.</div>
                                 </div>
                                 <div class="ar-step-badge">2</div>
                             </div>
@@ -3339,20 +3338,18 @@
                                     <span>Modo de tracking</span>
                                 </div>
                                 <select class="control-input" id="ar-tracking-mode" onchange="toggleTrackingInputsAR()">
-                                    <option value="qr">QR / BarcodeDetector</option>
                                     <option value="image">Imagen / MindAR (.mind)</option>
                                 </select>
                             </div>
                             <div class="control-group" id="ar-recognition-key-group" style="padding: 0;">
                                 <div class="control-label" style="margin-bottom: 6px;">
-                                    <span>Clave QR</span>
+                                    <span>Clave legacy</span>
                                 </div>
                                 <div class="ar-field-row">
-                                    <input type="text" class="control-input" id="ar-recognition-key" placeholder="Texto que tendrá el QR..." style="flex: 1;">
-                                    <button type="button" class="btn ar-mini-btn" onclick="generarQRParaMarcador()">Generar QR</button>
+                                    <input type="text" class="control-input" id="ar-recognition-key" placeholder="Compatibilidad con layouts antiguos..." style="flex: 1;">
                                 </div>
                                 <div class="ar-recognition-note">
-                                    Si el QR contiene esta clave, el visor activa el marcador y muestra su contenido.
+                                    Campo heredado. El visor final usa el archivo .mind para reconocer la imagen.
                                 </div>
                             </div>
                             <div class="control-group" id="ar-mind-target-group" style="padding: 0;">
@@ -3383,6 +3380,9 @@
                                     <a href="https://hiukim.github.io/mind-ar-js/compiler.html" target="_blank" class="btn btn-secondary-action" style="font-size: 9.5px; padding: 4px 8px; border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.08); color: #7dd3fc; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%;">
                                         🌐 Abrir Compilador Oficial MindAR ↗
                                     </a>
+                                    <button type="button" class="btn btn-secondary-action" onclick="abrirTarjetaImprimibleTarget()" style="font-size: 9.5px; padding: 4px 8px; border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.08); color: #86efac; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; margin-top: 6px;">
+                                        🖨️ Abrir tarjeta imprimible
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -3468,7 +3468,7 @@
                                 </div>
                                 <div class="ar-checklist-item" id="chk-target-compilation">
                                     <span class="chk-icon">⚪</span>
-                                    <span class="chk-label">Target (.mind / QR)</span>
+                                    <span class="chk-label">Target MindAR (.mind)</span>
                                 </div>
                                 <div class="ar-checklist-item" id="chk-content-association">
                                     <span class="chk-icon">⚪</span>
@@ -3580,7 +3580,6 @@
         <!-- PRECARGA DE ASSETS DE MODELOS 3D -->
         <a-assets>
             <a-asset-item id="modelo-ballena" src="output/blue%20whale%203d%20model.glb"></a-asset-item>
-            <a-asset-item id="modelo-laptop" src="output/laptop_caos.glb"></a-asset-item>
             <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
             <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
         </a-assets>
@@ -4289,7 +4288,7 @@
             document.getElementById('ar-media-url').value = objeto.mediaUrl || '';
             const recognitionKeyInput = document.getElementById('ar-recognition-key');
             if (recognitionKeyInput) recognitionKeyInput.value = objeto.recognitionKey || objeto.uuid || '';
-            document.getElementById('ar-tracking-mode').value = objeto.trackingMode || 'qr';
+            document.getElementById('ar-tracking-mode').value = objeto.trackingMode || 'image';
             document.getElementById('ar-mind-target-url').value = objeto.mindTargetUrl || '';
             document.getElementById('ar-mind-target-index').value = Number.isFinite(Number(objeto.mindTargetIndex)) ? Number(objeto.mindTargetIndex) : 0;
 
@@ -4376,13 +4375,12 @@
                 hudStatus.style.borderColor = "rgba(0, 243, 255, 0.3)";
                 hudStatus.style.background = "rgba(5, 7, 15, 0.85)";
 
-                const trackingMode = document.getElementById('ar-tracking-mode').value;
                 const markerImage = document.getElementById('ar-marker-image').value.trim();
 
-                if (trackingMode === 'image' && markerImage) {
+                if (markerImage) {
                     silhouetteImg.src = markerImage;
                     silhouette.style.display = "flex";
-                    btnSimulate.style.display = "block";
+                    btnSimulate.style.display = "none";
                 } else {
                     silhouette.style.display = "none";
                     btnSimulate.style.display = "none";
@@ -4428,73 +4426,26 @@
             if (cameraTestInterval) clearInterval(cameraTestInterval);
 
             const video = document.getElementById('camera-test-video');
-            const trackingMode = document.getElementById('ar-tracking-mode').value;
-            const recognitionKey = document.getElementById('ar-recognition-key').value.trim();
-            
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            let imageTimerStart = Date.now();
+            const mindTargetUrl = document.getElementById('ar-mind-target-url').value.trim();
+            let elapsedTicks = 0;
 
             cameraTestInterval = setInterval(() => {
                 if (cameraTestIsSuccess || !cameraTestStream) return;
                 if (video.videoWidth === 0 || video.videoHeight === 0) return;
-
-                if (trackingMode === 'qr') {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    
-                    ctx.translate(canvas.width, 0);
-                    ctx.scale(-1, 1);
-                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                    if (window.jsQR) {
-                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                            inversionAttempts: "dontInvert",
-                        });
-
-                        if (code) {
-                            const detectedValue = code.data.trim();
-                            console.log("[CAMERA TEST] QR Encontrado:", detectedValue);
-                            
-                            if (detectedValue === recognitionKey) {
-                                mostrarMatchExitoso(`QR: "${detectedValue}"`);
-                            } else {
-                                const hudStatus = document.getElementById('camera-test-hud-status');
-                                if (hudStatus) {
-                                    hudStatus.innerText = `QR: ${detectedValue.substring(0, 10)}...`;
-                                    hudStatus.style.color = "#eab308";
-                                    hudStatus.style.borderColor = "rgba(234, 179, 8, 0.4)";
-                                }
-                            }
-                        }
-                    }
-                } else if (trackingMode === 'image') {
-                    const elapsed = Date.now() - imageTimerStart;
-                    const hudStatus = document.getElementById('camera-test-hud-status');
-                    if (elapsed > 4000) {
-                        const mindTargetUrl = document.getElementById('ar-mind-target-url').value.trim();
-                        mostrarMatchExitoso(mindTargetUrl ? mindTargetUrl.split('/').pop() : "MindAR Target");
-                    } else {
-                        const remaining = Math.max(1, Math.ceil((4000 - elapsed) / 1000));
-                        if (hudStatus) hudStatus.innerText = `ALINEANDO... (${remaining}s)`;
-                    }
+                elapsedTicks++;
+                const hudStatus = document.getElementById('camera-test-hud-status');
+                if (hudStatus) {
+                    hudStatus.innerText = mindTargetUrl
+                        ? `TARGET .MIND LISTO · Vista ${elapsedTicks}`
+                        : 'FALTA ARCHIVO .MIND';
+                    hudStatus.style.color = mindTargetUrl ? "#22c55e" : "#ef4444";
+                    hudStatus.style.borderColor = mindTargetUrl ? "rgba(34, 197, 94, 0.5)" : "rgba(239, 68, 68, 0.45)";
                 }
             }, 250);
         }
 
         function simularMatchExitoso() {
-            const trackingMode = document.getElementById('ar-tracking-mode').value;
-            const recognitionKey = document.getElementById('ar-recognition-key').value.trim();
-            const mindTargetUrl = document.getElementById('ar-mind-target-url').value.trim();
-
-            if (trackingMode === 'qr') {
-                mostrarMatchExitoso(`QR: "${recognitionKey}" (simulado)`);
-            } else {
-                mostrarMatchExitoso(mindTargetUrl ? mindTargetUrl.split('/').pop() : "MindAR Target (simulado)");
-            }
+            mostrarNotificacion("La simulación fue desactivada. El visor final solo valida detección real con MindAR.", "warning");
         }
 
         function mostrarMatchExitoso(detalle) {
@@ -4544,7 +4495,7 @@
             const marker = obtenerMarcadorConfigurableModal();
             document.getElementById('ar-marker-image').value = marker?.markerImage || '';
             document.getElementById('ar-recognition-key').value = marker?.recognitionKey || marker?.uuid || '';
-            document.getElementById('ar-tracking-mode').value = marker?.trackingMode || 'qr';
+            document.getElementById('ar-tracking-mode').value = marker?.trackingMode || 'image';
             document.getElementById('ar-mind-target-url').value = marker?.mindTargetUrl || '';
             document.getElementById('ar-mind-target-index').value = Number.isFinite(Number(marker?.mindTargetIndex)) ? Number(marker.mindTargetIndex) : 0;
             toggleTrackingInputsAR();
@@ -4555,7 +4506,7 @@
             const el = document.getElementById(marker.uuid);
             const plane = el?.querySelector('a-plane');
             if (plane) {
-                plane.setAttribute('material', `src: ${marker.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                plane.setAttribute('material', marker.markerImage ? `src: ${marker.markerImage}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double');
             }
         }
 
@@ -4598,8 +4549,8 @@
             const mode = document.getElementById('ar-tracking-mode').value;
             const recognitionGroup = document.getElementById('ar-recognition-key-group');
             const mindGroup = document.getElementById('ar-mind-target-group');
-            if (recognitionGroup) recognitionGroup.style.display = mode === 'qr' ? 'flex' : 'none';
-            if (mindGroup) mindGroup.style.display = mode === 'image' ? 'flex' : 'none';
+            if (recognitionGroup) recognitionGroup.style.display = 'none';
+            if (mindGroup) mindGroup.style.display = 'flex';
             actualizarResumenModalAR();
         }
 
@@ -4608,10 +4559,140 @@
             return String(value).split('/').pop() || value;
         }
 
+        function auditarEscenaMindAR() {
+            const markers = escenaObjetos.filter(obj => obj.isMarker);
+            const content = escenaObjetos.filter(obj => !obj.isMarker);
+            const targetsSinImagen = markers.filter(marker => !marker.markerImage);
+            const targetsSinMind = markers.filter(marker => !marker.mindTargetUrl);
+            const contenidoSinTarget = content.filter(obj => !obj.arAnchor || obj.arAnchor === 'base');
+            const contenidoSinArchivo = content.filter(obj => (obj.mediaType === 'image' || obj.mediaType === 'video') && !obj.mediaUrl);
+            const mindUrls = [...new Set(markers.map(marker => marker.mindTargetUrl).filter(Boolean))];
+            const indices = new Map();
+            const indicesDuplicados = [];
+
+            markers.forEach(marker => {
+                if (!marker.mindTargetUrl) return;
+                const key = `${marker.mindTargetUrl}::${Number(marker.mindTargetIndex) || 0}`;
+                if (indices.has(key)) {
+                    indicesDuplicados.push(marker);
+                } else {
+                    indices.set(key, marker);
+                }
+            });
+
+            const errores = [];
+            if (markers.length === 0) errores.push('Crea al menos un target MindAR.');
+            if (targetsSinImagen.length > 0) errores.push(`${targetsSinImagen.length} target(s) sin imagen fisica.`);
+            if (targetsSinMind.length > 0) errores.push(`${targetsSinMind.length} target(s) sin archivo .mind.`);
+            if (mindUrls.length > 1) errores.push('La escena usa varios .mind distintos. Compila todos los targets dentro de un solo .mind y usa indices.');
+            if (indicesDuplicados.length > 0) errores.push(`${indicesDuplicados.length} target(s) repiten el mismo indice dentro del .mind.`);
+            if (content.length === 0) errores.push('Agrega contenido AR anclado a un target.');
+            if (contenidoSinTarget.length > 0) errores.push(`${contenidoSinTarget.length} contenido(s) sin target MindAR.`);
+            if (contenidoSinArchivo.length > 0) errores.push(`${contenidoSinArchivo.length} imagen/video sin archivo multimedia.`);
+
+            return {
+                listo: errores.length === 0,
+                errores,
+                markers,
+                content,
+                targetsSinImagen,
+                targetsSinMind,
+                contenidoSinTarget,
+                contenidoSinArchivo,
+                mindUrls,
+                indicesDuplicados
+            };
+        }
+
+        function mensajeAuditoriaMindAR(audit) {
+            return audit.errores.join(' ');
+        }
+
+        function abrirVistaFinalSiLista(event) {
+            const audit = auditarEscenaMindAR();
+            if (!audit.listo) {
+                if (event) event.preventDefault();
+                cambiarTabSidebar('publish');
+                validarPublicacion();
+                mostrarNotificacion(`No se puede abrir el visor final: ${mensajeAuditoriaMindAR(audit)}`, "error");
+                return false;
+            }
+            if (hayCambiosSinGuardar) {
+                if (event) event.preventDefault();
+                cambiarTabSidebar('publish');
+                validarPublicacion();
+                mostrarNotificacion("Guarda los cambios antes de abrir el visor final.", "warning");
+                return false;
+            }
+            return true;
+        }
+
+        function abrirTarjetaImprimibleTarget() {
+            const marker = obtenerMarcadorConfigurableModal();
+            const markerImage = document.getElementById('ar-marker-image')?.value.trim() || marker?.markerImage || '';
+            const mindTargetUrl = document.getElementById('ar-mind-target-url')?.value.trim() || marker?.mindTargetUrl || '';
+            const targetName = marker?.nombre || objetoEnConfiguracionAR?.nombre || 'Target MindAR';
+
+            if (!markerImage) {
+                mostrarNotificacion("Sube primero la imagen fisica del target.", "error");
+                return;
+            }
+
+            const html = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${targetName}</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; color: #111827; background: #f8fafc; }
+    .sheet { width: 210mm; min-height: 297mm; box-sizing: border-box; padding: 18mm; margin: 0 auto; background: white; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284c7; padding-bottom: 8mm; margin-bottom: 12mm; }
+    h1 { margin: 0; font-size: 22pt; color: #0369a1; }
+    .badge { font-size: 10pt; font-weight: 700; color: #047857; border: 1px solid #10b981; border-radius: 999px; padding: 4px 10px; }
+    .target { display: flex; justify-content: center; align-items: center; border: 1px dashed #64748b; border-radius: 8px; padding: 10mm; min-height: 130mm; }
+    .target img { max-width: 150mm; max-height: 130mm; object-fit: contain; }
+    .meta { margin-top: 10mm; display: grid; gap: 4mm; font-size: 11pt; }
+    .meta div { padding: 4mm; background: #f1f5f9; border-radius: 6px; }
+    .tips { margin-top: 10mm; font-size: 10pt; line-height: 1.45; color: #334155; }
+    @media print { body { background: white; } .sheet { margin: 0; } }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <section class="header">
+      <div>
+        <h1>${targetName}</h1>
+        <div>Target fisico para tracking MindAR</div>
+      </div>
+      <div class="badge">${mindTargetUrl ? 'MIND CARGADO' : 'FALTA .MIND'}</div>
+    </section>
+    <section class="target"><img src="${markerImage}" alt="${targetName}"></section>
+    <section class="meta">
+      <div><strong>Imagen:</strong> ${nombreCortoRuta(markerImage)}</div>
+      <div><strong>Archivo .mind:</strong> ${mindTargetUrl ? nombreCortoRuta(mindTargetUrl) : 'Pendiente'}</div>
+      <div><strong>Indice:</strong> ${document.getElementById('ar-mind-target-index')?.value || 0}</div>
+    </section>
+    <section class="tips">
+      Imprime esta hoja sin recortes y evita plastificados brillantes. Usa buena luz, mantenla plana y apunta la camara hasta que el visor detecte el target.
+    </section>
+  </main>
+</body>
+</html>`;
+            const win = window.open('', '_blank');
+            if (!win) {
+                mostrarNotificacion("El navegador bloqueo la ventana imprimible.", "error");
+                return;
+            }
+            win.document.open();
+            win.document.write(html);
+            win.document.close();
+            win.focus();
+        }
+
         function actualizarResumenModalAR() {
             if (!objetoEnConfiguracionAR) return;
             const markerImage = document.getElementById('ar-marker-image')?.value.trim() || objetoEnConfiguracionAR.markerImage || '';
-            const trackingMode = document.getElementById('ar-tracking-mode')?.value || objetoEnConfiguracionAR.trackingMode || 'qr';
+            const trackingMode = document.getElementById('ar-tracking-mode')?.value || objetoEnConfiguracionAR.trackingMode || 'image';
             const recognitionKey = document.getElementById('ar-recognition-key')?.value.trim() || objetoEnConfiguracionAR.recognitionKey || objetoEnConfiguracionAR.uuid || '';
             const mindTargetUrl = document.getElementById('ar-mind-target-url')?.value.trim() || objetoEnConfiguracionAR.mindTargetUrl || '';
             const mediaType = document.getElementById('ar-media-type')?.value || objetoEnConfiguracionAR.mediaType || '3d';
@@ -4629,13 +4710,13 @@
 
             if (objectEl) objectEl.innerText = objetoEnConfiguracionAR.nombre || objetoEnConfiguracionAR.uuid || "-";
             if (trackingEl) trackingEl.innerText = selectedMarker || objetoEnConfiguracionAR.isMarker
-                ? (trackingMode === 'image' ? 'MindAR imagen' : 'QR')
+                ? 'MindAR imagen'
                 : 'Sin disparador';
             if (targetEl) {
                 if (!objetoEnConfiguracionAR.isMarker && !selectedMarker) {
                     targetEl.innerText = 'Mesa / sin target';
                 } else {
-                    const targetValue = trackingMode === 'image' ? nombreCortoRuta(mindTargetUrl) : (recognitionKey || "-");
+                    const targetValue = nombreCortoRuta(mindTargetUrl);
                     targetEl.innerText = `${markerName || 'Target'} · ${targetValue}`;
                 }
             }
@@ -4658,8 +4739,8 @@
             }
 
             const hasTarget = objetoEnConfiguracionAR.isMarker
-                ? (trackingMode === 'image' ? Boolean(mindTargetUrl) : Boolean(recognitionKey))
-                : Boolean(selectedMarker) && (trackingMode === 'image' ? Boolean(mindTargetUrl) : Boolean(recognitionKey));
+                ? Boolean(markerImage && mindTargetUrl)
+                : Boolean(selectedMarker) && Boolean(markerImage && mindTargetUrl);
             const hasContent = objetoEnConfiguracionAR.isMarker || mediaType === '3d' || mediaType === 'oira-node' || Boolean(mediaUrl);
             if (statusEl) {
                 statusEl.className = 'ar-status-chip';
@@ -4693,30 +4774,18 @@
             if (chkTrackingMode) {
                 chkTrackingMode.className = 'ar-checklist-item success';
                 chkTrackingMode.querySelector('.chk-icon').innerText = '🟢';
-                chkTrackingMode.querySelector('.chk-label').innerText = trackingMode === 'image' ? 'Tracking: MindAR (.mind)' : 'Tracking: Código QR';
+                chkTrackingMode.querySelector('.chk-label').innerText = 'Tracking: MindAR (.mind)';
             }
 
             if (chkTargetCompilation) {
-                if (trackingMode === 'image') {
-                    if (mindTargetUrl) {
-                        chkTargetCompilation.className = 'ar-checklist-item success';
-                        chkTargetCompilation.querySelector('.chk-icon').innerText = '🟢';
-                        chkTargetCompilation.querySelector('.chk-label').innerText = `Target: ${nombreCortoRuta(mindTargetUrl)}`;
-                    } else {
-                        chkTargetCompilation.className = 'ar-checklist-item danger';
-                        chkTargetCompilation.querySelector('.chk-icon').innerText = '🔴';
-                        chkTargetCompilation.querySelector('.chk-label').innerText = 'Falta archivo .mind';
-                    }
+                if (mindTargetUrl) {
+                    chkTargetCompilation.className = 'ar-checklist-item success';
+                    chkTargetCompilation.querySelector('.chk-icon').innerText = '🟢';
+                    chkTargetCompilation.querySelector('.chk-label').innerText = `Target: ${nombreCortoRuta(mindTargetUrl)}`;
                 } else {
-                    if (recognitionKey) {
-                        chkTargetCompilation.className = 'ar-checklist-item success';
-                        chkTargetCompilation.querySelector('.chk-icon').innerText = '🟢';
-                        chkTargetCompilation.querySelector('.chk-label').innerText = `QR Clave: "${recognitionKey}"`;
-                    } else {
-                        chkTargetCompilation.className = 'ar-checklist-item danger';
-                        chkTargetCompilation.querySelector('.chk-icon').innerText = '🔴';
-                        chkTargetCompilation.querySelector('.chk-label').innerText = 'Falta clave del QR';
-                    }
+                    chkTargetCompilation.className = 'ar-checklist-item danger';
+                    chkTargetCompilation.querySelector('.chk-icon').innerText = '🔴';
+                    chkTargetCompilation.querySelector('.chk-label').innerText = 'Falta archivo .mind';
                 }
             }
 
@@ -4743,34 +4812,6 @@
                         chkContentAssociation.querySelector('.chk-label').innerText = 'No asociado a target';
                     }
                 }
-            }
-        }
-
-        async function generarQRParaMarcador() {
-            const marker = obtenerMarcadorConfigurableModal();
-            if (!marker) {
-                mostrarNotificacion("Selecciona un disparador asociado antes de generar el QR.", "error");
-                return;
-            }
-            const keyInput = document.getElementById('ar-recognition-key');
-            const key = (keyInput.value || marker.uuid).trim();
-            keyInput.value = key;
-            mostrarNotificacion("Generando QR del marcador...");
-            try {
-                const safeName = `${marker.uuid}.png`;
-                const response = await fetch(`/api/generate-qr?text=${encodeURIComponent(key)}&name=${encodeURIComponent(safeName)}`, { method: 'POST' });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
-                document.getElementById('ar-marker-image').value = data.src;
-                marker.markerImage = data.src;
-                marker.recognitionKey = key;
-                marker.trackingMode = 'qr';
-                document.getElementById('ar-tracking-mode').value = 'qr';
-                actualizarVisualMarcador(marker);
-                actualizarResumenModalAR();
-                mostrarNotificacion("QR generado y asignado al marcador.", "success");
-            } catch (err) {
-                mostrarNotificacion(`Error generando QR: ${err.message}`, "error");
             }
         }
 
@@ -4875,10 +4916,27 @@
                 ? objetoEnConfiguracionAR
                 : escenaObjetos.find(obj => obj.isMarker && obj.uuid === contentAnchor);
 
+            if (!markerConfigurable) {
+                mostrarNotificacion("Selecciona un target MindAR para este contenido.", "error");
+                return;
+            }
+            if (!markerImage) {
+                mostrarNotificacion("Falta la imagen fisica del target.", "error");
+                return;
+            }
+            if (!mindTargetUrl) {
+                mostrarNotificacion("Falta el archivo .mind compilado para tracking real.", "error");
+                return;
+            }
+            if (!objetoEnConfiguracionAR.isMarker && (mediaType === 'image' || mediaType === 'video') && !mediaUrl) {
+                mostrarNotificacion("Falta el archivo multimedia que se proyectara sobre el target.", "error");
+                return;
+            }
+
             if (markerConfigurable) {
                 markerConfigurable.markerImage = markerImage || null;
                 markerConfigurable.recognitionKey = recognitionKey || markerConfigurable.uuid;
-                markerConfigurable.trackingMode = trackingMode;
+                markerConfigurable.trackingMode = 'image';
                 markerConfigurable.mindTargetUrl = mindTargetUrl || null;
                 markerConfigurable.mindTargetIndex = mindTargetIndex;
                 actualizarVisualMarcador(markerConfigurable);
@@ -5014,8 +5072,6 @@
             // Ajustar escala y rotación por defecto según el tipo de objeto para una mejor presentación inicial
             if (modelId === 'modelo-ballena') {
                 nuevoObjeto.escala = 1.5;
-            } else if (modelId === 'modelo-laptop') {
-                nuevoObjeto.escala = 1.0;
             } else if (modelId === 'modelo-rack') {
                 nuevoObjeto.posicion.y = 0.8;
                 nuevoObjeto.escala = 0.8;
@@ -5081,8 +5137,11 @@
                 posicion: { x: 0, y: 0.02, z: -3.5 }, // floats slightly above ground grid
                 rotacion: { y: 0 },
                 escala: 1.0,
-                markerImage: 'output/qr_presentacion.png', // Imagen de target por defecto
+                markerImage: null,
                 recognitionKey: uuid,
+                trackingMode: 'image',
+                mindTargetUrl: null,
+                mindTargetIndex: 0,
                 arAnchor: 'base'
             };
             escenaObjetos.push(nuevoObjeto);
@@ -5100,7 +5159,9 @@
             const marcador = entidadSeleccionada;
             marcador.nombre = `Target ${nombreBase}`;
             marcador.recognitionKey = marcador.uuid;
-            marcador.trackingMode = 'qr';
+            marcador.trackingMode = 'image';
+            marcador.mindTargetUrl = marcador.mindTargetUrl || null;
+            marcador.mindTargetIndex = marcador.mindTargetIndex || 0;
 
             const contenido = crearContenidoAR(nombreBase, mediaType, marcador.uuid, mediaType === '3d' ? modelId : null, null);
             actualizarOpcionesAnclaje();
@@ -5110,9 +5171,9 @@
 
             if (mediaType === 'image' || mediaType === 'video') {
                 abrirModalAR(contenido);
-                mostrarNotificacion("Sube el QR/imagen fisica y el contenido que se proyectara encima.", "success");
+                mostrarNotificacion("Sube la imagen fisica, compilala a .mind y agrega el contenido que se proyectara encima.", "success");
             } else {
-                mostrarNotificacion("Experiencia AR creada: configura la imagen/QR del marcador y guarda.", "success");
+                mostrarNotificacion("Experiencia AR creada: configura la imagen target y sube su .mind.", "success");
             }
             });
         }
@@ -5123,11 +5184,13 @@
             const marcador = entidadSeleccionada;
             marcador.nombre = tipo === 'demo' ? 'Target Demo Guiada' : 'Target Ficha Producto';
             marcador.recognitionKey = marcador.uuid;
-            marcador.trackingMode = 'qr';
+            marcador.trackingMode = 'image';
+            marcador.mindTargetUrl = marcador.mindTargetUrl || null;
+            marcador.mindTargetIndex = marcador.mindTargetIndex || 0;
 
             if (tipo === 'demo') {
                 crearContenidoAR('Video Demo', 'video', marcador.uuid, null, null);
-                const apoyo = crearContenidoAR('Modelo de Apoyo', '3d', marcador.uuid, 'modelo-laptop', null);
+                const apoyo = crearContenidoAR('Modelo de Apoyo', '3d', marcador.uuid, 'modelo-rack', null);
                 apoyo.posicion = { x: 0.42, y: 1.0, z: -3.5 };
                 apoyo.escala = 0.55;
                 const apoyoEl = document.getElementById(apoyo.uuid);
@@ -5150,14 +5213,16 @@
             actualizarOpcionesAnclaje();
             renderOutliner();
             marcarCambiosSinGuardar();
-            mostrarNotificacion("Plantilla AR creada. Configura el QR/target y los archivos multimedia.", "success");
+            mostrarNotificacion("Plantilla AR creada. Configura el target MindAR y los archivos multimedia.", "success");
             });
         }
 
         function configurarMarcadorOIRA(marker, tipo, nombre, intro) {
             marker.nombre = nombre;
             marker.recognitionKey = tipo.toUpperCase();
-            marker.trackingMode = 'qr';
+            marker.trackingMode = 'image';
+            marker.mindTargetUrl = marker.mindTargetUrl || null;
+            marker.mindTargetIndex = marker.mindTargetIndex || 0;
             marker.oiraType = tipo;
             marker.oiraIntro = intro;
         }
@@ -5224,7 +5289,7 @@
                 actualizarOpcionesAnclaje();
                 renderOutliner();
                 marcarCambiosSinGuardar();
-                mostrarNotificacion("Plantilla OIRA creada. Configura el QR o target y guarda.", "success");
+                mostrarNotificacion("Plantilla OIRA creada. Configura el target MindAR y guarda.", "success");
             });
         }
 
@@ -5327,7 +5392,7 @@
                 item.onclick = () => seleccionarObjeto(obj);
 
                 const baseMeta = obj.isMarker
-                    ? `${obj.trackingMode === 'image' ? 'MindAR' : 'QR'} · ${obj.recognitionKey || obj.mindTargetUrl || 'sin clave'}`
+                    ? `MindAR · ${obj.mindTargetUrl || 'falta .mind'}`
                     : `${tipoEntidad(obj)} · ${nombreAnclaje(obj)}`;
                 const meta = remoteLock ? `${baseMeta} · Editando: ${remoteLock.name}` : baseMeta;
                 const lockDisabled = remoteLock ? 'disabled style="opacity:0.35; pointer-events:none;"' : '';
@@ -5883,6 +5948,7 @@
             const markers = escenaObjetos.filter(obj => obj.isMarker);
             const content = escenaObjetos.filter(obj => !obj.isMarker);
             const anchored = content.filter(obj => obj.arAnchor && obj.arAnchor !== 'base');
+            const audit = auditarEscenaMindAR();
 
             checks.push({
                 level: escenaObjetos.length > 0 ? 'ok' : 'error',
@@ -5896,28 +5962,40 @@
                 detail: markers.length > 0 ? `${markers.length} target(s) disponible(s).` : 'Crea al menos un marcador/target AR.'
             });
 
-            const markersSinTracking = markers.filter(marker => {
-                const mode = marker.trackingMode || 'qr';
-                return mode === 'image' ? !marker.mindTargetUrl : !marker.recognitionKey;
-            });
             checks.push({
-                level: markersSinTracking.length === 0 ? 'ok' : 'error',
+                level: audit.targetsSinMind.length === 0 ? 'ok' : 'error',
                 title: 'Reconocimiento de targets',
-                detail: markersSinTracking.length === 0 ? 'Todos los targets tienen clave QR o archivo MindAR.' : `${markersSinTracking.length} target(s) sin clave QR o .mind.`
+                detail: audit.targetsSinMind.length === 0 ? 'Todos los targets tienen archivo MindAR .mind.' : `${audit.targetsSinMind.length} target(s) sin archivo .mind.`
             });
 
-            const sinAnclaje = content.filter(obj => !obj.arAnchor || obj.arAnchor === 'base');
             checks.push({
-                level: content.length === 0 ? 'warn' : (sinAnclaje.length === 0 ? 'ok' : 'warn'),
+                level: audit.targetsSinImagen.length === 0 ? 'ok' : 'error',
+                title: 'Imagen fisica imprimible',
+                detail: audit.targetsSinImagen.length === 0 ? 'Todos los targets tienen imagen fisica.' : `${audit.targetsSinImagen.length} target(s) sin imagen fisica.`
+            });
+
+            checks.push({
+                level: audit.mindUrls.length <= 1 ? 'ok' : 'error',
+                title: 'Archivo .mind unico',
+                detail: audit.mindUrls.length <= 1 ? 'La escena usa un solo .mind compatible con MindAR.' : `${audit.mindUrls.length} archivos .mind distintos. Compila todos los targets en uno solo.`
+            });
+
+            checks.push({
+                level: audit.indicesDuplicados.length === 0 ? 'ok' : 'error',
+                title: 'Indices MindAR',
+                detail: audit.indicesDuplicados.length === 0 ? 'No hay indices duplicados en el .mind.' : `${audit.indicesDuplicados.length} target(s) repiten indice.`
+            });
+
+            checks.push({
+                level: content.length === 0 ? 'error' : (audit.contenidoSinTarget.length === 0 ? 'ok' : 'error'),
                 title: 'Contenido anclado',
-                detail: content.length === 0 ? 'No hay contenido AR para publicar.' : (sinAnclaje.length === 0 ? `${anchored.length} contenido(s) anclado(s).` : `${sinAnclaje.length} contenido(s) quedan en mesa base.`)
+                detail: content.length === 0 ? 'No hay contenido AR para publicar.' : (audit.contenidoSinTarget.length === 0 ? `${anchored.length} contenido(s) anclado(s).` : `${audit.contenidoSinTarget.length} contenido(s) quedan sin target MindAR.`)
             });
 
-            const contenidoSinArchivo = content.filter(obj => (obj.mediaType === 'image' || obj.mediaType === 'video') && !obj.mediaUrl);
             checks.push({
-                level: contenidoSinArchivo.length === 0 ? 'ok' : 'error',
+                level: audit.contenidoSinArchivo.length === 0 ? 'ok' : 'error',
                 title: 'Archivos multimedia',
-                detail: contenidoSinArchivo.length === 0 ? 'Imagenes y videos tienen archivo asignado.' : `${contenidoSinArchivo.length} imagen/video sin archivo.`
+                detail: audit.contenidoSinArchivo.length === 0 ? 'Imagenes y videos tienen archivo asignado.' : `${audit.contenidoSinArchivo.length} imagen/video sin archivo.`
             });
 
             const urlsExternas = escenaObjetos.filter(obj => archivoLocalReferenciado(obj.mediaUrl || obj.markerImage || obj.mindTargetUrl) === false && (obj.mediaUrl || obj.markerImage || obj.mindTargetUrl));
@@ -5970,6 +6048,8 @@
                     list.appendChild(row);
                 });
             }
+
+            return { checks, errorCount, score, audit };
         }
 
         function toggleObjetoVisible(event, uuid) {
@@ -6053,12 +6133,12 @@
             el.setAttribute('id', obj.uuid);
 
             if (obj.isMarker) {
-                // Si es un marcador, creamos un plano horizontal en el centro que muestra el QR / Target
+                // Si es un marcador, creamos un plano horizontal en el centro que muestra la imagen target
                 const plane = document.createElement('a-plane');
                 plane.setAttribute('width', '1.0');
                 plane.setAttribute('height', '1.0');
                 plane.setAttribute('rotation', '-90 0 0');
-                plane.setAttribute('material', `src: ${obj.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                plane.setAttribute('material', obj.markerImage ? `src: ${obj.markerImage}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double');
                 el.appendChild(plane);
             } else {
                 const mediaType = obj.mediaType || '3d';
@@ -6700,6 +6780,14 @@
             if (detail) detail.innerText = 'Guardando layout y preparando paquete...';
 
             try {
+                const audit = auditarEscenaMindAR();
+                if (!audit.listo) {
+                    validarPublicacion();
+                    if (detail) detail.innerText = mensajeAuditoriaMindAR(audit);
+                    mostrarNotificacion("No se puede exportar: la escena MindAR esta incompleta.", "error");
+                    return;
+                }
+
                 const saved = await guardarDiseno();
                 if (!saved) {
                     if (detail) detail.innerText = 'No se pudo guardar el layout. Corrige el error antes de exportar.';
@@ -7616,7 +7704,7 @@
                         
                         <div class="media-item-actions" style="display: flex; gap: 4px; margin-left: auto; flex-shrink: 0;">
                             ${asset.kind === 'model' ? `<button class="media-btn compress" title="Comprimir GLB con Draco (Blender)" onclick="comprimirAssetMediateca('${jsArg(asset.name)}', this)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></button>` : ''}
-                            <button class="media-btn add" title="Añadir a escena" onclick="agregarAssetAEscena('${jsArg(asset.name)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                            ${asset.kind === 'model' || asset.kind === 'image' || asset.kind === 'video' ? `<button class="media-btn add" title="Añadir a escena" onclick="agregarAssetAEscena('${jsArg(asset.name)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>` : ''}
                             <button class="media-btn assign" title="Asignar al objeto seleccionado" onclick="asignarAssetSeleccionado('${jsArg(asset.name)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></button>
                             <button class="media-btn" title="Copiar ruta" onclick="copiarRutaAsset('${jsArg(asset.src)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                             <button class="media-btn del" title="Eliminar del servidor" ${asset.protected ? 'disabled' : ''} onclick="eliminarAssetMediateca('${jsArg(asset.name)}', this)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -8103,21 +8191,6 @@
                 }
             } else {
                 agregarQAItem(checklistContainer, 'success', '🟢', 'MindAR: No requerido', 'No hay marcadores de imagen en la escena actual.');
-            }
-
-            // 4. COMPROBAR CLAVES QR
-            const qrMarkers = escenaObjetos.filter(obj => obj.isMarker && obj.trackingMode === 'qr');
-            const totalQrMarkers = qrMarkers.length;
-            const emptyQrKeys = qrMarkers.filter(obj => !obj.recognitionKey).length;
-
-            if (totalQrMarkers > 0) {
-                if (emptyQrKeys === 0) {
-                    agregarQAItem(checklistContainer, 'success', '🟢', 'Marcadores QR configurados', 'Todos los marcadores QR tienen una clave de coincidencia asignada.');
-                } else {
-                    agregarQAItem(checklistContainer, 'danger', '🔴', `QR: ${emptyQrKeys} sin clave`, 'Hay marcadores QR que no tienen definida una clave de reconocimiento.');
-                }
-            } else {
-                agregarQAItem(checklistContainer, 'success', '🟢', 'Códigos QR: No requerido', 'No hay marcadores de código QR en la escena.');
             }
 
             // --- ESTIMAR RENDIMIENTO Y PERFORMANCE ---

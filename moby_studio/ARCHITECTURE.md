@@ -13,8 +13,8 @@ flowchart TD
     Projects[(projects/\nlayouts versionados)]
     Collab[(COLLAB_STATE\npresencia + locks)]
     Blender[Blender headless\nscripts/*.py]
-    YOLO[YOLOv8 local]
-    Ollama[Ollama qwen\nlocalhost:11434]
+    Gemma[Gemma4:e2b vision\nvia Ollama]
+    Ollama[Ollama\nlocalhost:11434]
 
     Editor -->|fetch /api/save-layout?project&version| Server
     Editor -->|fetch /api/load-layout| Server
@@ -28,7 +28,7 @@ flowchart TD
     Server --> Projects
     Server --> Collab
     Server --> Blender
-    Server --> YOLO
+    Server --> Gemma
     Server --> Ollama
 ```
 
@@ -71,7 +71,7 @@ let collabState = { users: [], locks: {} };
 Subsistemas del editor:
 
 - **Creacion AR rapida**: crea marcador + contenido y abre el flujo de configuracion.
-- **Modal de disparador AR**: configura target fisico, QR/MindAR y contenido proyectado desde archivo local o URL directa.
+- **Modal de disparador AR**: configura target fisico MindAR y contenido proyectado desde archivo local o URL directa.
 - **Nodos OIRA**: contenido generado (`mediaType: "oira-node"`) sin depender de modelos GLB heredados.
 - **Outliner**: lista targets, objetos anclados y objetos de mesa base.
 - **Colaboracion**: muestra usuarios activos, bloquea objetos seleccionados por otros y avisa versiones remotas.
@@ -88,7 +88,7 @@ Responsabilidades:
 
 - Leer `output/layout.json`.
 - Reconstruir la escena A-Frame final.
-- Activar contenido por QR o MindAR.
+- Activar contenido por tracking de imagen MindAR.
 - Mostrar contenido flotante para imagenes y videos.
 - Mostrar nodos OIRA generados desde layout.
 - Exponer controles compactos para telefono.
@@ -96,7 +96,6 @@ Responsabilidades:
 
 El cliente soporta:
 
-- `BarcodeDetector` cuando el navegador lo ofrece.
 - MindAR mediante CDN cuando un marcador tiene `trackingMode: "image"` y `mindTargetUrl`.
 - Eventos de target encontrado/perdido para mostrar u ocultar contenido.
 
@@ -114,9 +113,9 @@ Responsabilidades:
 - Mantener estado colaborativo en memoria.
 - Subir y eliminar assets.
 - Listar assets con metadata.
-- Generar QR.
+- Mantener endpoints heredados de QR para compatibilidad.
 - Ejecutar scripts de Blender.
-- Procesar vision local con YOLOv8 y Ollama.
+- Procesar vision local con Gemma4:e2b via Ollama.
 
 Endpoints activos:
 
@@ -135,10 +134,10 @@ Endpoints activos:
 | `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia. |
 | `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
 | `/api/delete-model?name=...` | POST | Elimina modelos. |
-| `/api/generate-qr?text=...&name=...` | POST | Genera QR en `output/`. |
+| `/api/generate-qr?text=...&name=...` | POST | Genera QR heredado en `output/`; el visor final usa MindAR. |
 | `/api/generate-model?script=...` | POST | Ejecuta Blender headless. |
 | `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
-| `/api/vision` | POST | Procesa imagen base64 con YOLOv8 y Ollama. |
+| `/api/vision` | POST | Procesa imagen base64 con Gemma4:e2b via Ollama. |
 
 ## 4. Persistencia
 
@@ -301,12 +300,12 @@ Limitacion actual: la sincronizacion es por version guardada, no por operacion a
 
 1. El usuario presiona una plantilla, por ejemplo `Marcador + Imagen`.
 2. El editor crea un marcador y un contenido asociado.
-3. El modal permite subir o generar el target fisico: QR, imagen/icono o `.mind`.
+3. El modal permite subir la imagen fisica y el target compilado `.mind`.
 4. El modal permite subir archivo local o pegar URL directa del contenido.
 5. El contenido guarda `arAnchor` con el UUID del marcador.
 6. El layout se guarda en el proyecto y se copia a `output/layout.json`.
 7. `index.html` carga `output/layout.json`.
-8. El cliente activa contenido cuando detecta el QR o target MindAR.
+8. El cliente activa contenido cuando MindAR detecta la imagen entrenada.
 
 ## 10. Flujo De Assets
 

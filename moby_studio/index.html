@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Moby AI Assistant 3D - Docker Conversational AR</title>
+    <title>Moby Studio AR - MindAR Viewer</title>
     
     <!-- Librería A-Frame para WebXR y renderizado 3D -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -1049,8 +1049,8 @@
 </head>
 <body>
 
-    <!-- CONSOLA DE LOGS VISIBLE EN EL CLIENTE MÓVIL (DEBUG QA) -->
-    <div id="mobile-debug-console-container" style="position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100000; font-family: monospace; box-sizing: border-box;">
+    <!-- Consola de logs solo para QA con ?debugConsole=1 -->
+    <div id="mobile-debug-console-container" style="display: none; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 100000; font-family: monospace; box-sizing: border-box;">
         <!-- Toggle button -->
         <button type="button" id="btn-toggle-debug-console" onclick="toggleDebugConsole()" style="position: absolute; bottom: 100%; right: 12px; margin-bottom: 8px; background: rgba(15, 23, 42, 0.95); border: 1.5px solid rgba(0, 243, 255, 0.45); color: #00f3ff; border-radius: 20px; padding: 6px 14px; font-size: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 4px; pointer-events: auto;">
             <span>📂</span> Logs de Consola (<span id="debug-log-count">0</span>)
@@ -1093,8 +1093,8 @@
         <!-- Cabecera Superior -->
         <header>
             <div class="header-title">
-                <h1>Moby AI Assistant v2</h1>
-                <p>Mascota Docker interactiva por Voz y Hologramas</p>
+                <h1>Moby Studio AR</h1>
+                <p>Experiencia WebAR con tracking MindAR</p>
                 <div class="mobile-status-row">
                     <span id="mobile-client-state">AR listo</span>
                 </div>
@@ -1119,7 +1119,7 @@
 
             <div class="status-indicator">
                 <div class="status-dot"></div>
-                <span class="status-text">Docker Only</span>
+                <span class="status-text">MindAR</span>
             </div>
         </header>
 
@@ -1136,27 +1136,18 @@
             <div class="dialogue-box">
                 <span class="speaker-tag" id="speaker-label">Moby (Ballena)</span>
                 <p class="dialogue-text" id="dialogue-display">
-                    ¡Hola! Soy Moby. Escribe tu duda o <strong>presiona el micrófono para hablarme en voz alta</strong>.
-                    Mi conocimiento está estrictamente limitado a <strong>Docker y contenedores</strong> 🐳📣.
+                    Activa la cámara RA y apunta al target físico entrenado. También puedes analizar la cámara con visión IA o hacer una pregunta por voz.
                 </p>
             </div>
 
             <!-- Entrada de Texto y Controles -->
             <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
                 
-                <!-- Acciones Rápidas Estilo Pokémon Go -->
+                <!-- Acciones rápidas útiles para el visor final -->
                 <div class="quick-actions">
-                    <button type="button" class="btn-action" onclick="lanzarContenedor()" title="Lanzar un contenedor Docker a Moby">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                        Lanzar Contenedor
-                    </button>
-                    <button type="button" class="btn-action" onclick="hacerSaltarMoby()" title="Hacer saltar o dar un giro a Moby">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 5.2l-1.4 1.4M7.2 15.8l-1.4 1.4M22 22l-5-5M9.5 4.5L13 8 8 13 4.5 9.5z"/></svg>
-                        Hacer Truco
-                    </button>
-                    <button type="button" class="btn-action" id="btn-scan" onclick="escanearEntorno()" title="Escanear tu pantalla o Docker Desktop con el Sonar de Moby">
+                    <button type="button" class="btn-action" id="btn-scan" onclick="escanearEntorno()" title="Analizar la imagen actual de la cámara con visión IA">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        Escanear Pantalla
+                        Analizar Cámara
                     </button>
                 </div>
 
@@ -1174,7 +1165,7 @@
                         type="text" 
                         id="chat-input" 
                         class="chat-input" 
-                        placeholder="Pregúntame sobre imágenes, contenedores, volúmenes..."
+                        placeholder="Pregunta sobre lo que ves o sobre la experiencia AR..."
                         autocomplete="off">
                     
                     <!-- Botón de Envío -->
@@ -1189,21 +1180,15 @@
                 <!-- Checkbox de Voz (Texto a Voz) -->
                 <label class="voice-control">
                     <input type="checkbox" id="voice-toggle" checked>
-                    <span>Habilitar respuestas por voz alta (Speech Synthesis) 🐳🔊</span>
+                    <span>Habilitar respuestas por voz alta</span>
                 </label>
             </div>
         </div>
     </div>
 
     <div class="mobile-action-dock" aria-label="Acciones AR">
-        <button type="button" class="dock-btn" onclick="lanzarContenedor()" title="Lanzar contenedor">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-        </button>
-        <button type="button" class="dock-btn primary" onclick="escanearEntorno()" title="Escanear entorno">
+        <button type="button" class="dock-btn primary" onclick="escanearEntorno()" title="Analizar cámara">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4 12h4M16 12h4"/></svg>
-        </button>
-        <button type="button" class="dock-btn" onclick="hacerSaltarMoby()" title="Animar Moby">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
         </button>
         <button type="button" class="dock-btn" onclick="togglePresentationMode()" title="Modo presentación">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -1247,7 +1232,6 @@
         <!-- Precarga y Caché de TODOS los Modelos 3D para Metáforas Visuales -->
         <a-assets>
             <a-asset-item id="modelo-ballena" src="output/blue%20whale%203d%20model.glb"></a-asset-item>
-            <a-asset-item id="modelo-laptop" src="output/laptop_caos.glb"></a-asset-item>
             <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
             <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
         </a-assets>
@@ -1334,16 +1318,24 @@
 
     </a-scene>
 
-    <!-- Script de Interactividad, STT, Ollama (Docker Only) y Metáforas Visuales -->
+    <!-- Script de interactividad, voz, vision IA y visor WebAR -->
     <script>
-        // --- EVOLUCIÓN: CONSOLA DE LOGS VISIBLE EN EL MOVIL (DEBUG QA) ---
+        // Consola de QA opcional: visible solo con ?debugConsole=1.
         (function() {
+            const debugParams = new URLSearchParams(window.location.search);
+            const debugConsoleEnabled = debugParams.get('debugConsole') === '1';
+            const debugContainer = document.getElementById('mobile-debug-console-container');
+            if (debugContainer && debugConsoleEnabled) {
+                debugContainer.style.display = 'block';
+            }
+
             let logCount = 0;
             const originalLog = console.log;
             const originalWarn = console.warn;
             const originalError = console.error;
             
             function addLogToOverlay(type, args) {
+                if (!debugConsoleEnabled) return;
                 const logList = document.getElementById('mobile-debug-console-loglist');
                 const countBadge = document.getElementById('debug-log-count');
                 
@@ -1439,7 +1431,6 @@
         // Referencias a las Entidades 3D de A-Frame (se asignarán dinámicamente)
         let entities = {
             defecto: null,
-            caos: null,
             servidor: null,
             buque: null
         };
@@ -1447,7 +1438,6 @@
         // Escalas por defecto de cada modelo en visualización
         const defaultScales = {
             defecto: "2.2 2.2 2.2",
-            caos: "1.0 1.0 1.0",
             servidor: "0.8 0.8 0.8",
             buque: "0.6 0.6 0.6"
         };
@@ -1458,10 +1448,6 @@
         let recording = false;
         let recognition = null;
         const markerRegistry = new Map();
-        let qrDetector = null;
-        let qrScanTimer = null;
-        let lastQrScanAt = 0;
-        const activeMarkerTimeouts = new Map();
 
         function esDispositivoMovil() {
             return window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
@@ -1469,7 +1455,7 @@
 
         function debeMostrarSimuladorMarcadores() {
             const params = new URLSearchParams(window.location.search);
-            return params.get('debugMarkers') === '1' || !esDispositivoMovil();
+            return params.get('debugMarkers') === '1';
         }
 
         // Desbloquear audio del navegador
@@ -1567,7 +1553,7 @@
                 case 'yolo_vision':
                     speakerLabel.innerText = "🧠 Gemma4 Vision";
                     setMobileClientState("Analizando con IA");
-                    dialogueDisplay.innerHTML = `<span style="color: #00f3ff; font-weight: bold;">[Gemma4:e2b]</span> Analizando la imagen con visión IA local... puede tardar unos segundos.`;
+                    dialogueDisplay.innerHTML = `<span style="color: #00f3ff; font-weight: bold;">[Gemma4:e2b]</span> Analizando la imagen con visión IA local... la primera carga puede tardar.`;
                     laser.classList.add('active');
                     panel.classList.add('hud-thinking');
                     break;
@@ -1585,7 +1571,7 @@
             }
         }
 
-        // --- SPATIAL UX: Lanzar Contenedores a Marcadores Específicos ---
+        // --- Efecto visual al detectar un target ---
         function lanzarContenedorEnMarcador(marcadorId) {
             const scene = document.querySelector("a-scene");
             const anchorEl = document.getElementById("anchor-" + marcadorId);
@@ -1787,7 +1773,7 @@
                 // Restaurar fondo del body removiendo la clase transparente
                 document.body.classList.remove("camera-active-body");
                 document.body.style.backgroundColor = "#05070f";
-                detenerScannerQR();
+                detenerTrackingImagenAR();
                 
                 // Hacer visible el cielo virtual
                 skyEl.setAttribute("visible", "true");
@@ -1809,10 +1795,19 @@
                 return;
             }
 
-            // Validar contexto seguro HTTPS para evitar crashes por navigator.mediaDevices undefined
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                console.error("Contexto no seguro o navegador incompatible con getUserMedia.");
-                escribirTexto("Error: Tu navegador bloquea la cámara porque no estás usando una conexión segura HTTPS. Por favor, asegúrate de ingresar usando HTTPS://ar.alexandervillalva.uk 🐳🔒", 15);
+            // Validar contexto seguro HTTPS para evitar crashes por navigator.mediaDevices undefined.
+            const isLocalhost = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+            if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.error("[Camara RA] Contexto inseguro o navegador incompatible con getUserMedia.", {
+                    origin: window.location.origin,
+                    isSecureContext: window.isSecureContext,
+                    hasMediaDevices: !!navigator.mediaDevices,
+                    hasGetUserMedia: !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+                });
+                const detalle = isLocalhost
+                    ? "localhost sí puede usar cámara, pero solo desde este mismo equipo."
+                    : `Estás entrando desde ${window.location.origin}; en celular la cámara requiere HTTPS.`;
+                escribirTexto(`Error: el navegador bloqueó la cámara por contexto inseguro. ${detalle} Abre la experiencia con HTTPS o un túnel seguro hacia este servidor. 🐳🔒`, 15);
                 hablar("Acceso denegado. Se requiere una conexión segura HTTPS.");
                 return;
             }
@@ -1919,7 +1914,7 @@
                     panel.classList.add('collapsed');
                     document.body.classList.add('chat-panel-collapsed');
                 }
-                iniciarScannerQR();
+                iniciarTrackingImagenAR();
 
             } catch (err) {
                 console.error("Error al acceder a la cámara:", err);
@@ -1938,85 +1933,19 @@
             }
         }
 
-        function iniciarScannerQR() {
-            const hasImageTargets = Array.from(markerRegistry.values()).some(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
-            if (hasImageTargets && !('BarcodeDetector' in window)) {
-                setMobileClientState("Tracking imagen");
-                mostrarNotificacion("Tracking de imagen activo si MindAR esta disponible.");
+        function iniciarTrackingImagenAR() {
+            const imageTargets = Array.from(markerRegistry.values()).filter(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+            if (imageTargets.length === 0) {
+                setMobileClientState("Falta .mind");
+                mostrarNotificacion("No hay target MindAR compilado. Sube un archivo .mind en el editor para tracking tipo Vuforia.");
                 return;
             }
-
-            if (!('BarcodeDetector' in window)) {
-                console.warn("[AR Tracking] BarcodeDetector no disponible. Se mantiene simulador por clic.");
-                if (debeMostrarSimuladorMarcadores()) {
-                    setMobileClientState("Simulador AR");
-                    mostrarNotificacion("Tu navegador no soporta lectura QR automatica; usa clic en el marcador para simular deteccion.");
-                } else {
-                    setMobileClientState("QR no disponible");
-                    mostrarNotificacion("Lectura QR automatica no disponible en este navegador.");
-                }
-                return;
-            }
-
-            try {
-                qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
-            } catch (err) {
-                console.warn("[AR Tracking] No se pudo crear BarcodeDetector:", err);
-                return;
-            }
-
-            detenerScannerQR();
-            qrScanTimer = window.setInterval(escanearQRDesdeCamara, 650);
-            setMobileClientState("Buscando target");
-            mostrarNotificacion("Scanner QR activo: apunta la camara al target asociado.");
+            setMobileClientState("Buscando imagen");
+            mostrarNotificacion("Tracking de imagen activo: apunta la camara al target fisico entrenado.");
         }
 
-        function detenerScannerQR() {
-            if (qrScanTimer) {
-                window.clearInterval(qrScanTimer);
-                qrScanTimer = null;
-            }
-            activeMarkerTimeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
-            activeMarkerTimeouts.clear();
+        function detenerTrackingImagenAR() {
             setMobileClientState("AR listo");
-        }
-
-        async function escanearQRDesdeCamara() {
-            if (!qrDetector || !cameraStream) return;
-            const videoEl = document.getElementById("camera-stream");
-            if (!videoEl || videoEl.readyState < 2) return;
-            if (performance.now() - lastQrScanAt < 550) return;
-            lastQrScanAt = performance.now();
-
-            try {
-                const codes = await qrDetector.detect(videoEl);
-                codes.forEach(code => activarMarcadorPorClave(code.rawValue || ""));
-            } catch (err) {
-                console.warn("[AR Tracking] Falla leyendo QR:", err);
-            }
-        }
-
-        function normalizarClaveAR(value) {
-            return String(value || "").trim().toLowerCase();
-        }
-
-        function activarMarcadorPorClave(rawValue) {
-            const claveLeida = normalizarClaveAR(rawValue);
-            if (!claveLeida) return;
-
-            for (const marker of markerRegistry.values()) {
-                const candidates = [
-                    marker.uuid,
-                    marker.nombre,
-                    marker.recognitionKey,
-                    marker.markerImage
-                ].map(normalizarClaveAR).filter(Boolean);
-
-                const match = candidates.some(key => claveLeida === key || claveLeida.includes(key) || key.includes(claveLeida));
-                if (match) {
-                    setMarkerDetected(marker.uuid, true, "qr");
-                }
-            }
         }
 
         function setMarkerDetected(markerId, detected, source = "manual") {
@@ -2048,20 +1977,6 @@
                 setMobileClientState(cameraStream ? "Buscando target" : "AR listo");
                 const pill = document.getElementById('ar-detection-pill');
                 if (pill) pill.classList.remove('active');
-                const prevTimeout = activeMarkerTimeouts.get(markerId);
-                if (prevTimeout) {
-                    window.clearTimeout(prevTimeout);
-                    activeMarkerTimeouts.delete(markerId);
-                }
-            }
-
-            if (detected) {
-                const prevTimeout = activeMarkerTimeouts.get(markerId);
-                if (prevTimeout) window.clearTimeout(prevTimeout);
-                activeMarkerTimeouts.set(markerId, window.setTimeout(() => {
-                    setMarkerDetected(markerId, false, "timeout");
-                    activeMarkerTimeouts.delete(markerId);
-                }, 3200));
             }
         }
 
@@ -2128,11 +2043,7 @@
             }
 
             // 1. Cambiar color de la luz puntual neón de la plataforma para coincidir con la escena
-            if (nuevoModelo === "caos") {
-                elNeonLight.setAttribute("light", "color", "#ef4444"); // Rojo error
-                elSpeaker.innerText = "Laptop de Caos";
-                elSpeaker.style.color = "#ef4444";
-            } else if (nuevoModelo === "buque") {
+            if (nuevoModelo === "buque") {
                 elNeonLight.setAttribute("light", "color", "#00f3ff"); // Celeste carguero
                 elSpeaker.innerText = "Buque de Carga";
                 elSpeaker.style.color = "#00f3ff";
@@ -2302,11 +2213,9 @@
             const queryLower = pregunta.toLowerCase();
             let temaDetectado = "defecto";
 
-            if (queryLower.includes("caos") || queryLower.includes("error") || queryLower.includes("problema") || queryLower.includes("laptop") || queryLower.includes("inconsistencia") || queryLower.includes("mi máquina")) {
-                temaDetectado = "caos";
-            } else if (queryLower.includes("barco") || queryLower.includes("buque") || queryLower.includes("transporte") || queryLower.includes("carga") || queryLower.includes("marítimo") || queryLower.includes("carguero") || queryLower.includes("navegar")) {
+            if (queryLower.includes("barco") || queryLower.includes("buque") || queryLower.includes("transporte") || queryLower.includes("carga") || queryLower.includes("marítimo") || queryLower.includes("carguero") || queryLower.includes("navegar")) {
                 temaDetectado = "buque";
-            } else if (queryLower.includes("servidor") || queryLower.includes("rack") || queryLower.includes("producción") || queryLower.includes("despliegue") || queryLower.includes("cloud") || queryLower.includes("nube")) {
+            } else if (queryLower.includes("servidor") || queryLower.includes("rack") || queryLower.includes("producción") || queryLower.includes("despliegue") || queryLower.includes("cloud") || queryLower.includes("nube") || queryLower.includes("caos") || queryLower.includes("error") || queryLower.includes("problema") || queryLower.includes("inconsistencia") || queryLower.includes("mi máquina")) {
                 temaDetectado = "servidor";
             }
 
@@ -2430,7 +2339,7 @@
             }, 900);
         }
 
-        // Lanzar contenedor (Pokéball Throw)
+        // Efecto visual de objeto enviado hacia el target
         let containerCount = 0;
         const containerColors = ["#00f3ff", "#22c55e", "#a855f7", "#eab308", "#ef4444"];
         const dockerTips = [
@@ -2766,9 +2675,10 @@
                         posicion: { x: 0, y: 0.02, z: -3.0 },
                         rotacion: { y: 0 },
                         escala: 1.0,
-                        markerImage: "output/qr_presentacion.png",
-                        recognitionKey: "OIRA-DEMO",
-                        trackingMode: "qr",
+                        markerImage: "",
+                        mindTargetUrl: null,
+                        mindTargetIndex: 0,
+                        trackingMode: "image",
                         arAnchor: "base"
                     },
                     {
@@ -2798,7 +2708,7 @@
                     let pos = { x: 0, y: 0.6, z: -3.0 };
                     let nombre = "Marcador Genérico";
                     if (anc === 'marcador_a') { pos = { x: -1.8, y: 0.6, z: -3.0 }; nombre = "Marcador A (Logo Docker)"; }
-                    else if (anc === 'marcador_b') { pos = { x: 1.8, y: 0.6, z: -3.0 }; nombre = "Marcador B (Código QR)"; }
+                    else if (anc === 'marcador_b') { pos = { x: 1.8, y: 0.6, z: -3.0 }; nombre = "Marcador B (Legacy)"; }
                     else if (anc === 'marcador_c') { pos = { x: 0, y: 0.6, z: -5.0 }; nombre = "Marcador C (Database Target)"; }
                     
                     const mLegacy = {
@@ -2808,8 +2718,10 @@
                         posicion: pos,
                         rotacion: { y: 0 },
                         escala: 1.0,
-                        markerImage: 'output/qr_presentacion.png',
-                        recognitionKey: anc
+                        markerImage: '',
+                        mindTargetUrl: null,
+                        mindTargetIndex: 0,
+                        trackingMode: 'image'
                     };
                     marcadores.push(mLegacy);
                     datosLienzo.push(mLegacy);
@@ -2818,16 +2730,27 @@
 
             // 2. Instanciar dinámicamente cada marcador en la escena
             const sceneEl = document.querySelector('a-scene');
-            const markerMind = marcadores.find(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+            const imageMarkers = marcadores.filter(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+            const markerMind = imageMarkers[0];
+            if (sceneEl) {
+                sceneEl.removeAttribute('mindar-image');
+            }
             if (markerMind && sceneEl) {
-                sceneEl.setAttribute('mindar-image', `imageTargetSrc: ${markerMind.mindTargetUrl}; autoStart: true; uiScanning: yes;`);
+                sceneEl.setAttribute('mindar-image', `imageTargetSrc: ${markerMind.mindTargetUrl}; autoStart: true; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5;`);
                 setMobileClientState("Tracking imagen");
+                const differentTargets = new Set(imageMarkers.map(marker => marker.mindTargetUrl)).size;
+                if (differentTargets > 1) {
+                    mostrarNotificacion("MindAR usa un solo archivo .mind por escena. Usa indices distintos dentro del mismo .mind para varios targets.");
+                }
+            } else if (marcadores.length > 0) {
+                setMobileClientState("Falta .mind");
+                mostrarNotificacion("La escena tiene targets sin archivo .mind. Compila y sube el target para tracking real.");
             }
 
             const mostrarSimulador = debeMostrarSimuladorMarcadores();
 
             marcadores.forEach(marker => {
-                marker.recognitionKey = marker.recognitionKey || marker.uuid;
+                marker.trackingMode = marker.trackingMode || 'image';
                 markerRegistry.set(marker.uuid, marker);
                 const markerContainer = document.createElement('a-entity');
                 markerContainer.setAttribute('id', `anchor-${marker.uuid}`);
@@ -2835,19 +2758,22 @@
                 markerContainer.setAttribute('position', `${marker.posicion.x} ${marker.posicion.y} ${marker.posicion.z}`);
                 markerContainer.setAttribute('rotation', `0 ${marker.rotacion.y || 0} 0`);
                 markerContainer.setAttribute('scale', `${marker.escala} ${marker.escala} ${marker.escala}`);
-                if (marker.trackingMode === 'image' && marker.mindTargetUrl) {
+                markerContainer.setAttribute('visible', marker.trackingMode === 'image' && marker.mindTargetUrl ? 'true' : 'false');
+                if (marker.trackingMode === 'image' && marker.mindTargetUrl && marker.mindTargetUrl === markerMind?.mindTargetUrl) {
                     markerContainer.setAttribute('mindar-image-target', `targetIndex: ${marker.mindTargetIndex || 0}`);
                 }
+                markerContainer.addEventListener('targetFound', () => setMarkerDetected(marker.uuid, true, 'mindar'));
+                markerContainer.addEventListener('targetLost', () => setMarkerDetected(marker.uuid, false, 'mindar'));
 
                 if (mostrarSimulador) {
                     const markerPlane = document.createElement('a-plane');
                     markerPlane.setAttribute('width', '0.8');
                     markerPlane.setAttribute('height', '0.8');
                     markerPlane.setAttribute('rotation', '-90 0 0');
-                    markerPlane.setAttribute('material', `src: ${marker.markerImage || 'output/qr_presentacion.png'}; shader: flat; side: double`);
+                    markerPlane.setAttribute('material', marker.markerImage ? `src: ${marker.markerImage}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double');
                     markerContainer.appendChild(markerPlane);
 
-                    // Billboard de simulacion solo para escritorio/debug.
+                    // Vista de diagnostico solo con ?debugMarkers=1.
                     const billboard = document.createElement('a-plane');
                     billboard.setAttribute('billboard-ui', '');
                     billboard.setAttribute('class', 'clickable');
@@ -2874,7 +2800,7 @@
                     billboard.appendChild(textTitle);
 
                     const textAction = document.createElement('a-text');
-                    textAction.setAttribute('value', 'Clic para simular deteccion');
+                    textAction.setAttribute('value', 'Debug target MindAR');
                     textAction.setAttribute('align', 'center');
                     textAction.setAttribute('width', '1.5');
                     textAction.setAttribute('position', '0 -0.18 0.01');
@@ -2882,21 +2808,15 @@
                     textAction.setAttribute('font', 'mozillavr');
                     billboard.appendChild(textAction);
 
-                    billboard.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const isDetected = markerContainer.dataset.detected === "true";
-                        setMarkerDetected(marker.uuid, !isDetected, "manual");
-                    });
-
                     markerContainer.addEventListener('targetFound', () => {
                         border.setAttribute('color', '#22c55e');
-                        textAction.setAttribute('value', 'Marcador Detectado');
+                        textAction.setAttribute('value', 'Target Detectado');
                         textAction.setAttribute('color', '#22c55e');
                     });
 
                     markerContainer.addEventListener('targetLost', () => {
                         border.setAttribute('color', '#00f3ff');
-                        textAction.setAttribute('value', 'Clic para simular deteccion');
+                        textAction.setAttribute('value', 'Debug target MindAR');
                         textAction.setAttribute('color', '#cbd5e1');
                     });
 
@@ -2906,7 +2826,7 @@
             });
 
             // Resetear entidades de referencias para compatibilidad retrospectiva
-            entities = { defecto: null, caos: null, servidor: null, buque: null };
+            entities = { defecto: null, servidor: null, buque: null };
 
             // 3. Instanciar físicamente cada objeto en su respectivo contenedor de anclaje
             datosLienzo.forEach(obj => {
@@ -3082,9 +3002,6 @@
                 if (obj.modelId === "modelo-ballena" && !entities.defecto) {
                     entities.defecto = el;
                     defaultScales.defecto = `${obj.escala} ${obj.escala} ${obj.escala}`;
-                } else if (obj.modelId === "modelo-laptop" && !entities.caos) {
-                    entities.caos = el;
-                    defaultScales.caos = `${obj.escala} ${obj.escala} ${obj.escala}`;
                 } else if (obj.modelId === "modelo-rack" && !entities.servidor) {
                     entities.servidor = el;
                     defaultScales.servidor = `${obj.escala} ${obj.escala} ${obj.escala}`;
@@ -3137,29 +3054,32 @@
                 return;
             }
 
-            btnScan.disabled = true;
-            setInferenceState('capturing');
-
-            // ── PASO 1: Tomar la foto ──────────────────────────────────
-            dispararFlash();                          // flash blanco visual
-            mostrarEscanerAnimacion(true);             // barra de scan
-
-            const canvas = document.createElement('canvas');
-            canvas.width  = video.videoWidth  || 1280;
-            canvas.height = video.videoHeight || 720;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const base64Image = canvas.toDataURL('image/jpeg', 0.90);
-
-            // Mostrar preview de la foto al usuario
-            mostrarFotoPreview(base64Image, '📤 Enviando a Gemma4 Vision...');
-            mostrarEscanerAnimacion(false);
-            setInferenceState('yolo_vision');
-
-            // ── PASO 2: Enviar foto a Gemma4 ──────────────────────────
             try {
+                btnScan.disabled = true;
+                setInferenceState('capturing');
+
+                // ── PASO 1: Tomar la foto ──────────────────────────────────
+                dispararFlash();                          // flash blanco visual
+                mostrarEscanerAnimacion(true);             // barra de scan
+
+                const canvas = document.createElement('canvas');
+                canvas.width  = video.videoWidth  || 1280;
+                canvas.height = video.videoHeight || 720;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    throw new Error('No se pudo preparar el canvas de captura.');
+                }
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const base64Image = canvas.toDataURL('image/jpeg', 0.90);
+
+                // Mostrar preview de la foto al usuario
+                mostrarFotoPreview(base64Image, '📤 Enviando a Gemma4 Vision...');
+                mostrarEscanerAnimacion(false);
+                setInferenceState('yolo_vision');
+
+                // ── PASO 2: Enviar foto a Gemma4 ──────────────────────────
                 const controller = new AbortController();
-                const timeoutId  = setTimeout(() => controller.abort(), 90000);
+                const timeoutId  = setTimeout(() => controller.abort(), 180000);
 
                 let response;
                 try {
@@ -3173,11 +3093,19 @@
                     clearTimeout(timeoutId);
                 }
 
-                const data = await response.json();
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (jsonErr) {
+                    throw new Error(`Respuesta inválida del servidor de visión (${response.status}).`);
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Servidor de visión respondió HTTP ${response.status}.`);
+                }
 
                 // ── PASO 3: Mostrar resultado ──────────────────────────
                 mostrarFotoPreview(null);              // ocultar preview
-                btnScan.disabled = false;
 
                 if (data.error) {
                     setInferenceState('idle');
@@ -3196,14 +3124,18 @@
                 setInferenceState('idle');
                 mostrarFotoPreview(null);
                 mostrarEscanerAnimacion(false);
-                btnScan.disabled = false;
                 if (err.name === 'AbortError') {
-                    escribirTexto('⏱️ Tiempo agotado. Verifica que Ollama esté corriendo con gemma4:e2b. 🐳', 15);
+                    escribirTexto('⏱️ Tiempo agotado. Verifica que Ollama esté corriendo con gemma4:e2b; la primera carga puede tardar varios minutos. 🐳', 15);
+                } else if (err.message && err.message.includes('HTTP')) {
+                    escribirTexto(`Error del servidor de visión: ${err.message}`, 15);
+                } else if (err instanceof TypeError) {
+                    escribirTexto('No pude conectar con /api/vision. Verifica que el servidor Python esté corriendo y que el celular use la misma URL/túnel del servidor. 🐳🔌', 15);
                 } else {
-                    escribirTexto('¡Sin conexión al servidor! Asegúrate de que Python esté corriendo. 🐳🔌', 15);
+                    escribirTexto(`Error en visión IA: ${err.message || 'fallo desconocido'}`, 15);
                 }
-                hablar('El sonar perdió la señal.');
+                hablar('No pude conectar con el servidor de visión.');
             } finally {
+                btnScan.disabled = false;
                 setTimeout(() => {
                     const speakerLbl = document.getElementById('speaker-label');
                     if (speakerLbl && speakerLbl.innerText.includes('Hablando')) {

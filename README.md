@@ -1,6 +1,6 @@
 # Moby Studio
 
-Moby Studio es una aplicacion local para crear, editar y probar experiencias AR desde el navegador. Incluye un editor 3D, un cliente movil AR, gestion de assets, disparadores por QR o imagen entrenada, y un backend Python que guarda el layout y sirve los recursos desde `moby_studio/output/`.
+Moby Studio es una aplicacion local para crear, editar y probar experiencias AR desde el navegador. Incluye un editor 3D, un cliente movil AR, gestion de assets, disparadores por imagen entrenada MindAR, y un backend Python que guarda el layout y sirve los recursos desde `moby_studio/output/`.
 
 ## Estado Actual
 
@@ -23,12 +23,12 @@ La aplicacion ya incluye:
 - Autosave local y recuperacion de borradores.
 - Undo/Redo real por snapshots de escena.
 - Validador de publicacion.
-- Soporte para QR y MindAR.
+- Soporte principal para tracking de imagen MindAR tipo Vuforia.
 - Flujo AR target fisico + contenido proyectado desde el mismo modal.
 - Contenido por archivo local o URL directa para imagen, video y GLB/GLTF.
 - Nodos OIRA generados sin depender de modelos base heredados.
 - Cliente movil con controles compactos para telefono.
-- Integracion opcional de vision local con YOLOv8 y Ollama.
+- Integracion opcional de vision local con Gemma4:e2b via Ollama.
 
 ## Estructura Del Proyecto
 
@@ -115,7 +115,6 @@ Funciones actuales:
 
 Los marcadores AR son entidades normales con `isMarker: true`. Pueden configurarse con:
 
-- `trackingMode: "qr"` y `recognitionKey` para QR / BarcodeDetector.
 - `trackingMode: "image"` y `mindTargetUrl` para targets MindAR `.mind`.
 - `markerImage` para la textura visual del target dentro del editor.
 
@@ -124,10 +123,10 @@ El contenido asociado guarda `arAnchor` con el UUID del marcador.
 Flujo recomendado:
 
 1. Presiona `Marcador + Imagen` o `Marcador + Video`.
-2. En `Target fisico`, sube la imagen/QR/icono que se va a imprimir o mostrar en una tarjeta.
-3. En `Reconocimiento`, usa QR o MindAR.
+2. En `Target fisico`, sube la imagen que se va a imprimir o mostrar en una tarjeta.
+3. Compila esa imagen en el compilador oficial de MindAR y sube el archivo `.mind`.
 4. En `Contenido flotante`, sube un archivo local o pega una URL directa.
-5. Guarda. En telefono, al detectar el target, el contenido aparece encima.
+5. Guarda. En telefono, al detectar la imagen entrenada, el contenido aparece encima.
 
 Para video, el link debe apuntar directo al archivo (`.mp4` o `.webm`). Un enlace normal de YouTube/Vimeo no funciona como textura AR directa.
 
@@ -137,7 +136,6 @@ Para video, el link debe apuntar directo al archivo (`.mp4` o `.webm`). Un enlac
 
 - Interfaz compacta.
 - Dock de acciones.
-- Escaneo de QR si `BarcodeDetector` esta disponible.
 - Soporte para MindAR cuando el marcador tiene `.mind`.
 - Paneles espaciales flotantes para imagenes y videos.
 - Nodos OIRA flotantes generados desde datos del layout.
@@ -207,10 +205,10 @@ Atajos:
 | `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia permitido. |
 | `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
 | `/api/delete-model?name=...` | POST | Elimina modelos GLB/GLTF. |
-| `/api/generate-qr?text=...&name=...` | POST | Genera un QR PNG en `output/`. |
+| `/api/generate-qr?text=...&name=...` | POST | Endpoint heredado para generar QR PNG en `output/`; el visor final usa MindAR. |
 | `/api/generate-model?script=...` | POST | Ejecuta Blender headless con un script procedural. |
 | `/api/compress-model` | POST | Ejecuta compresion de modelo con Blender. |
-| `/api/vision` | POST | Analiza un frame base64 con YOLOv8 y Ollama local. |
+| `/api/vision` | POST | Analiza un frame base64 con Gemma4:e2b via Ollama local. |
 
 ## Datos De Layout
 
@@ -234,9 +232,10 @@ Formato actual:
       "posicion": { "x": 0, "y": 0.02, "z": -3.5 },
       "rotacion": { "y": 0 },
       "escala": 1,
-      "markerImage": "output/qr_presentacion.png",
+      "markerImage": "output/target-fisico.png",
       "recognitionKey": "objeto-marcador-1",
-      "trackingMode": "qr",
+      "trackingMode": "image",
+      "mindTargetUrl": "output/target-fisico.mind",
       "mindTargetUrl": null,
       "mindTargetIndex": 0,
       "arAnchor": "base"
