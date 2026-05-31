@@ -55,11 +55,6 @@ def save_users(users):
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, indent=4, ensure_ascii=False)
 
-try:
-    import qrcode
-except ImportError:
-    qrcode = None
-
 # Forzar codificación UTF-8 en flujos estándar de consola para Windows
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
@@ -229,8 +224,7 @@ def asset_kind(file_name):
 def friendly_asset_name(file_name):
     name = os.path.splitext(file_name)[0].replace("_", " ").replace("-", " ").title()
     known = {
-        "blue whale 3d model.glb": "Ballena Azul (Original)",
-        "qr_presentacion.png": "QR de Presentacion"
+        "blue whale 3d model.glb": "Ballena Azul (Original)"
     }
     return known.get(file_name, name)
 
@@ -672,67 +666,6 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 send_json(self, 200, collab_payload(project))
             except Exception as e:
                 send_json(self, 500, {"error": str(e)})
-        elif self.path.startswith('/api/generate-qr'):
-            query = urllib.parse.urlparse(self.path).query
-            params = urllib.parse.parse_qs(query)
-            qr_text = params.get('text', [''])[0].strip()
-            file_name = params.get('name', [''])[0].strip()
-
-            if not qr_text:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "Texto QR no especificado."}).encode('utf-8'))
-                return
-
-            if qrcode is None:
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": "La librería qrcode no está instalada en este Python. Usa moby_studio\\venv\\Scripts\\python.exe lanzador_ar.py."}).encode('utf-8'))
-                return
-
-            safe_name = os.path.basename(file_name or f"qr_{abs(hash(qr_text))}.png")
-            if not safe_name.lower().endswith(".png"):
-                safe_name += ".png"
-
-            try:
-                output_dir = "output"
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-
-                qr = qrcode.QRCode(
-                    version=1,
-                    error_correction=qrcode.constants.ERROR_CORRECT_M,
-                    box_size=10,
-                    border=4,
-                )
-                qr.add_data(qr_text)
-                qr.make(fit=True)
-                img = qr.make_image(fill_color="black", back_color="white")
-                ruta_qr = os.path.join(output_dir, safe_name)
-                img.save(ruta_qr)
-
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({
-                    "status": "success",
-                    "message": "QR generado exitosamente.",
-                    "src": f"output/{safe_name}",
-                    "text": qr_text
-                })
-                self.wfile.write(response_body.encode('utf-8'))
-            except Exception as e:
-                print(f"[QR ERROR] Error al generar QR: {str(e)}")
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({"error": f"Falla al generar QR: {str(e)}"}).encode('utf-8'))
         elif self.path.startswith('/api/upload-model'):
             query = urllib.parse.urlparse(self.path).query
             params = urllib.parse.parse_qs(query)
@@ -1408,29 +1341,7 @@ def main():
         print(f"URL de destino por defecto: {url_servicio}")
     print("-" * 80)
 
-    # 2. Generar QR opcional de acceso. No participa en tracking AR.
-    ruta_qr = None
-    if qrcode is not None:
-        try:
-            qr = qrcode.QRCode(
-                version=1,
-                error_correction=qrcode.constants.ERROR_CORRECT_L,
-                box_size=10,
-                border=4,
-            )
-            qr.add_data(url_servicio)
-            qr.make(fit=True)
-
-            img = qr.make_image(fill_color="black", back_color="white")
-            ruta_qr = os.path.abspath("qr_presentacion.png")
-            img.save(ruta_qr)
-            print(f"QR opcional de acceso generado: {ruta_qr}")
-            print("Nota: el tracking AR real usa MindAR con archivo .mind, no QR.")
-            print("-" * 80)
-        except Exception as e:
-            print(f"[WARN] No se pudo generar el QR opcional de acceso: {str(e)}", file=sys.stderr)
-
-    # 3. Lanzar Servidor HTTP
+    # 2. Lanzar Servidor HTTP
     ThreadedARServer.allow_reuse_address = True
     
     # Asegurar tipos MIME correctos para modelos 3D y WASM
@@ -1451,8 +1362,6 @@ def main():
             print("Acceso Móvil (Celular):")
             print(f"   -> {url_servicio}")
             print("Tracking AR: sube imagen fisica + archivo .mind desde el editor.")
-            if ruta_qr:
-                print(f"QR opcional para abrir la URL: {ruta_qr}")
             print("-" * 80)
             print("=" * 80)
             print("Presione Ctrl+C para detener el servidor de despliegue.")

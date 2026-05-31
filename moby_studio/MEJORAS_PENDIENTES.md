@@ -11,7 +11,7 @@ Estamos convirtiendo Moby Studio en un editor y visor WebAR profesional tipo Vuf
 - El AR real y obligatorio funciona con MindAR: imagen fisica entrenada, archivo `.mind`, `mindTargetIndex` y contenido anclado al target.
 - La vision IA con Ollama/Gemma (`/api/vision`) es solo una herramienta opcional de "Analizar Camara". No debe bloquear publicacion, tracking ni experiencia AR.
 
-No volver al flujo antiguo de QR/BarcodeDetector/simulacion como sistema principal. El QR solo podria conservarse como acceso a la URL del visor, no como tracking AR.
+No volver al flujo antiguo de QR/BarcodeDetector/simulacion como sistema principal. El acceso al visor debe resolverse con URL HTTPS o instrucciones de publicacion, no con QR dentro del runtime.
 
 Estado actual importante:
 
@@ -48,8 +48,6 @@ Lo siguiente que toca hacer:
    - No mezclar vision IA con deteccion del target.
 
 5. Limpiar legado restante.
-   - Revisar mensajes del lanzador que todavia hablan de QR.
-   - Decidir si `/api/generate-qr` queda como compatibilidad o se elimina.
    - Evitar textos de Docker/demo si no aportan al visor final.
 
 Cuando retomes, empieza revisando:
@@ -153,12 +151,7 @@ Nota: los tuneles rapidos de Cloudflare pueden cambiar de URL al reiniciarse. Al
    - Medir tiempo de deteccion y estabilidad.
    - Ajustar escala/posicion inicial del contenido segun resultado real.
 
-5. Limpieza legacy
-   - Mantener `/api/generate-qr` solo como endpoint heredado o eliminarlo si ya no se necesita.
-   - Revisar mensajes del lanzador que todavia hablan de QR de acceso.
-   - Decidir si se conserva el QR solo para abrir la URL del visor, no para tracking AR.
-
-6. Publicacion profesional
+5. Publicacion profesional
    - Generar una pagina de entrega para cliente con instrucciones minimas.
    - Incluir target imprimible, URL del visor y checklist de compatibilidad.
    - Validar paquete exportado en telefono antes de entregar.

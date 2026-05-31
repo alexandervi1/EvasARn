@@ -41,7 +41,7 @@ Retirado o no principal:
 - El `Banco 3D` ya no aparece como paso principal; queda como busqueda externa opcional desde `Importar GLB`.
 - La carpeta legacy de `dataset/` y vision local anterior ya no forma parte del flujo.
 - `/api/generate-model` queda retirado y responde como endpoint obsoleto.
-- QR, BarcodeDetector y simulaciones no son el sistema principal de tracking AR.
+- QR, BarcodeDetector y simulaciones fueron retirados del flujo AR principal.
 - La compilacion local de `.mind` todavia esta pendiente; por ahora se suben archivos `.mind` ya generados.
 
 ## Estructura
@@ -72,6 +72,15 @@ mcpBlender/
 
 ## Ejecucion Local
 
+Primera instalacion despues de clonar:
+
+```powershell
+cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender
+python -m venv moby_studio\venv
+.\moby_studio\venv\Scripts\python.exe -m pip install --upgrade pip
+.\moby_studio\venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
 Desde PowerShell:
 
 ```powershell
@@ -86,6 +95,11 @@ Abrir:
 - Assets: `http://localhost:8000/api/list-assets`
 
 Para probar en telefono se necesita una URL HTTPS. Puedes usar Cloudflare Tunnel, ngrok u otra herramienta equivalente apuntando al puerto `8000`. La camara movil suele fallar si se abre por HTTP normal.
+
+Dependencias externas opcionales:
+
+- Blender: necesario solo para comprimir GLB con Draco desde `/api/compress-model`.
+- Ollama con `gemma4:e2b`: necesario solo para `Analizar Camara` y vision IA opcional.
 
 ## Flujo Recomendado
 
@@ -271,7 +285,6 @@ Si la vision IA falla:
 | `/api/export-experience?name=...` | POST | Genera ZIP de experiencia. |
 | `/api/compress-model` | POST | Comprime GLB con Blender/Draco. |
 | `/api/vision` | POST | Analiza frame con Ollama/Gemma. |
-| `/api/generate-qr?text=...&name=...` | POST | Endpoint heredado para QR de acceso. |
 | `/api/generate-model?script=...` | POST | Retirado; generacion procedural eliminada. |
 | `/api/connection-info` | GET | Devuelve informacion de conexion local. |
 
@@ -352,7 +365,7 @@ Prioridad actual:
 3. Refinar publicacion profesional para cliente.
 4. Validar experiencia en telefono por HTTPS.
 5. Mantener vision IA como modulo opcional controlado desde el editor.
-6. Limpiar legado restante de QR y compatibilidad OIRA interna.
+6. Limpiar compatibilidad OIRA interna restante.
 
 ## Documentacion Relacionada
 

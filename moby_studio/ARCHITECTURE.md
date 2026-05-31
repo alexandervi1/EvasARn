@@ -113,7 +113,6 @@ Responsabilidades:
 - Mantener estado colaborativo en memoria.
 - Subir y eliminar assets.
 - Listar assets con metadata.
-- Mantener endpoints heredados de QR para compatibilidad.
 - Ejecutar scripts de Blender.
 - Procesar vision local con Gemma4:e2b via Ollama.
 
@@ -134,7 +133,6 @@ Endpoints activos:
 | `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia. |
 | `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
 | `/api/delete-model?name=...` | POST | Elimina modelos. |
-| `/api/generate-qr?text=...&name=...` | POST | Genera QR heredado en `output/`; el visor final usa MindAR. |
 | `/api/generate-model?script=...` | POST | Endpoint retirado; la generacion procedural fue eliminada. |
 | `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
 | `/api/vision` | POST | Procesa imagen base64 con Gemma4:e2b via Ollama. |
