@@ -1083,6 +1083,50 @@
             font-weight: bold;
         }
 
+        .viewport-ar-summary {
+            position: absolute;
+            top: 82px;
+            right: 18px;
+            z-index: 6;
+            width: min(340px, calc(100% - 36px));
+            pointer-events: none;
+            background: rgba(5, 7, 15, 0.82);
+            border: 1px solid rgba(56, 189, 248, 0.22);
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #cbd5e1;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .viewport-ar-summary-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 7px;
+        }
+
+        .viewport-ar-summary-title {
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: 0;
+        }
+
+        .viewport-ar-summary-chip {
+            font-size: 9px;
+            font-weight: 800;
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            background: rgba(245, 158, 11, 0.08);
+            border-radius: 999px;
+            padding: 2px 7px;
+            flex-shrink: 0;
+        }
+
         /* UNITY-LIKE TRANSFORM TOOLBAR */
         #transform-toolbar {
             position: absolute;
@@ -2296,6 +2340,13 @@
             .viewport-instructions {
                 display: none;
             }
+            .viewport-ar-summary {
+                top: 86px;
+                right: 12px;
+                left: 12px;
+                width: auto;
+                font-size: 10.5px;
+            }
             #viewport-navigation-star {
                 right: 20px;
                 top: 110px;
@@ -2682,6 +2733,10 @@
                             <span>Ver Rejilla Neón</span>
                             <input type="checkbox" id="check-stage-grid" checked onchange="toggleRejillaEscenario()" style="accent-color: var(--color-docker); width: 14px; height: 14px; cursor: pointer; pointer-events: auto;">
                         </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: #cbd5e1;">
+                            <span>Guías MindAR</span>
+                            <input type="checkbox" id="check-ar-guides" checked onchange="toggleGuiasAR()" style="accent-color: var(--color-docker); width: 14px; height: 14px; cursor: pointer; pointer-events: auto;">
+                        </div>
                     </div>
 
                     <div class="panel-section-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
@@ -2856,6 +2911,14 @@
                 <div class="inst-item"><span class="inst-icon">[E]</span> Rotar (Y-Rot Scroll)</div>
                 <div class="inst-item"><span class="inst-icon">[R]</span> Escalar (Size Scroll)</div>
                 <div class="inst-item"><span class="inst-icon">[Supr]</span> Eliminar</div>
+            </div>
+
+            <div id="viewport-ar-summary" class="viewport-ar-summary">
+                <div class="viewport-ar-summary-head">
+                    <span class="viewport-ar-summary-title">Estado MindAR</span>
+                    <span id="viewport-ar-summary-chip" class="viewport-ar-summary-chip">Pendiente</span>
+                </div>
+                <div id="viewport-ar-summary-body">Crea un target, asigna imagen fisica, sube .mind y ancla contenido.</div>
             </div>
         </div>
 
@@ -3363,23 +3426,22 @@
                                 </div>
                                 <input type="number" class="control-input" id="ar-mind-target-index" min="0" step="1" value="0" placeholder="Indice target" style="margin-top: 6px;">
                                 
-                                <!-- GUÍA DE COMPILACIÓN MINDAR -->
+                                <!-- Estado de compilación local pendiente -->
                                 <div class="mind-guide-box" style="margin-top: 10px; border: 1px solid rgba(0, 243, 255, 0.16); background: rgba(2, 132, 199, 0.05); border-radius: 8px; padding: 10px; font-size: 10.5px; line-height: 1.4; color: #cbd5e1;">
                                     <div style="font-weight: 700; color: #00f3ff; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-                                        <span>⚙️</span> Compilador de Imagen
+                                        <span>⚙️</span> Procesamiento de target
                                     </div>
                                     <p style="margin: 0 0 6px 0;">
-                                        MindAR requiere compilar la imagen física en un archivo entrenado <strong>.mind</strong> para reconocerla.
+                                        El editor ya no depende del compilador externo. Por ahora puedes subir un <strong>.mind</strong> existente; la compilación local queda como módulo pendiente.
                                     </p>
                                     <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 6px; border-left: 2px solid rgba(0, 243, 255, 0.25); margin-bottom: 8px;">
                                         <div>1. Sube tu imagen física en el <strong>Paso 1</strong>.</div>
-                                        <div>2. Abre el compilador oficial de MindAR a continuación.</div>
-                                        <div>3. Carga la imagen, compila el target y descarga el archivo <strong>.mind</strong>.</div>
-                                        <div>4. Súbelo aquí usando el botón <strong>Subir</strong>.</div>
+                                        <div>2. Si ya tienes un archivo entrenado <strong>.mind</strong>, súbelo aquí.</div>
+                                        <div>3. Para producción, falta implementar <strong>Procesar target</strong> dentro del backend.</div>
                                     </div>
-                                    <a href="https://hiukim.github.io/mind-ar-js/compiler.html" target="_blank" class="btn btn-secondary-action" style="font-size: 9.5px; padding: 4px 8px; border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.08); color: #7dd3fc; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%;">
-                                        🌐 Abrir Compilador Oficial MindAR ↗
-                                    </a>
+                                    <button type="button" class="btn btn-secondary-action" disabled title="Pendiente: compilar target localmente en el servidor" style="font-size: 9.5px; padding: 4px 8px; border-color: rgba(148, 163, 184, 0.25); background: rgba(148, 163, 184, 0.06); color: #94a3b8; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; cursor: not-allowed; opacity: 0.72;">
+                                        ⚙️ Procesar target local (pendiente)
+                                    </button>
                                     <button type="button" class="btn btn-secondary-action" onclick="abrirTarjetaImprimibleTarget()" style="font-size: 9.5px; padding: 4px 8px; border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.08); color: #86efac; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; margin-top: 6px;">
                                         🖨️ Abrir tarjeta imprimible
                                     </button>
@@ -3660,6 +3722,7 @@
         let entidadSeleccionada = null;
         let contadorIds = 0;
         let hayCambiosSinGuardar = false;
+        let guiasARVisibles = true;
         let proyectoActivo = localStorage.getItem('moby_studio_active_project_v1') || 'default';
         let proyectoVersion = 0;
         const AUTOSAVE_KEY_BASE = 'moby_studio_editor_draft_v1';
@@ -4503,10 +4566,10 @@
 
         function actualizarVisualMarcador(marker) {
             if (!marker) return;
-            const el = document.getElementById(marker.uuid);
-            const plane = el?.querySelector('a-plane');
-            if (plane) {
-                plane.setAttribute('material', marker.markerImage ? `src: ${marker.markerImage}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double');
+            const estabaSeleccionado = entidadSeleccionada?.uuid === marker.uuid;
+            renderizarEntidad3D(marker);
+            if (estabaSeleccionado) {
+                seleccionarObjeto(marker);
             }
         }
 
@@ -4962,6 +5025,7 @@
             mostrarNotificacion(`¡Configuración guardada para ${objetoEnConfiguracionAR.nombre}!`, "success");
             document.getElementById('ar-trigger-modal-overlay').style.display = 'none';
             objetoEnConfiguracionAR = null;
+            renderOutliner();
             marcarCambiosSinGuardar();
         }
 
@@ -5171,7 +5235,7 @@
 
             if (mediaType === 'image' || mediaType === 'video') {
                 abrirModalAR(contenido);
-                mostrarNotificacion("Sube la imagen fisica, compilala a .mind y agrega el contenido que se proyectara encima.", "success");
+                mostrarNotificacion("Sube la imagen fisica, agrega un .mind existente y configura el contenido que se proyectara encima.", "success");
             } else {
                 mostrarNotificacion("Experiencia AR creada: configura la imagen target y sube su .mind.", "success");
             }
@@ -5353,6 +5417,43 @@
             return marker ? marker.nombre : obj.arAnchor;
         }
 
+        function actualizarResumenLienzoAR() {
+            const panel = document.getElementById('viewport-ar-summary');
+            const chip = document.getElementById('viewport-ar-summary-chip');
+            const body = document.getElementById('viewport-ar-summary-body');
+            if (!panel || !chip || !body) return;
+
+            const markers = escenaObjetos.filter(obj => obj.isMarker);
+            const content = escenaObjetos.filter(obj => !obj.isMarker);
+            const audit = auditarEscenaMindAR();
+            const ready = audit.listo;
+            const color = ready ? '#22c55e' : '#f59e0b';
+            const bg = ready ? 'rgba(34, 197, 94, 0.08)' : 'rgba(245, 158, 11, 0.08)';
+            const border = ready ? 'rgba(34, 197, 94, 0.35)' : 'rgba(245, 158, 11, 0.35)';
+
+            chip.innerText = ready ? 'Listo' : 'Pendiente';
+            chip.style.color = color;
+            chip.style.background = bg;
+            chip.style.borderColor = border;
+
+            if (escenaObjetos.length === 0) {
+                body.innerText = 'Crea un target MindAR y agrega contenido para comenzar.';
+                return;
+            }
+
+            const parts = [
+                `${markers.length} target(s)`,
+                `${content.length} contenido(s)`,
+                `${audit.targetsSinImagen.length} sin imagen`,
+                `${audit.targetsSinMind.length} sin .mind`,
+                `${audit.contenidoSinTarget.length} sin anclaje`
+            ];
+
+            body.innerText = ready
+                ? `Escena lista para probar en el visor. ${markers.length} target(s), ${content.length} contenido(s) anclado(s).`
+                : `${parts.join(' · ')}. ${mensajeAuditoriaMindAR(audit)}`;
+        }
+
         function renderOutliner() {
             const list = document.getElementById('outliner-list');
             if (!list) return;
@@ -5366,6 +5467,7 @@
             document.getElementById('scene-stat-markers').innerText = markers.length;
             document.getElementById('scene-stat-anchored').innerText = anchored.length;
             document.getElementById('outliner-summary').innerText = `${escenaObjetos.length} objetos · ${markers.length} targets`;
+            actualizarResumenLienzoAR();
 
             const matches = (obj) => {
                 if (!query) return true;
@@ -5871,6 +5973,7 @@
             if (inspector) inspector.style.display = 'none';
             if (empty) empty.style.display = 'flex';
             actualizarGizmo3D();
+            actualizarResumenLienzoAR();
         }
 
         function recalcularContadorIds() {
@@ -6125,21 +6228,139 @@
         }
 
         // Renderizar dinámicamente en A-Frame la entidad del lienzo
+        function estadoTargetEditor(marker) {
+            const tieneContenido = escenaObjetos.some(obj => !obj.isMarker && obj.arAnchor === marker.uuid);
+            if (!marker.markerImage) return { texto: 'Falta imagen fisica', color: '#ef4444' };
+            if (!marker.mindTargetUrl) return { texto: 'Falta archivo .mind', color: '#f59e0b' };
+            if (!tieneContenido) return { texto: 'Sin contenido anclado', color: '#eab308' };
+            return { texto: 'Target MindAR listo', color: '#22c55e' };
+        }
+
+        function agregarTextoBillboard(parent, texto, position, color = '#e2e8f0', width = '2.2') {
+            const label = document.createElement('a-text');
+            label.setAttribute('value', texto);
+            label.setAttribute('align', 'center');
+            label.setAttribute('color', color);
+            label.setAttribute('width', width);
+            label.setAttribute('position', position);
+            label.setAttribute('font', 'mozillavr');
+            label.setAttribute('billboard-ui', '');
+            parent.appendChild(label);
+            return label;
+        }
+
+        function agregarMarcoTarget(surface, width, height, color) {
+            const specs = [
+                { w: width, h: 0.025, p: `0 ${height / 2} 0.025` },
+                { w: width, h: 0.025, p: `0 ${-height / 2} 0.025` },
+                { w: 0.025, h: height, p: `${-width / 2} 0 0.025` },
+                { w: 0.025, h: height, p: `${width / 2} 0 0.025` }
+            ];
+            specs.forEach(spec => {
+                const edge = document.createElement('a-plane');
+                edge.setAttribute('width', spec.w);
+                edge.setAttribute('height', spec.h);
+                edge.setAttribute('position', spec.p);
+                edge.setAttribute('material', `color: ${color}; shader: flat; side: double; opacity: 0.95; transparent: true`);
+                surface.appendChild(edge);
+            });
+        }
+
+        function agregarEtiquetaEstado(el, titulo, estado, color) {
+            const badge = document.createElement('a-entity');
+            badge.setAttribute('position', '0 0.78 0');
+            badge.setAttribute('billboard-ui', '');
+
+            const bg = document.createElement('a-plane');
+            bg.setAttribute('width', '1.55');
+            bg.setAttribute('height', '0.34');
+            bg.setAttribute('material', 'color: #06111f; shader: flat; side: double; opacity: 0.86; transparent: true');
+            badge.appendChild(bg);
+
+            const top = document.createElement('a-text');
+            top.setAttribute('value', titulo);
+            top.setAttribute('align', 'center');
+            top.setAttribute('color', '#f8fafc');
+            top.setAttribute('width', '2.25');
+            top.setAttribute('position', '0 0.06 0.02');
+            top.setAttribute('font', 'mozillavr');
+            badge.appendChild(top);
+
+            const bottom = document.createElement('a-text');
+            bottom.setAttribute('value', estado);
+            bottom.setAttribute('align', 'center');
+            bottom.setAttribute('color', color);
+            bottom.setAttribute('width', '2.0');
+            bottom.setAttribute('position', '0 -0.09 0.02');
+            bottom.setAttribute('font', 'mozillavr');
+            badge.appendChild(bottom);
+
+            el.appendChild(badge);
+        }
+
+        function agregarGuiaAnclajeContenido(el, obj) {
+            if (obj.isMarker) return;
+            const anchorId = obj.arAnchor || 'base';
+            if (anchorId === 'base') {
+                agregarEtiquetaEstado(el, obj.nombre || 'Contenido AR', 'Sin target MindAR', '#ef4444');
+                return;
+            }
+
+            const marker = escenaObjetos.find(item => item.isMarker && item.uuid === anchorId);
+            if (!marker) {
+                agregarEtiquetaEstado(el, obj.nombre || 'Contenido AR', 'Target no encontrado', '#ef4444');
+                return;
+            }
+
+            const dx = (marker.posicion?.x || 0) - (obj.posicion?.x || 0);
+            const dy = ((marker.posicion?.y || 0) + 0.06) - (obj.posicion?.y || 0);
+            const dz = (marker.posicion?.z || 0) - (obj.posicion?.z || 0);
+            const line = document.createElement('a-entity');
+            line.setAttribute('line', `start: 0 0 0; end: ${dx} ${dy} ${dz}; color: #38bdf8; opacity: 0.65`);
+            el.appendChild(line);
+
+            agregarTextoBillboard(el, `Anclado a ${marker.nombre || 'Target'}`, '0 0.5 0', '#7dd3fc', '2.0');
+        }
+
         function renderizarEntidad3D(obj) {
             const container = document.getElementById('entities-container');
+            const existente = document.getElementById(obj.uuid);
+            if (existente) existente.remove();
             
             // Crear el elemento de A-Frame
             const el = document.createElement('a-entity');
             el.setAttribute('id', obj.uuid);
 
             if (obj.isMarker) {
-                // Si es un marcador, creamos un plano horizontal en el centro que muestra la imagen target
+                const estado = estadoTargetEditor(obj);
+                const surface = document.createElement('a-entity');
+                surface.setAttribute('rotation', '-90 0 0');
+
                 const plane = document.createElement('a-plane');
                 plane.setAttribute('width', '1.0');
                 plane.setAttribute('height', '1.0');
-                plane.setAttribute('rotation', '-90 0 0');
-                plane.setAttribute('material', obj.markerImage ? `src: ${obj.markerImage}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double');
-                el.appendChild(plane);
+                plane.setAttribute('material', obj.markerImage ? `src: ${obj.markerImage}; shader: flat; side: double` : 'color: #0f172a; shader: flat; side: double; opacity: 0.88; transparent: true');
+                surface.appendChild(plane);
+
+                const crossX = document.createElement('a-plane');
+                crossX.setAttribute('width', '1.12');
+                crossX.setAttribute('height', '0.012');
+                crossX.setAttribute('position', '0 0 0.03');
+                crossX.setAttribute('material', 'color: #94a3b8; shader: flat; side: double; opacity: 0.42; transparent: true');
+                surface.appendChild(crossX);
+
+                const crossY = document.createElement('a-plane');
+                crossY.setAttribute('width', '0.012');
+                crossY.setAttribute('height', '1.12');
+                crossY.setAttribute('position', '0 0 0.03');
+                crossY.setAttribute('material', 'color: #94a3b8; shader: flat; side: double; opacity: 0.42; transparent: true');
+                surface.appendChild(crossY);
+
+                agregarMarcoTarget(surface, 1.08, 1.08, estado.color);
+                el.appendChild(surface);
+                if (guiasARVisibles) {
+                    agregarEtiquetaEstado(el, obj.nombre || 'Target MindAR', estado.texto, estado.color);
+                }
             } else {
                 const mediaType = obj.mediaType || '3d';
                 if (mediaType === 'image') {
@@ -6193,6 +6414,9 @@
                 } else {
                     el.setAttribute('gltf-model', `#${obj.modelId}`);
                 }
+            }
+            if (guiasARVisibles) {
+                agregarGuiaAnclajeContenido(el, obj);
             }
 
             el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
@@ -6619,6 +6843,15 @@
             if (grid) {
                 grid.setAttribute('visible', visible);
             }
+        }
+
+        function toggleGuiasAR() {
+            const check = document.getElementById('check-ar-guides');
+            guiasARVisibles = check ? check.checked : true;
+            document.querySelectorAll('#entities-container > .interactive-entity').forEach(el => el.remove());
+            escenaObjetos.forEach(obj => renderizarEntidad3D(obj));
+            if (entidadSeleccionada) seleccionarObjeto(entidadSeleccionada);
+            actualizarResumenLienzoAR();
         }
 
         // --- ANCLAJES: Actualizar el tipo de anclaje físico AR asignado al objeto seleccionado ---

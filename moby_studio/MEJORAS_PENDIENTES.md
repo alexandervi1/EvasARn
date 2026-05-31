@@ -56,7 +56,7 @@ Cuando retomes, empieza revisando:
 
 ```powershell
 git status --short
-python -m py_compile moby_studio/lanzador_ar.py moby_studio/scripts/gen_laptop.py
+python -m py_compile moby_studio/lanzador_ar.py
 git diff --check
 Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html
 Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
@@ -85,7 +85,7 @@ El flujo esperado es:
 
 1. En el editor se crea un target AR.
 2. El target tiene una imagen fisica imprimible.
-3. Esa imagen se compila en el compilador oficial de MindAR y produce un archivo `.mind`.
+3. Esa imagen debe convertirse en un target entrenado `.mind`; la compilacion local queda como modulo pendiente.
 4. El `.mind` se sube al editor y se asigna al target.
 5. El contenido AR se ancla a ese target.
 6. En `index.html`, MindAR detecta la imagen real con la camara y muestra el contenido.
@@ -111,7 +111,7 @@ La zona de trabajo del editor es el taller de composicion: ahi se colocan, escal
 
 ## Pruebas realizadas
 
-- `python -m py_compile moby_studio/lanzador_ar.py moby_studio/scripts/gen_laptop.py`
+- `python -m py_compile moby_studio/lanzador_ar.py`
 - Validacion de sintaxis JavaScript embebida de `editor.html` con Node.
 - `git diff --check`
 - `http://localhost:8000/editor.html` responde `200 OK`.
@@ -144,7 +144,7 @@ Nota: los tuneles rapidos de Cloudflare pueden cambiar de URL al reiniciarse. Al
    - Mostrar estado por target: falta imagen, falta `.mind`, falta contenido, listo.
    - Explicar cuando usar `mindTargetIndex`.
    - Advertir si dos targets usan el mismo indice.
-   - Guiar al usuario a compilar varios targets dentro de un solo `.mind`.
+   - Implementar compilacion local de uno o varios targets dentro de un solo `.mind`.
 
 4. Prueba movil real
    - Probar en telefono con Cloudflare HTTPS.
@@ -200,7 +200,7 @@ MindAR no funciona igual que Vuforia Cloud Recognition. En esta version:
 
 ```powershell
 cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender
-python -m py_compile moby_studio/lanzador_ar.py moby_studio/scripts/gen_laptop.py
+python -m py_compile moby_studio/lanzador_ar.py
 git diff --check
 Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
 Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html

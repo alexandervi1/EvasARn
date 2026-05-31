@@ -135,7 +135,7 @@ Endpoints activos:
 | `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
 | `/api/delete-model?name=...` | POST | Elimina modelos. |
 | `/api/generate-qr?text=...&name=...` | POST | Genera QR heredado en `output/`; el visor final usa MindAR. |
-| `/api/generate-model?script=...` | POST | Ejecuta Blender headless. |
+| `/api/generate-model?script=...` | POST | Endpoint retirado; la generacion procedural fue eliminada. |
 | `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
 | `/api/vision` | POST | Procesa imagen base64 con Gemma4:e2b via Ollama. |
 

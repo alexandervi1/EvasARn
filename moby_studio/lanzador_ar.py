@@ -222,10 +222,6 @@ def friendly_asset_name(file_name):
     name = os.path.splitext(file_name)[0].replace("_", " ").replace("-", " ").title()
     known = {
         "blue whale 3d model.glb": "Ballena Azul (Original)",
-        "ballena_docker.glb": "Ballena Docker (Procedural)",
-        "contenedor_docker.glb": "Contenedor Estandar (Procedural)",
-        "servidor_rack.glb": "Servidor Rack (Procedural)",
-        "buque_carga.glb": "Buque de Carga (Procedural)",
         "qr_presentacion.png": "QR de Presentacion"
     }
     return known.get(file_name, name)
@@ -390,9 +386,7 @@ def get_local_ip():
 # ─────────────────────────────────────────────────────────────────────────────
 # PIPELINE DE VISIÓN: Gemma4:e2b Multimodal (ve la imagen directamente)
 # ─────────────────────────────────────────────────────────────────────────────
-# Gemma4:e2b reemplaza completamente a YOLO porque:
-#  - YOLO solo detecta objetos físicos con bounding boxes (no lee texto ni UI)
-#  - YOLO nunca puede entender Docker Desktop, terminales ni código en pantalla
+# Gemma4:e2b se usa como vision principal porque puede leer objetos, texto e interfaces.
 #  - Gemma4:e2b ve la imagen completa y la explica con contexto Docker educativo
 
 SYSTEM_PROMPT_DOCKER = """Eres Moby, la mascota oficial de Docker — una ballena simpática, didáctica y entusiasta.
@@ -483,7 +477,7 @@ def analizar_vision(base64_image_data: str) -> str:
     """
     Pipeline de visión usando Gemma4:e2b (multimodal).
     Si Ollama no está disponible, devuelve un mensaje de ayuda claro.
-    YOLO fue eliminado: no puede leer interfaces ni explicar Docker.
+    La vision local anterior fue eliminada; Gemma puede leer interfaces y explicar contexto.
     """
     resultado = query_gemma_vision(base64_image_data)
     if resultado:
@@ -938,74 +932,14 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": f"Falla al exportar experiencia: {str(e)}"}).encode('utf-8'))
         elif self.path.startswith('/api/generate-model'):
-            query = urllib.parse.urlparse(self.path).query
-            params = urllib.parse.parse_qs(query)
-            script_name = params.get('script', ['generar_contenedor.py'])[0]
-            
-            # Sanitizar y validar
-            script_name = os.path.basename(script_name)
-            script_path = os.path.join("scripts", script_name)
-            
-            if not os.path.exists(script_path):
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({"error": f"El script {script_name} no existe."})
-                self.wfile.write(response_body.encode('utf-8'))
-                return
-                
-            try:
-                # Buscar blender
-                blender_path = find_blender()
-                print(f"[BLENDER ENGINE] Ejecutando {script_name} con Blender en {blender_path}...")
-                
-                # Ejecutar Blender en modo headless
-                cmd = [blender_path, "--background", "--python", script_path]
-                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-                print("[BLENDER ENGINE] Compilación procedural exitosa.")
-                
-                # Mapear el script de salida al archivo .glb generado
-                mapa_modelos = {
-                    "gen_ballena.py": {"file": "ballena_docker.glb", "id": "modelo-ballena_docker"},
-                    "gen_buque.py": {"file": "buque_carga.glb", "id": "modelo-buque_carga"},
-                    "gen_laptop.py": {"file": "modelo_apoyo.glb", "id": "modelo-modelo_apoyo"},
-                    "gen_server.py": {"file": "servidor_rack.glb", "id": "modelo-servidor_rack"},
-                    "generar_contenedor.py": {"file": "contenedor_docker.glb", "id": "modelo-contenedor_docker"}
-                }
-                
-                info_modelo = mapa_modelos.get(script_name, {"file": "contenedor_docker.glb", "id": "modelo-contenedor_docker"})
-                file_glb = info_modelo["file"]
-                model_id = info_modelo["id"]
-                
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({
-                    "status": "success",
-                    "message": f"Modelo compilado exitosamente por Blender a partir de {script_name}.",
-                    "modelId": model_id,
-                    "src": f"output/{file_glb}"
-                })
-                self.wfile.write(response_body.encode('utf-8'))
-                
-            except subprocess.CalledProcessError as err:
-                print(f"[BLENDER ENGINE ERROR] Error en subprocess: {err.stderr}")
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({"error": f"Falla al ejecutar Blender: {err.stderr or err.stdout or str(err)}"})
-                self.wfile.write(response_body.encode('utf-8'))
-            except Exception as e:
-                print(f"[BLENDER ENGINE ERROR] Error: {str(e)}")
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({"error": f"Falla en el motor de generación: {str(e)}"})
-                self.wfile.write(response_body.encode('utf-8'))
+            self.send_response(410)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            response_body = json.dumps({
+                "error": "La generación procedural de modelos fue retirada. Sube modelos GLB/GLTF propios desde la mediateca."
+            })
+            self.wfile.write(response_body.encode('utf-8'))
         elif self.path.startswith('/api/compress-model'):
             try:
                 # Obtener el nombre del archivo del parámetro 'name'
@@ -1373,14 +1307,6 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                         nombre_amigable = file_name.replace('.glb', '').replace('.gltf', '').replace('_', ' ').replace('-', ' ').title()
                         if file_name == "blue whale 3d model.glb":
                             nombre_amigable = "🐳 Ballena Azul (Original)"
-                        elif file_name == "ballena_docker.glb":
-                            nombre_amigable = "🐳 Ballena Docker (Procedural)"
-                        elif file_name == "contenedor_docker.glb":
-                            nombre_amigable = "📦 Contenedor Estándar (Procedural)"
-                        elif file_name == "servidor_rack.glb":
-                            nombre_amigable = "🖥️ Servidor Rack (Procedural)"
-                        elif file_name == "buque_carga.glb":
-                            nombre_amigable = "🚢 Buque de Carga (Procedural)"
                             
                         modelos.append({
                             "name": file_name,
@@ -1422,6 +1348,12 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Pragma', 'no-cache')
         self.send_header('Expires', '0')
         super().end_headers()
+
+
+class ThreadedARServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
 
 def main():
     # Asegurar que el directorio de trabajo es la raíz del servicio
@@ -1469,7 +1401,7 @@ def main():
         pass
 
     # 3. Lanzar Servidor HTTP
-    socketserver.TCPServer.allow_reuse_address = True
+    ThreadedARServer.allow_reuse_address = True
     
     # Asegurar tipos MIME correctos para modelos 3D y WASM
     CustomHTTPRequestHandler.extensions_map.update({
@@ -1480,7 +1412,7 @@ def main():
     
     try:
         print(f"Iniciando servidor HTTP en puerto {PORT}...")
-        with socketserver.TCPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
+        with ThreadedARServer(("", PORT), CustomHTTPRequestHandler) as httpd:
             print("=" * 80)
             print("[OK] SERVIDOR WEBXR AR CORRIENDO CORRECTAMENTE")
             print("Acceso Local (PC):")

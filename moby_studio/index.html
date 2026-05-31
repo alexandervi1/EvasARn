@@ -1550,7 +1550,7 @@
                     setMobileClientState("Capturando");
                     dialogueDisplay.innerHTML = `<span style="color: #00f3ff;">[Captura]</span> Enfocando visor y tomando captura de pantalla real...`;
                     break;
-                case 'yolo_vision':
+                case 'gemma_vision':
                     speakerLabel.innerText = "🧠 Gemma4 Vision";
                     setMobileClientState("Analizando con IA");
                     dialogueDisplay.innerHTML = `<span style="color: #00f3ff; font-weight: bold;">[Gemma4:e2b]</span> Analizando la imagen con visión IA local... la primera carga puede tardar.`;
@@ -3075,7 +3075,7 @@
                 // Mostrar preview de la foto al usuario
                 mostrarFotoPreview(base64Image, '📤 Enviando a Gemma4 Vision...');
                 mostrarEscanerAnimacion(false);
-                setInferenceState('yolo_vision');
+                setInferenceState('gemma_vision');
 
                 // ── PASO 2: Enviar foto a Gemma4 ──────────────────────────
                 const controller = new AbortController();

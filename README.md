@@ -53,7 +53,7 @@ mcpBlender/
     │   └── <proyecto>/
     │       └── layout.json
     ├── scripts/
-    ├── vision/
+    │   └── compress_model.py
     └── venv/
 ```
 
@@ -124,7 +124,7 @@ Flujo recomendado:
 
 1. Presiona `Marcador + Imagen` o `Marcador + Video`.
 2. En `Target fisico`, sube la imagen que se va a imprimir o mostrar en una tarjeta.
-3. Compila esa imagen en el compilador oficial de MindAR y sube el archivo `.mind`.
+3. Sube un `.mind` existente o implementa el modulo pendiente de compilacion local de target.
 4. En `Contenido flotante`, sube un archivo local o pega una URL directa.
 5. Guarda. En telefono, al detectar la imagen entrenada, el contenido aparece encima.
 
@@ -206,7 +206,7 @@ Atajos:
 | `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
 | `/api/delete-model?name=...` | POST | Elimina modelos GLB/GLTF. |
 | `/api/generate-qr?text=...&name=...` | POST | Endpoint heredado para generar QR PNG en `output/`; el visor final usa MindAR. |
-| `/api/generate-model?script=...` | POST | Ejecuta Blender headless con un script procedural. |
+| `/api/generate-model?script=...` | POST | Endpoint retirado; la generacion procedural fue eliminada. |
 | `/api/compress-model` | POST | Ejecuta compresion de modelo con Blender. |
 | `/api/vision` | POST | Analiza un frame base64 con Gemma4:e2b via Ollama local. |
 
