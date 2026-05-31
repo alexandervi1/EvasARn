@@ -28,12 +28,17 @@ Implementado:
 - Autosave local, Undo/Redo y bloqueo temporal por objeto.
 - Manual de ayuda integrado en el editor y en el visor.
 - Paneles laterales del editor pulidos para guiar el flujo `Target -> Assets -> Anclar -> Probar`.
+- Plantilla principal `Marcador + Modelo 3D` para crear una experiencia AR funcional sin pasos de demo.
+- Gestion de proyectos con crear, duplicar, renombrar, archivar, restaurar y eliminar.
+- Visor simplificado: solo muestra controles necesarios para AR; chatbot y acciones extra se habilitan desde el editor.
 - Compresion Draco de modelos GLB usando Blender mediante `scripts/compress_model.py`.
 - Vision IA opcional mediante `/api/vision` con Ollama y `gemma4:e2b`.
 
 Retirado o no principal:
 
 - Los generadores procedurales antiguos de modelos 3D fueron eliminados.
+- Las plantillas `OIRA 1`, `OIRA 2` y `OIRA 3` fueron retiradas del flujo principal.
+- El `Banco 3D` ya no aparece como paso principal; queda como busqueda externa opcional desde `Importar GLB`.
 - La carpeta legacy de `dataset/` y vision local anterior ya no forma parte del flujo.
 - `/api/generate-model` queda retirado y responde como endpoint obsoleto.
 - QR, BarcodeDetector y simulaciones no son el sistema principal de tracking AR.
@@ -94,8 +99,7 @@ Para probar en telefono se necesita una URL HTTPS. Puedes usar Cloudflare Tunnel
 5. Sube o selecciona contenido:
    - modelo `.glb` / `.gltf`;
    - imagen;
-   - video;
-   - nodo OIRA.
+   - video.
 6. Ancla el contenido al target desde el inspector derecho.
 7. Ajusta posicion, escala y rotacion en el lienzo.
 8. Abre `Publicar` y ejecuta la validacion.
@@ -108,7 +112,7 @@ El editor es la herramienta de autoria para PC. Sus zonas principales son:
 
 - Panel izquierdo:
   - `Escena`: outliner de targets, contenido anclado y objetos de mesa base.
-  - `Crear`: flujo AR, plantillas, target MindAR, importar GLB, banco 3D y mediateca.
+  - `Crear`: flujo AR, plantilla `Marcador + Modelo 3D`, target MindAR, importar GLB, modelos externos opcionales y mediateca.
   - `Publicar`: validacion, exportacion y QA movil.
 - Lienzo central:
   - taller de composicion AR;
@@ -135,10 +139,10 @@ Funciones principales:
 - Cargar MindAR cuando hay targets con `.mind`.
 - Mostrar contenido al detectar `targetFound`.
 - Ocultar contenido con `targetLost`.
+- Reproducir contenido de video con audio cuando el navegador lo permite tras interaccion del usuario.
 - Ajustar escala y distancia del contenido desde controles flotantes.
 - Entrar en modo presentacion.
-- Analizar un frame de camara con vision IA opcional.
-- Usar voz/texto para preguntas si el navegador lo permite.
+- Mostrar chatbot, voz/texto y analisis de camara solo si `stage.viewer.chatEnabled` esta habilitado desde el editor.
 
 El visor tambien tiene un icono de ayuda con instrucciones de uso y problemas comunes.
 
@@ -206,7 +210,8 @@ moby_studio/output/layout.json
 Caracteristicas:
 
 - Selector de proyecto.
-- Crear, duplicar, renombrar, archivar y restaurar proyectos.
+- Crear, duplicar, renombrar, archivar, restaurar y eliminar proyectos.
+- El proyecto `default` queda protegido para tener siempre una base limpia de trabajo.
 - Version incremental por proyecto.
 - Conflicto `409` si se intenta guardar sobre una version antigua.
 - Usuario local por navegador.
@@ -253,6 +258,7 @@ Si la vision IA falla:
 | `/api/rename-project` | POST | Renombra proyecto. |
 | `/api/archive-project` | POST | Archiva proyecto. |
 | `/api/restore-project` | POST | Restaura proyecto archivado. |
+| `/api/delete-project` | POST | Elimina permanentemente un proyecto activo o archivado, excepto `default`. |
 | `/api/collab-heartbeat` | POST | Registra presencia y lock temporal. |
 | `/api/collab-release` | POST | Libera locks del usuario. |
 | `/api/collab-state?project=...` | GET | Devuelve usuarios, locks y version remota. |
@@ -342,12 +348,11 @@ La lista completa esta en `moby_studio/MEJORAS_PENDIENTES.md`.
 Prioridad actual:
 
 1. Probar ciclo completo con target real.
-2. Mejorar la zona de trabajo del editor como taller AR.
-3. Implementar asistente/compilador local de targets `.mind`.
-4. Refinar publicacion profesional para cliente.
-5. Validar experiencia en telefono por HTTPS.
-6. Mantener vision IA como modulo opcional.
-7. Limpiar legado restante de QR y textos de demo.
+2. Implementar asistente/compilador local de targets `.mind`.
+3. Refinar publicacion profesional para cliente.
+4. Validar experiencia en telefono por HTTPS.
+5. Mantener vision IA como modulo opcional controlado desde el editor.
+6. Limpiar legado restante de QR y compatibilidad OIRA interna.
 
 ## Documentacion Relacionada
 
