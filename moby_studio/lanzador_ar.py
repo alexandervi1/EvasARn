@@ -103,6 +103,14 @@ def project_layout_path(project):
     safe = safe_project_name(project)
     return os.path.join(PROJECTS_DIR, safe, "layout.json")
 
+def safe_child_dir(base_dir, name):
+    safe = safe_project_name(name)
+    base_abs = os.path.abspath(base_dir)
+    target_abs = os.path.abspath(os.path.join(base_abs, safe))
+    if os.path.commonpath([base_abs, target_abs]) != base_abs:
+        raise ValueError("Ruta de proyecto no valida.")
+    return safe, target_abs
+
 def read_layout_file(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -1099,6 +1107,31 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 
                 shutil.move(src_dir, dst_dir)
                 send_json(self, 200, {"status": "success", "message": f"Proyecto '{project}' restaurado con éxito."})
+            except Exception as e:
+                send_json(self, 500, {"error": str(e)})
+        elif self.path.startswith('/api/delete-project'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length) if content_length else b'{}'
+            try:
+                data = json.loads(post_data.decode('utf-8') or '{}')
+                project = safe_project_name(data.get("project"))
+                archived = bool(data.get("archived"))
+                if project == "default":
+                    send_json(self, 400, {"error": "El proyecto default esta protegido y no se puede eliminar."})
+                    return
+
+                base_dir = ARCHIVE_DIR if archived else PROJECTS_DIR
+                project, target_dir = safe_child_dir(base_dir, project)
+                layout_path = os.path.join(target_dir, "layout.json")
+
+                if not os.path.isdir(target_dir) or not os.path.isfile(layout_path):
+                    location = "archivo" if archived else "activos"
+                    send_json(self, 404, {"error": f"El proyecto '{project}' no existe en proyectos {location}."})
+                    return
+
+                shutil.rmtree(target_dir)
+                COLLAB_STATE.pop(project, None)
+                send_json(self, 200, {"status": "success", "message": f"Proyecto '{project}' eliminado permanentemente."})
             except Exception as e:
                 send_json(self, 500, {"error": str(e)})
         elif self.path.startswith('/api/login'):

@@ -2009,21 +2009,6 @@
             margin-top: 3px;
         }
 
-        .ar-step-badge {
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: rgba(0, 243, 255, 0.1);
-            border: 1px solid rgba(0, 243, 255, 0.24);
-            color: var(--color-docker);
-            font-weight: 800;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
         .ar-field-row {
             display: flex;
             gap: 10px;
@@ -2683,9 +2668,9 @@
                     <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
                         <div style="font-weight: 700; color: #f8fafc; font-size: 11px; margin-bottom: 4px;">¿Cómo probar en tu Teléfono?</div>
                         <div class="ar-recognition-note" style="font-size: 9.5px; line-height: 1.45; border-color: rgba(56, 189, 248, 0.22); background: rgba(56, 189, 248, 0.05); padding: 8px 10px; width: 100%; box-sizing: border-box; color: #cbd5e1;">
-                            1. Asegúrate de que el teléfono y la PC estén en la <strong>misma red WiFi</strong>.<br>
-                            2. El visor requiere <strong>HTTPS o localhost</strong>. Expón el servidor usando ngrok o abre el visor con la URL LAN segura.<br>
-                            3. Haz clic en <strong>Publicar</strong> para probar el target MindAR final.
+                            Teléfono y PC deben estar en la <strong>misma red WiFi</strong>.<br>
+                            El visor requiere <strong>HTTPS o localhost</strong>; usa un túnel seguro para móvil.<br>
+                            Publica la escena antes de probar el target MindAR final.
                         </div>
                     </div>
                 </div>
@@ -2733,9 +2718,6 @@
                     <button class="segment-btn active" id="subtab-models" onclick="switchLibrarySection('models')">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Flujo AR
                     </button>
-                    <button class="segment-btn" id="subtab-poly" onclick="switchLibrarySection('poly')">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>Banco 3D
-                    </button>
                     <button class="segment-btn" id="subtab-media" onclick="switchLibrarySection('media')">
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Mediateca
                     </button>
@@ -2770,31 +2752,13 @@
                                     <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Reproductor de video asociado al marcador.</div>
                                 </div>
                             </div>
-                            <div class="quick-ar-card" onclick="crearPlantillaOIRA('oira1')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
+                            <div class="quick-ar-card" onclick="crearExperienciaARRapida('modelo-ballena', 'Modelo 3D AR', '3d')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
                                 <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                                 </div>
                                 <div>
-                                    <div style="font-weight: 700; color: #fff; font-size: 11px;">OIRA1 Voz + Docker</div>
-                                    <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Consultas por voz y respuesta en RA.</div>
-                                </div>
-                            </div>
-                            <div class="quick-ar-card" onclick="crearPlantillaOIRA('oira2')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
-                                <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                                </div>
-                                <div>
-                                    <div style="font-weight: 700; color: #fff; font-size: 11px;">OIRA2 Interfaz Docker</div>
-                                    <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Botones 3D explicativos en RA.</div>
-                                </div>
-                            </div>
-                            <div class="quick-ar-card" onclick="crearPlantillaOIRA('oira3')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
-                                <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><circle cx="4" cy="12" r="3"/><circle cx="12" cy="12" r="3"/><circle cx="20" cy="12" r="3"/></svg>
-                                </div>
-                                <div>
-                                    <div style="font-weight: 700; color: #fff; font-size: 11px;">OIRA3 Pipeline 3D</div>
-                                    <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Secuencia de objetos explicativa.</div>
+                                    <div style="font-weight: 700; color: #fff; font-size: 11px;">Marcador + Modelo 3D</div>
+                                    <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Modelo 3D anclado al target físico.</div>
                                 </div>
                             </div>
                         </div>
@@ -2860,12 +2824,18 @@
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                             Subir Modelo GLB
                         </button>
+                        <button class="btn btn-secondary-action" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto; min-height: 32px; font-size: 10.5px; border-radius: 8px; margin-top: 8px;" onclick="switchLibrarySection('poly')">
+                            Buscar modelos externos
+                        </button>
                         <div class="asset-list" id="imported-assets-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;"></div>
                     </div>
                 </div>
 
                 <!-- SUB SECCIÓN 2: BUSCADOR POLY PIZZA -->
                 <div id="lib-sec-poly" style="display: none; width: 100%; flex-direction: column; gap: 12px;">
+                    <button class="btn btn-secondary-action" style="justify-content: center; min-height: 32px; font-size: 10.5px; border-radius: 8px;" onclick="switchLibrarySection('models')">
+                        Volver al flujo AR
+                    </button>
                     <div class="sidebar-helper-card">
                         Banco externo opcional. Para trabajo profesional, prioriza modelos GLB propios desde Mediateca o Importar GLB.
                     </div>
@@ -3428,7 +3398,7 @@
                         <div class="ar-modal-title">
                             <span>📂</span> Gestión de Proyectos Moby
                         </div>
-                        <div class="ar-modal-subtitle">Duplica, renombra, archiva o restaura tus experiencias colaborativas.</div>
+                        <div class="ar-modal-subtitle">Duplica, renombra, archiva, restaura o elimina tus experiencias colaborativas.</div>
                     </div>
                     <button type="button" class="ar-modal-close" onclick="cerrarModalGestionProyectos()">&times;</button>
                 </div>
@@ -3493,31 +3463,31 @@
                 </div>
                 <div class="ar-modal-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; max-height: min(68vh, 680px); overflow-y: auto;">
                     <section class="ar-section-card">
-                        <div class="ar-section-title">1. Crear el proyecto</div>
+                        <div class="ar-section-title">Crear el proyecto</div>
                         <div class="ar-section-desc">Usa el selector superior para abrir un proyecto existente o escribe un nombre y presiona Crear. Guarda con frecuencia antes de abrir la vista final.</div>
                     </section>
                     <section class="ar-section-card">
-                        <div class="ar-section-title">2. Preparar el target</div>
+                        <div class="ar-section-title">Preparar el target</div>
                         <div class="ar-section-desc">Añade un Marcador AR. Sube la imagen fisica que se va a imprimir o mostrar. Si ya tienes un `.mind`, súbelo en Target MindAR. La compilación local de target queda pendiente.</div>
                     </section>
                     <section class="ar-section-card">
-                        <div class="ar-section-title">3. Agregar contenido</div>
-                        <div class="ar-section-desc">Agrega imagen, video, modelo GLB/GLTF o nodo OIRA. En el inspector o modal AR, asigna el contenido a un target. No dejes contenido en Mesa base si debe aparecer en AR.</div>
+                        <div class="ar-section-title">Agregar contenido</div>
+                        <div class="ar-section-desc">Agrega imagen, video o modelo GLB/GLTF. En el inspector o modal AR, asigna el contenido a un target. No dejes contenido en Mesa base si debe aparecer en AR.</div>
                     </section>
                     <section class="ar-section-card">
-                        <div class="ar-section-title">4. Trabajar en el lienzo</div>
+                        <div class="ar-section-title">Trabajar en el lienzo</div>
                         <div class="ar-section-desc">Usa Orbita, Mover, Rotar y Escala. El target representa la superficie fisica. Las guias MindAR muestran si falta imagen, `.mind` o anclaje. Puedes ocultarlas desde Escenario AR.</div>
                     </section>
                     <section class="ar-section-card">
-                        <div class="ar-section-title">5. Mediateca</div>
+                        <div class="ar-section-title">Mediateca</div>
                         <div class="ar-section-desc">Sube modelos, imagenes, videos o `.mind`. Los `.mind` no se agregan como objetos: se asignan a un target seleccionado. Los GLB grandes se pueden comprimir con Draco.</div>
                     </section>
                     <section class="ar-section-card">
-                        <div class="ar-section-title">6. Validar y publicar</div>
+                        <div class="ar-section-title">Validar y publicar</div>
                         <div class="ar-section-desc">Abre Publicar para revisar errores. La escena debe tener target, imagen fisica, `.mind`, contenido anclado y archivos multimedia necesarios. La vision IA no bloquea la publicacion.</div>
                     </section>
                     <section class="ar-section-card">
-                        <div class="ar-section-title">7. Probar en telefono</div>
+                        <div class="ar-section-title">Probar en telefono</div>
                         <div class="ar-section-desc">Usa Vista Final Play por localhost en la PC o por un tunel HTTPS en telefono. La camara movil requiere HTTPS. Apunta al target fisico y espera `Target detectado`.</div>
                     </section>
                     <section class="ar-section-card">
@@ -3552,7 +3522,6 @@
                                     <div class="ar-section-title">Target físico</div>
                                     <div class="ar-section-desc">Imagen física que el usuario apunta con la cámara.</div>
                                 </div>
-                                <div class="ar-step-badge">1</div>
                             </div>
                             <div class="control-group" style="padding: 0;">
                                 <div class="control-label" style="margin-bottom: 6px;">
@@ -3572,7 +3541,6 @@
                                     <div class="ar-section-title">Reconocimiento</div>
                                     <div class="ar-section-desc">Tracking real tipo Vuforia mediante imagen entrenada MindAR.</div>
                                 </div>
-                                <div class="ar-step-badge">2</div>
                             </div>
                             <div class="control-group" id="ar-tracking-mode-group" style="padding: 0;">
                                 <div class="control-label" style="margin-bottom: 6px;">
@@ -3613,9 +3581,9 @@
                                         El editor ya no depende del compilador externo. Por ahora puedes subir un <strong>.mind</strong> existente; la compilación local queda como módulo pendiente.
                                     </p>
                                     <div style="display: flex; flex-direction: column; gap: 4px; padding-left: 6px; border-left: 2px solid rgba(0, 243, 255, 0.25); margin-bottom: 8px;">
-                                        <div>1. Sube tu imagen física en el <strong>Paso 1</strong>.</div>
-                                        <div>2. Si ya tienes un archivo entrenado <strong>.mind</strong>, súbelo aquí.</div>
-                                        <div>3. Para producción, falta implementar <strong>Procesar target</strong> dentro del backend.</div>
+                                        <div>Sube tu imagen física en la sección Target físico.</div>
+                                        <div>Si ya tienes un archivo entrenado <strong>.mind</strong>, súbelo aquí.</div>
+                                        <div>Para producción, falta implementar <strong>Procesar target</strong> dentro del backend.</div>
                                     </div>
                                     <button type="button" class="btn btn-secondary-action" disabled title="Pendiente: compilar target localmente en el servidor" style="font-size: 9.5px; padding: 4px 8px; border-color: rgba(148, 163, 184, 0.25); background: rgba(148, 163, 184, 0.06); color: #94a3b8; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: 100%; cursor: not-allowed; opacity: 0.72;">
                                         ⚙️ Procesar target local (pendiente)
@@ -3633,7 +3601,6 @@
                                     <div class="ar-section-title">Contenido flotante</div>
                                     <div class="ar-section-desc">Modelo, imagen o video que aparece al detectar el target.</div>
                                 </div>
-                                <div class="ar-step-badge">3</div>
                             </div>
                             <div class="control-group" id="ar-content-anchor-group" style="padding: 0;">
                                 <div class="control-label" style="margin-bottom: 6px;">
@@ -3651,7 +3618,6 @@
                                     <option value="3d">Modelo 3D (.glb)</option>
                                     <option value="image">Imagen estática (.png / .jpg)</option>
                                     <option value="video">Video inmersivo (.mp4)</option>
-                                    <option value="oira-node">Nodo OIRA generado</option>
                                 </select>
                             </div>
                             <div class="control-group" id="ar-content-url-group" style="padding: 0;">
@@ -4776,7 +4742,7 @@
                 fileInput.accept = "video/*";
                 if (sourceNote) sourceNote.innerText = "Usa un link directo al archivo de video, no una pagina tipo YouTube, o sube un MP4/WebM local.";
             } else if (mediaType === 'oira-node') {
-                contentLabel.innerText = "Nodo generado por OIRA";
+                contentLabel.innerText = "Nodo legado";
                 contentInput.placeholder = "No requiere archivo externo";
                 fileInput.accept = "";
                 if (sourceNote) sourceNote.innerText = "Este contenido se genera dentro de la experiencia y no necesita archivo.";
@@ -5459,82 +5425,6 @@
             });
         }
 
-        function configurarMarcadorOIRA(marker, tipo, nombre, intro) {
-            marker.nombre = nombre;
-            marker.recognitionKey = tipo.toUpperCase();
-            marker.trackingMode = 'image';
-            marker.mindTargetUrl = marker.mindTargetUrl || null;
-            marker.mindTargetIndex = marker.mindTargetIndex || 0;
-            marker.oiraType = tipo;
-            marker.oiraIntro = intro;
-        }
-
-        function crearContenidoOIRA(nombre, markerUuid, posicion, escala, narracion, color = '#0f766e') {
-            const obj = crearContenidoAR(nombre, 'oira-node', markerUuid, null, null);
-            obj.posicion = posicion;
-            obj.escala = escala;
-            obj.relativeToAnchor = true;
-            obj.oiraLabel = nombre;
-            obj.oiraColor = color;
-            obj.oiraNarration = narracion;
-            obj.oiraAutoNarrate = false;
-            aplicarTransformacionObjeto(obj);
-            return obj;
-        }
-
-        function crearPlantillaOIRA(tipo) {
-            ejecutarComoAccionHistorial('Crear plantilla OIRA', () => {
-                crearMarcadorAR();
-                const marcador = entidadSeleccionada;
-
-                if (tipo === 'oira1') {
-                    configurarMarcadorOIRA(
-                        marcador,
-                        'oira1',
-                        'OIRA1 Voz Docker',
-                        'OIRA uno activo. Puedes hacer consultas por voz sobre Docker y recibir respuesta en texto y audio dentro de la experiencia.'
-                    );
-                    const asistente = crearContenidoOIRA(
-                        'Asistente de Voz Docker',
-                        marcador.uuid,
-                        { x: 0, y: 0.55, z: 0.05 },
-                        0.95,
-                        'Este disparador activa el asistente de voz para consultas sobre Docker, contenedores, imagenes y volumenes.',
-                        '#0369a1'
-                    );
-                    seleccionarObjeto(asistente);
-                } else if (tipo === 'oira2') {
-                    configurarMarcadorOIRA(
-                        marcador,
-                        'oira2',
-                        'OIRA2 Docker Desktop',
-                        'OIRA dos activo. Explora los objetos de la interfaz para escuchar definiciones de Docker Desktop.'
-                    );
-                    crearContenidoOIRA('Contenedores', marcador.uuid, { x: -0.55, y: 0.5, z: 0.05 }, 0.52, 'Contenedores representa las aplicaciones aisladas que se ejecutan con sus dependencias.', '#0f766e');
-                    crearContenidoOIRA('Imagenes', marcador.uuid, { x: 0, y: 0.5, z: 0.05 }, 0.52, 'Imagenes representa las plantillas versionadas desde donde se crean contenedores reproducibles.', '#1d4ed8');
-                    const volumenes = crearContenidoOIRA('Volumenes', marcador.uuid, { x: 0.55, y: 0.5, z: 0.05 }, 0.52, 'Volumenes representa la persistencia de datos que sobrevive aunque el contenedor se elimine.', '#7c3aed');
-                    seleccionarObjeto(volumenes);
-                } else {
-                    configurarMarcadorOIRA(
-                        marcador,
-                        'oira3',
-                        'OIRA3 Pipeline Docker',
-                        'OIRA tres activo. Recorre la pipeline 3D para explicar el flujo de construccion, prueba, despliegue y monitoreo.'
-                    );
-                    crearContenidoOIRA('Build', marcador.uuid, { x: -0.75, y: 0.5, z: 0.05 }, 0.46, 'Build compila la imagen Docker a partir del Dockerfile y sus dependencias.', '#0369a1');
-                    crearContenidoOIRA('Test', marcador.uuid, { x: -0.25, y: 0.5, z: 0.05 }, 0.46, 'Test valida que la imagen se comporte correctamente antes de publicarla.', '#0f766e');
-                    crearContenidoOIRA('Deploy', marcador.uuid, { x: 0.25, y: 0.5, z: 0.05 }, 0.46, 'Deploy transporta el contenedor a un entorno donde puede ejecutarse de forma portable.', '#7c3aed');
-                    const monitoreo = crearContenidoOIRA('Monitoreo', marcador.uuid, { x: 0.75, y: 0.55, z: 0.05 }, 0.46, 'Monitoreo observa salud, logs y comportamiento para cerrar el ciclo de operacion.', '#b45309');
-                    seleccionarObjeto(monitoreo);
-                }
-
-                actualizarOpcionesAnclaje();
-                renderOutliner();
-                marcarCambiosSinGuardar();
-                mostrarNotificacion("Plantilla OIRA creada. Configura el target MindAR y guarda.", "success");
-            });
-        }
-
         // Población dinámica del selector de anclajes en el inspector
         function actualizarOpcionesAnclaje() {
             const select = document.getElementById('select-ar-anchor');
@@ -5567,7 +5457,7 @@
 
         function tipoEntidad(obj) {
             if (obj.isMarker) return 'Target';
-            if (obj.mediaType === 'oira-node') return 'Nodo OIRA';
+            if (obj.mediaType === 'oira-node') return 'Nodo legado';
             if (obj.mediaType === 'video') return 'Video';
             if (obj.mediaType === 'image') return 'Imagen';
             return 'Modelo 3D';
@@ -5675,7 +5565,7 @@
                     ? `MindAR · ${obj.mindTargetUrl || 'falta .mind'}`
                     : `${tipoEntidad(obj)} · ${nombreAnclaje(obj)}`;
                 const meta = remoteLock ? `${baseMeta} · Editando: ${remoteLock.name}` : baseMeta;
-                const lockDisabled = remoteLock ? 'disabled style="opacity:0.35; pointer-events:none;"' : '';
+                const lockDisabled = remoteLock ? 'disabled' : '';
 
                 const visIcon = obj.hidden
                     ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; display: block;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
@@ -6655,7 +6545,7 @@
                     accent.setAttribute('material', 'color: #22d3ee; shader: flat; side: double');
 
                     const label = document.createElement('a-text');
-                    label.setAttribute('value', obj.oiraLabel || obj.nombre || 'OIRA');
+                    label.setAttribute('value', obj.oiraLabel || obj.nombre || 'Nodo');
                     label.setAttribute('align', 'center');
                     label.setAttribute('color', '#e0faff');
                     label.setAttribute('width', '2.2');
@@ -8975,9 +8865,10 @@
                             <td style="padding: 10px 12px; color: #94a3b8;">v${p.version || 0}</td>
                             <td style="padding: 10px 12px; color: #94a3b8;">${p.updatedAt || 'Desconocida'}</td>
                             <td style="padding: 10px 12px; text-align: right; display: flex; justify-content: flex-end; gap: 6px; pointer-events: auto;">
-                                <button class="btn btn-save" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #0891b2;" onclick="duplicarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled style="opacity:0.4; pointer-events:none;"'}>Duplicar</button>
-                                <button class="btn btn-view" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset;" onclick="renombrarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled style="opacity:0.4; pointer-events:none;"'}>Renombrar</button>
-                                <button class="btn btn-delete" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #c2410c;" onclick="archivarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled style="opacity:0.4; pointer-events:none;"'}>Archivar</button>
+                                <button class="btn btn-save" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #0891b2;" onclick="duplicarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Duplicar</button>
+                                <button class="btn btn-view" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset;" onclick="renombrarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Renombrar</button>
+                                <button class="btn btn-delete" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #c2410c;" onclick="archivarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Archivar</button>
+                                <button class="btn btn-delete" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #991b1b;" onclick="eliminarProyectoUI('${p.name}', false)" ${puedoGestionarProyectos() && p.name !== 'default' ? '' : 'disabled'}>Eliminar</button>
                             </td>
                         </tr>
                     `;
@@ -9006,8 +8897,9 @@
                         <td style="padding: 10px 12px; font-weight: 600; color: #94a3b8;">📦 ${p.name}</td>
                         <td style="padding: 10px 12px; color: #94a3b8;">v${p.version || 0}</td>
                         <td style="padding: 10px 12px; color: #94a3b8;">${p.updatedAt || 'Desconocida'}</td>
-                        <td style="padding: 10px 12px; text-align: right; pointer-events: auto;">
-                            <button class="btn btn-save" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #d97706;" onclick="restaurarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled style="opacity:0.4; pointer-events:none;"'}>Restaurar</button>
+                        <td style="padding: 10px 12px; text-align: right; display: flex; justify-content: flex-end; gap: 6px; pointer-events: auto;">
+                            <button class="btn btn-save" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #d97706;" onclick="restaurarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Restaurar</button>
+                            <button class="btn btn-delete" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #991b1b;" onclick="eliminarProyectoUI('${p.name}', true)" ${puedoGestionarProyectos() ? '' : 'disabled'}>Eliminar</button>
                         </td>
                     </tr>
                 `).join('');
@@ -9109,6 +9001,42 @@
                 const data = await res.json();
                 if (res.ok) {
                     mostrarNotificacion(`✨ ${data.message}`, 'success');
+                    await Promise.all([
+                        refrescarTablaProyectosActivos(),
+                        refrescarTablaProyectosArchivados(),
+                        cargarListaProyectos()
+                    ]);
+                } else {
+                    mostrarNotificacion(`Error: ${data.error}`, 'error');
+                }
+            } catch (err) {
+                mostrarNotificacion('Error de conexión con el servidor.', 'error');
+            }
+        }
+
+        async function eliminarProyectoUI(project, archived = false) {
+            if (!puedoGestionarProyectos()) return;
+            if (project === 'default') {
+                mostrarNotificacion('El proyecto default esta protegido.', 'error');
+                return;
+            }
+
+            const origen = archived ? 'archivado' : 'activo';
+            const confirmacion = prompt(`Eliminar permanentemente el proyecto ${origen} '${project}'. Escribe ELIMINAR para confirmar:`);
+            if (confirmacion !== 'ELIMINAR') return;
+
+            try {
+                const res = await fetch('/api/delete-project', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project, archived })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    mostrarNotificacion(`✨ ${data.message}`, 'success');
+                    if (!archived && project === proyectoActivo) {
+                        await cambiarProyectoActivo('default');
+                    }
                     await Promise.all([
                         refrescarTablaProyectosActivos(),
                         refrescarTablaProyectosArchivados(),
