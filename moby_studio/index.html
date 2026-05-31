@@ -380,6 +380,141 @@
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
         }
 
+        .help-modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 120;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(2, 6, 23, 0.72);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+
+        .help-modal {
+            width: min(920px, 100%);
+            max-height: min(82vh, 780px);
+            overflow: hidden;
+            background: rgba(10, 15, 30, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 16px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .help-modal-header,
+        .help-modal-footer {
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        .help-modal-footer {
+            border-top: 1px solid rgba(148, 163, 184, 0.14);
+            border-bottom: 0;
+            justify-content: flex-end;
+        }
+
+        .help-modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .help-modal-title span {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 132, 199, 0.18);
+            border: 1px solid rgba(2, 132, 199, 0.65);
+            color: #7dd3fc;
+        }
+
+        .help-modal-subtitle {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .help-modal-close {
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .help-modal-body {
+            padding: 16px 18px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .help-card {
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.035);
+            padding: 13px;
+        }
+
+        .help-card h3 {
+            font-size: 12px;
+            color: #f8fafc;
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+        }
+
+        .help-card p,
+        .help-card li {
+            font-size: 12px;
+            line-height: 1.45;
+            color: #cbd5e1;
+        }
+
+        .help-card ul {
+            margin-left: 16px;
+            display: grid;
+            gap: 5px;
+        }
+
+        .help-footer-btn {
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #e2e8f0;
+            padding: 9px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .help-footer-btn.primary {
+            border-color: var(--color-docker);
+            background: rgba(2, 132, 199, 0.24);
+            color: #fff;
+        }
+
         a-scene, .a-canvas {
             background: transparent !important;
             background-color: transparent !important;
@@ -681,6 +816,25 @@
 
             .btn-camera span {
                 display: none;
+            }
+
+            .help-modal-overlay {
+                padding: 10px;
+            }
+
+            .help-modal {
+                max-height: 88vh;
+                border-radius: 14px;
+            }
+
+            .help-modal-header,
+            .help-modal-footer {
+                padding: 12px;
+            }
+
+            .help-modal-body {
+                grid-template-columns: 1fr;
+                padding: 12px;
             }
 
             .chat-panel {
@@ -1117,6 +1271,15 @@
                 <span>Presentar</span>
             </button>
 
+            <button type="button" class="btn-camera" onclick="abrirManualVisor()" title="Manual de uso del visor">
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.1 9a3 3 0 1 1 4.7 2.5c-.9.6-1.8 1.2-1.8 2.5"/>
+                    <path d="M12 17h.01"/>
+                </svg>
+                <span>Ayuda</span>
+            </button>
+
             <div class="status-indicator">
                 <div class="status-dot"></div>
                 <span class="status-text">MindAR</span>
@@ -1193,6 +1356,9 @@
         <button type="button" class="dock-btn" onclick="togglePresentationMode()" title="Modo presentación">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </button>
+        <button type="button" class="dock-btn" onclick="abrirManualVisor()" title="Manual de uso">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 4.7 2.5c-.9.6-1.8 1.2-1.8 2.5"/><path d="M12 17h.01"/></svg>
+        </button>
     </div>
 
     <div class="ar-control-sheet" aria-label="Controles del contenido AR">
@@ -1208,6 +1374,61 @@
         <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('distance', 0.12)" title="Alejar contenido">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
         </button>
+    </div>
+
+    <div id="viewer-help-modal-overlay" class="help-modal-overlay" onclick="cerrarManualVisor(event)">
+        <div class="help-modal" onclick="event.stopPropagation()">
+            <div class="help-modal-header">
+                <div>
+                    <div class="help-modal-title"><span>?</span> Manual del Visor</div>
+                    <div class="help-modal-subtitle">Uso recomendado para probar la experiencia final con MindAR.</div>
+                </div>
+                <button type="button" class="help-modal-close" onclick="cerrarManualVisor()">&times;</button>
+            </div>
+            <div class="help-modal-body">
+                <section class="help-card">
+                    <h3>1. Abrir la experiencia</h3>
+                    <p>En PC usa localhost para revisar la escena. En telefono usa un tunel HTTPS, porque los navegadores moviles bloquean la camara si la pagina no es segura.</p>
+                </section>
+                <section class="help-card">
+                    <h3>2. Activar camara RA</h3>
+                    <p>Presiona Camara RA y acepta permisos. Si el navegador pregunta por camara frontal o trasera, usa la trasera para detectar mejor el target fisico.</p>
+                </section>
+                <section class="help-card">
+                    <h3>3. Detectar el target</h3>
+                    <p>Apunta a la imagen fisica entrenada. Mantén buena luz, evita reflejos y procura que el target ocupe una parte clara de la pantalla.</p>
+                </section>
+                <section class="help-card">
+                    <h3>4. Ver contenido AR</h3>
+                    <p>Cuando MindAR detecta el target, el contenido anclado aparece sobre la imagen. Usa los controles flotantes para acercar, alejar o ajustar escala durante la prueba.</p>
+                </section>
+                <section class="help-card">
+                    <h3>5. Vision IA opcional</h3>
+                    <p>Analizar Camara envia un fotograma al servicio de vision local. Si ese servicio no responde, el tracking AR sigue funcionando; solo falla el analisis inteligente.</p>
+                </section>
+                <section class="help-card">
+                    <h3>6. Modo presentacion</h3>
+                    <p>Presentar oculta la interfaz para dejar limpia la demostracion. Vuelve a presionarlo para recuperar botones, chat y estado.</p>
+                </section>
+                <section class="help-card">
+                    <h3>7. Preguntas y voz</h3>
+                    <p>Puedes escribir o dictar preguntas sobre la escena. La respuesta por voz se activa con el checkbox inferior y depende del navegador.</p>
+                </section>
+                <section class="help-card">
+                    <h3>Problemas comunes</h3>
+                    <ul>
+                        <li>Sin camara: revisa HTTPS, permisos y que otro programa no la tenga ocupada.</li>
+                        <li>No detecta: valida que el `.mind` corresponda a la imagen fisica.</li>
+                        <li>Se pierde el tracking: mejora luz, distancia y estabilidad del telefono.</li>
+                        <li>IA no conecta: prueba primero la experiencia AR sin Analizar Camara.</li>
+                    </ul>
+                </section>
+            </div>
+            <div class="help-modal-footer">
+                <button type="button" class="help-footer-btn" onclick="cerrarManualVisor()">Cerrar</button>
+                <button type="button" class="help-footer-btn primary" onclick="cerrarManualVisor(); activarCamaraRA()">Activar camara RA</button>
+            </div>
+        </div>
     </div>
 
     <!-- Cámara de video en segundo plano para Realidad Aumentada Real -->
@@ -1485,6 +1706,20 @@
             const enabled = document.body.classList.toggle("presentation-mode");
             setMobileClientState(enabled ? "Presentacion" : (cameraStream ? "Camara activa" : "AR listo"));
             mostrarNotificacion(enabled ? "Modo presentacion activado." : "Interfaz completa activada.");
+        }
+
+        function abrirManualVisor() {
+            feedbackMovil(10);
+            const overlay = document.getElementById('viewer-help-modal-overlay');
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        function cerrarManualVisor(event) {
+            const overlay = document.getElementById('viewer-help-modal-overlay');
+            if (!overlay) return;
+            if (!event || event.target === event.currentTarget) {
+                overlay.style.display = 'none';
+            }
         }
 
         function obtenerContenidosARVisibles() {

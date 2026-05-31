@@ -1086,7 +1086,7 @@
         .viewport-ar-summary {
             position: absolute;
             top: 82px;
-            right: 18px;
+            left: 18px;
             z-index: 6;
             width: min(340px, calc(100% - 36px));
             pointer-events: none;
@@ -1252,6 +1252,85 @@
 
         .sidebar-panel.active {
             display: flex;
+        }
+
+        .workflow-guide {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .workflow-step {
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: 8px;
+            padding: 7px 5px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 8.8px;
+            line-height: 1.25;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .workflow-step strong {
+            display: block;
+            color: #e2e8f0;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+
+        .workflow-step.active {
+            border-color: rgba(0, 243, 255, 0.35);
+            background: rgba(0, 243, 255, 0.06);
+        }
+
+        .sidebar-helper-card {
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            background: rgba(56, 189, 248, 0.045);
+            border-radius: 8px;
+            padding: 10px;
+            color: #cbd5e1;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .inspector-status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .inspector-status-item {
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.025);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .inspector-status-label {
+            color: #64748b;
+            font-size: 8.8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+
+        .inspector-status-value {
+            color: #e2e8f0;
+            font-size: 10.5px;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .inspector-action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
         }
 
         /* === MEDIATECA (GESTOR DE MEDIOS) === */
@@ -2342,8 +2421,8 @@
             }
             .viewport-ar-summary {
                 top: 86px;
-                right: 12px;
                 left: 12px;
+                right: 12px;
                 width: auto;
                 font-size: 10.5px;
             }
@@ -2414,6 +2493,9 @@
                 <button class="header-btn" id="btn-toggle-iphone-sim" onclick="toggleIphoneSimulator()" title="Simulador iPhone (375x812)">
                     📱 Vista Móvil
                 </button>
+                <button class="header-btn" onclick="abrirManualEditor()" title="Manual de uso del editor">
+                    ?
+                </button>
                 <a href="index.html" class="header-btn" style="text-decoration: none;" onclick="return abrirVistaFinalSiLista(event)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     Vista Final Play
@@ -2456,11 +2538,18 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>Escena
                 </button>
                 <button class="sidebar-tab active" id="tab-library" onclick="cambiarTabSidebar('library')">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Librería
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Crear
                 </button>
                 <button class="sidebar-tab" id="tab-publish" onclick="cambiarTabSidebar('publish')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Publicar
                 </button>
+            </div>
+
+            <div class="workflow-guide">
+                <div class="workflow-step active"><strong>1</strong>Target</div>
+                <div class="workflow-step"><strong>2</strong>Assets</div>
+                <div class="workflow-step"><strong>3</strong>Anclar</div>
+                <div class="workflow-step"><strong>4</strong>Probar</div>
             </div>
 
             <!-- === PANEL PUBLICAR Y QA MÓVIL COMBINADO === -->
@@ -2642,21 +2731,25 @@
                 <!-- SEGMENT SWITCHER -->
                 <div class="segment-control">
                     <button class="segment-btn active" id="subtab-models" onclick="switchLibrarySection('models')">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Integrados
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Flujo AR
                     </button>
                     <button class="segment-btn" id="subtab-poly" onclick="switchLibrarySection('poly')">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>Poly Pizza
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>Banco 3D
                     </button>
                     <button class="segment-btn" id="subtab-media" onclick="switchLibrarySection('media')">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Mis Medios
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Mediateca
                     </button>
                 </div>
 
                 <!-- SUB SECCIÓN 1: MODELOS LOCALES / INTEGRADOS -->
                 <div id="lib-sec-models" style="display: block; width: 100%;">
+                    <div class="sidebar-helper-card" style="margin-bottom: 12px;">
+                        Flujo recomendado: primero crea un Marcador AR, luego sube imagen y `.mind`, después agrega contenido y anclalo al target desde el inspector.
+                    </div>
+
                     <div class="api-key-section" style="margin-bottom: 12px; border-color: rgba(0, 243, 255, 0.18); background: rgba(0, 243, 255, 0.025); padding: 12px;">
                         <div class="panel-section-title" style="margin-bottom: 8px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle; color: var(--color-docker);"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Experiencias AR Rápidas
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle; color: var(--color-docker);"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>Plantillas AR
                         </div>
                         <div class="quick-ar-grid" style="display: grid; grid-template-columns: 1fr; gap: 8px;">
                             <div class="quick-ar-card" onclick="crearExperienciaARRapida(null, 'Panel de Imagen AR', 'image')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
@@ -2741,7 +2834,7 @@
 
                     <div class="panel-section-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-docker)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                        Marcadores y assets
+                        Target MindAR
                     </div>
                     <div class="asset-list" style="display: flex; flex-direction: column; gap: 8px;">
                         <div class="asset-card" style="border: 1px dashed var(--color-docker); background: rgba(0, 243, 255, 0.03); padding: 12px; border-radius: 8px; cursor: pointer;" onclick="crearMarcadorAR()">
@@ -2769,6 +2862,9 @@
 
                 <!-- SUB SECCIÓN 2: BUSCADOR POLY PIZZA -->
                 <div id="lib-sec-poly" style="display: none; width: 100%; flex-direction: column; gap: 12px;">
+                    <div class="sidebar-helper-card">
+                        Banco externo opcional. Para trabajo profesional, prioriza modelos GLB propios desde Mediateca o Importar GLB.
+                    </div>
                     <div class="api-key-section" style="padding: 12px; background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;">
                         <div style="display: flex; align-items: center; justify-content: space-between;">
                             <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.8px;">🍕 Poly Pizza API</div>
@@ -2942,6 +3038,30 @@
                     <div class="selected-badge" id="selected-entity-badge" style="background: rgba(0, 243, 255, 0.06); border: 1px solid rgba(0, 243, 255, 0.25); padding: 10px; border-radius: 8px; font-weight: 700; font-size: 12px; color: #00f3ff; text-align: center; text-shadow: 0 0 8px rgba(0, 243, 255, 0.2);">
                         Objeto Seleccionado
                     </div>
+
+                    <div class="inspector-status-grid" id="inspector-object-status">
+                        <div class="inspector-status-item">
+                            <div class="inspector-status-label">Tipo</div>
+                            <div class="inspector-status-value" id="status-object-type">Objeto</div>
+                        </div>
+                        <div class="inspector-status-item">
+                            <div class="inspector-status-label">Estado AR</div>
+                            <div class="inspector-status-value" id="status-object-ar">Pendiente</div>
+                        </div>
+                        <div class="inspector-status-item">
+                            <div class="inspector-status-label">Target</div>
+                            <div class="inspector-status-value" id="status-object-anchor">Mesa base</div>
+                        </div>
+                        <div class="inspector-status-item">
+                            <div class="inspector-status-label">Archivo</div>
+                            <div class="inspector-status-value" id="status-object-file">Sin archivo</div>
+                        </div>
+                    </div>
+
+                    <div class="inspector-action-row">
+                        <button class="btn btn-secondary-action" onclick="duplicarEntidadSeleccionada()" style="margin: 0; min-height: 30px; font-size: 10px; justify-content: center;">Duplicar</button>
+                        <button class="btn btn-secondary-action" onclick="resetTransformSeleccionado()" style="margin: 0; min-height: 30px; font-size: 10px; justify-content: center;">Reset transform</button>
+                    </div>
                     
                     <!-- NOMBRE DE LA ENTIDAD -->
                     <div class="control-group" style="gap: 4px;">
@@ -3064,6 +3184,10 @@
                         <button class="btn btn-secondary-action" style="width: 100%; justify-content: center; gap: 8px; pointer-events: auto; border-radius: 8px; min-height: 36px; font-size: 11px; margin: 0;" onclick="abrirModalAR(entidadSeleccionada)">
                             ▶ Configurar 3D / Imagen / Video
                         </button>
+                    </div>
+
+                    <div class="ar-recognition-note" id="inspector-ar-note" style="font-size: 9.5px; border-color: rgba(56, 189, 248, 0.22); background: rgba(56, 189, 248, 0.05); padding: 8px 10px; width: 100%; box-sizing: border-box; color: #cbd5e1; border-radius: 8px;">
+                        Selecciona o crea un target para activar el flujo MindAR.
                     </div>
                 </div>
 
@@ -3350,6 +3474,56 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+        </div>
+
+        <div id="editor-help-modal-overlay" class="ar-modal-overlay" onclick="cerrarManualEditor(event)" style="display: none; z-index: 2100;">
+            <div class="ar-modal" onclick="event.stopPropagation()" style="max-width: 860px; width: 92%;">
+                <div class="ar-modal-header">
+                    <div>
+                        <div class="ar-modal-title"><span>?</span> Manual del Editor</div>
+                        <div class="ar-modal-subtitle">Flujo recomendado para crear experiencias WebAR con targets propios.</div>
+                    </div>
+                    <button type="button" class="ar-modal-close" onclick="cerrarManualEditor()">&times;</button>
+                </div>
+                <div class="ar-modal-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; max-height: min(68vh, 680px); overflow-y: auto;">
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">1. Crear el proyecto</div>
+                        <div class="ar-section-desc">Usa el selector superior para abrir un proyecto existente o escribe un nombre y presiona Crear. Guarda con frecuencia antes de abrir la vista final.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">2. Preparar el target</div>
+                        <div class="ar-section-desc">Añade un Marcador AR. Sube la imagen fisica que se va a imprimir o mostrar. Si ya tienes un `.mind`, súbelo en Target MindAR. La compilación local de target queda pendiente.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">3. Agregar contenido</div>
+                        <div class="ar-section-desc">Agrega imagen, video, modelo GLB/GLTF o nodo OIRA. En el inspector o modal AR, asigna el contenido a un target. No dejes contenido en Mesa base si debe aparecer en AR.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">4. Trabajar en el lienzo</div>
+                        <div class="ar-section-desc">Usa Orbita, Mover, Rotar y Escala. El target representa la superficie fisica. Las guias MindAR muestran si falta imagen, `.mind` o anclaje. Puedes ocultarlas desde Escenario AR.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">5. Mediateca</div>
+                        <div class="ar-section-desc">Sube modelos, imagenes, videos o `.mind`. Los `.mind` no se agregan como objetos: se asignan a un target seleccionado. Los GLB grandes se pueden comprimir con Draco.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">6. Validar y publicar</div>
+                        <div class="ar-section-desc">Abre Publicar para revisar errores. La escena debe tener target, imagen fisica, `.mind`, contenido anclado y archivos multimedia necesarios. La vision IA no bloquea la publicacion.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">7. Probar en telefono</div>
+                        <div class="ar-section-desc">Usa Vista Final Play por localhost en la PC o por un tunel HTTPS en telefono. La camara movil requiere HTTPS. Apunta al target fisico y espera `Target detectado`.</div>
+                    </section>
+                    <section class="ar-section-card">
+                        <div class="ar-section-title">Problemas comunes</div>
+                        <div class="ar-section-desc">Si no detecta, revisa luz, nitidez, distancia, `.mind`, indice del target y que todos los targets usen el mismo `.mind`. Si la IA falla, solo afecta Analizar Camara, no el tracking AR.</div>
+                    </section>
+                </div>
+                <div class="ar-modal-footer">
+                    <button type="button" class="btn btn-secondary-action" onclick="cerrarManualEditor()">Cerrar</button>
+                    <button type="button" class="btn btn-save" onclick="cambiarTabSidebar('publish'); validarPublicacion(); cerrarManualEditor()">Ir a Validacion</button>
                 </div>
             </div>
         </div>
@@ -6209,6 +6383,78 @@
             mostrarNotificacion(`Duplicado: ${copia.nombre}`, 'success');
         }
 
+        function duplicarEntidadSeleccionada() {
+            if (!entidadSeleccionada) return;
+            duplicarEntidad({ stopPropagation() {} }, entidadSeleccionada.uuid);
+        }
+
+        function resetTransformSeleccionado() {
+            if (!entidadSeleccionada) return;
+            if (!puedoEditarObjeto(entidadSeleccionada)) return;
+            document.getElementById('num-pos-x').value = 0;
+            document.getElementById('num-pos-y').value = entidadSeleccionada.isMarker ? 0.02 : 0.55;
+            document.getElementById('num-pos-z').value = entidadSeleccionada.isMarker ? -2.5 : -3.5;
+            document.getElementById('num-rot-y').value = 0;
+            document.getElementById('num-scale').value = 1;
+            actualizarTransformacionDesdeNumericos();
+            mostrarNotificacion('Transformacion restablecida.', 'success');
+        }
+
+        function actualizarEstadoInspectorObjeto(obj) {
+            const typeEl = document.getElementById('status-object-type');
+            const arEl = document.getElementById('status-object-ar');
+            const anchorEl = document.getElementById('status-object-anchor');
+            const fileEl = document.getElementById('status-object-file');
+            const noteEl = document.getElementById('inspector-ar-note');
+            if (!typeEl || !arEl || !anchorEl || !fileEl || !noteEl) return;
+
+            const marker = obj.isMarker ? obj : escenaObjetos.find(o => o.uuid === obj.arAnchor && o.isMarker);
+            const hasMarkerImage = Boolean(marker?.markerImage);
+            const hasMind = Boolean(marker?.mindTargetUrl);
+            const hasMedia = Boolean(obj.mediaUrl || obj.isMarker);
+
+            typeEl.textContent = obj.isMarker ? 'Target MindAR' : tipoEntidad(obj);
+            anchorEl.textContent = obj.isMarker ? 'Es target' : (marker?.nombre || 'Mesa base');
+            fileEl.textContent = obj.isMarker
+                ? (obj.mindTargetUrl ? nombreCortoRuta(obj.mindTargetUrl) : 'Falta .mind')
+                : (obj.mediaUrl ? nombreCortoRuta(obj.mediaUrl) : 'Sin media');
+
+            let statusText = 'Pendiente';
+            let statusColor = '#f59e0b';
+            let noteText = 'Completa target, archivo .mind y contenido anclado antes de publicar.';
+
+            if (obj.isMarker) {
+                if (hasMarkerImage && hasMind) {
+                    statusText = 'Target listo';
+                    statusColor = '#22c55e';
+                    noteText = 'Este target ya tiene imagen fisica y archivo .mind asignados.';
+                } else if (!hasMarkerImage && !hasMind) {
+                    statusText = 'Falta imagen y .mind';
+                } else if (!hasMarkerImage) {
+                    statusText = 'Falta imagen fisica';
+                } else {
+                    statusText = 'Falta archivo .mind';
+                }
+            } else if (obj.arAnchor && obj.arAnchor !== 'base' && hasMarkerImage && hasMind && hasMedia) {
+                statusText = 'Anclado listo';
+                statusColor = '#22c55e';
+                noteText = 'Este contenido esta vinculado a un target MindAR listo.';
+            } else if (!obj.arAnchor || obj.arAnchor === 'base') {
+                statusText = 'Sin target';
+                noteText = 'Asigna este contenido a un target en el selector de anclaje.';
+            } else if (!hasMarkerImage || !hasMind) {
+                statusText = 'Target incompleto';
+                noteText = 'El contenido esta anclado, pero el target necesita imagen fisica y archivo .mind.';
+            } else if (!hasMedia) {
+                statusText = 'Falta archivo';
+                noteText = 'Configura el archivo de imagen, video o modelo para publicar.';
+            }
+
+            arEl.textContent = statusText;
+            arEl.style.color = statusColor;
+            noteEl.textContent = noteText;
+        }
+
         // Actualizar el nombre de la entidad seleccionada en tiempo real
         function actualizarNombreEntidad() {
             if (!entidadSeleccionada) return;
@@ -6224,6 +6470,7 @@
                 }
                 renderOutliner();
                 marcarCambiosSinGuardar();
+                actualizarEstadoInspectorObjeto(entidadSeleccionada);
             }
         }
 
@@ -6469,6 +6716,7 @@
             
             // Rellenar input de nombre
             document.getElementById('input-entity-name').value = obj.nombre || '';
+            actualizarEstadoInspectorObjeto(obj);
 
             // Rellenar sliders de transformación
             document.getElementById('slide-pos-x').value = obj.posicion.x;
@@ -6875,6 +7123,7 @@
             
             renderOutliner();
             marcarCambiosSinGuardar();
+            actualizarEstadoInspectorObjeto(entidadSeleccionada);
         }
 
 
@@ -8655,6 +8904,19 @@
         function cerrarModalGestionProyectos(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('project-management-modal-overlay').style.display = 'none';
+        }
+
+        function abrirManualEditor() {
+            const overlay = document.getElementById('editor-help-modal-overlay');
+            if (overlay) overlay.style.display = 'flex';
+        }
+
+        function cerrarManualEditor(event) {
+            const overlay = document.getElementById('editor-help-modal-overlay');
+            if (!overlay) return;
+            if (!event || event.target === event.currentTarget) {
+                overlay.style.display = 'none';
+            }
         }
 
         async function refrescarTablaProyectosActivos() {
