@@ -16,12 +16,17 @@
 
     <style>
         :root {
-            --color-docker: #0284c7;
-            --color-docker-glow: rgba(2, 132, 199, 0.4);
+            --color-docker: #0ea5e9;
+            --color-docker-glow: rgba(14, 165, 233, 0.28);
             --color-error: #ef4444;
             --color-error-glow: rgba(239, 68, 68, 0.4);
-            --color-bg-glass: rgba(10, 15, 30, 0.82);
-            --color-border-glass: rgba(255, 255, 255, 0.08);
+            --color-bg-glass: rgba(8, 11, 18, 0.78);
+            --color-border-glass: rgba(255, 255, 255, 0.12);
+            --color-panel: rgba(9, 12, 19, 0.86);
+            --color-panel-strong: rgba(12, 16, 24, 0.94);
+            --color-text: #f8fafc;
+            --color-muted: #a8b3c2;
+            --color-success: #22c55e;
             --font-main: 'Outfit', sans-serif;
         }
 
@@ -33,17 +38,53 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        body:not(.viewer-chat-enabled) .chat-panel,
+        body:not(.viewer-chat-enabled) .mobile-action-dock {
+            display: none !important;
+        }
+
+        body:not(.viewer-chat-enabled) .viewer-chat-control {
+            display: none !important;
+        }
+
+        body.ar-session-active .ar-start-panel {
+            opacity: 0;
+            transform: translate(-50%, 14px);
+            pointer-events: none;
+        }
+
+        .viewer-secondary-control {
+            display: none !important;
+        }
+
         body {
-            background-color: #05070f;
+            background: #07090d;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
             min-height: 100dvh;
+            color: var(--color-text);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 34%),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 72px);
+            opacity: 0.72;
+            z-index: 0;
         }
 
         body.camera-active-body {
             background-color: transparent !important;
             background: transparent !important;
+        }
+
+        body.camera-active-body::before {
+            opacity: 0;
         }
 
         body.presentation-mode header,
@@ -77,19 +118,20 @@
         /* Cabecera Premium */
         header {
             width: 100%;
-            max-width: 580px;
+            max-width: 520px;
             margin: 0 auto;
             background: var(--color-bg-glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border: 1px solid var(--color-border-glass);
-            border-radius: 16px;
-            padding: 14px 20px;
+            border-radius: 14px;
+            padding: 10px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
             pointer-events: auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
             animation: fadeInDown 0.6s ease-out;
         }
 
@@ -97,18 +139,147 @@
             display: none;
         }
 
-        .header-title h1 {
-            font-size: 14px;
+        .ar-start-panel {
+            position: fixed;
+            left: 50%;
+            bottom: max(28px, env(safe-area-inset-bottom));
+            width: min(430px, calc(100vw - 32px));
+            transform: translateX(-50%);
+            z-index: 24;
+            pointer-events: auto;
+            background: var(--color-panel-strong);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 12px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+            padding: 18px;
+            display: grid;
+            gap: 14px;
+            color: #f8fafc;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+
+        .ar-start-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 3px;
+            border-radius: 12px 12px 0 0;
+            background: linear-gradient(90deg, #0ea5e9, #22c55e);
+        }
+
+        .ar-start-title {
+            font-size: 18px;
             font-weight: 800;
-            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .ar-start-copy {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-muted);
+            margin-top: 5px;
+        }
+
+        .ar-start-status {
+            min-height: 34px;
+            font-size: 12px;
+            line-height: 1.35;
+            color: #bfdbfe;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 10px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .ar-start-status::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            background: var(--color-docker);
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.52);
+        }
+
+        .ar-start-panel[data-mode="error"] .ar-start-status {
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, 0.28);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .ar-start-panel[data-mode="error"] .ar-start-status::before {
+            background: var(--color-error);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.52);
+        }
+
+        .ar-start-panel[data-mode="success"] .ar-start-status {
+            color: #bbf7d0;
+            border-color: rgba(34, 197, 94, 0.28);
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .ar-start-panel[data-mode="success"] .ar-start-status::before {
+            background: var(--color-success);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.52);
+        }
+
+        .ar-start-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ar-start-button {
+            appearance: none;
+            border: 0;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #0ea5e9, #0f766e);
+            color: #ffffff;
+            min-height: 46px;
+            width: 100%;
+            padding: 0 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.24);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+
+        .ar-start-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(14, 165, 233, 0.32);
+        }
+
+        .ar-start-button:active {
+            transform: translateY(0);
+        }
+
+        .ar-start-button:disabled {
+            cursor: wait;
+            opacity: 0.72;
+        }
+
+        .header-title h1 {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
             color: #fff;
             text-transform: uppercase;
         }
 
         .header-title p {
             font-size: 11px;
-            color: #94a3b8;
-            font-weight: 400;
+            color: var(--color-muted);
+            font-weight: 500;
             margin-top: 2px;
         }
 
@@ -117,26 +288,27 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(2, 132, 199, 0.15);
-            border: 1px solid var(--color-docker);
-            padding: 6px 12px;
-            border-radius: 20px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.32);
+            padding: 6px 10px;
+            border-radius: 999px;
+            flex: 0 0 auto;
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
-            background-color: #22c55e;
+            background-color: var(--color-success);
             border-radius: 50%;
-            box-shadow: 0 0 10px #22c55e;
+            box-shadow: 0 0 10px var(--color-success);
             animation: pulse 1.8s infinite;
         }
 
         .status-text {
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 800;
             color: #fff;
-            letter-spacing: 1px;
+            letter-spacing: 0.4px;
             text-transform: uppercase;
         }
 
@@ -352,32 +524,34 @@
 
         /* Botón de Cámara RA */
         .btn-camera {
-            background: rgba(2, 132, 199, 0.15);
-            border: 1px solid var(--color-docker);
-            border-radius: 20px;
-            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.055);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            padding: 8px 12px;
             font-size: 10px;
-            font-weight: 600;
+            font-weight: 800;
             color: #fff;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             pointer-events: auto;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
 
         .btn-camera:hover {
-            background: rgba(2, 132, 199, 0.3);
-            box-shadow: 0 0 12px var(--color-docker-glow);
+            background: rgba(14, 165, 233, 0.16);
+            border-color: rgba(14, 165, 233, 0.42);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.22), 0 0 12px var(--color-docker-glow);
         }
 
         .btn-camera.camera-active {
-            background: rgba(34, 197, 94, 0.2);
-            border-color: #22c55e;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+            background: rgba(34, 197, 94, 0.14);
+            border-color: rgba(34, 197, 94, 0.46);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.24);
         }
 
         .help-modal-overlay {
@@ -594,12 +768,12 @@
             gap: 10px;
             pointer-events: auto;
             padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(7, 12, 24, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(9, 12, 19, 0.84);
             border-radius: 999px;
             box-shadow: 0 12px 34px rgba(0,0,0,0.42);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             transition: opacity 0.2s ease, transform 0.25s ease, bottom 0.25s ease;
         }
 
@@ -614,20 +788,20 @@
             gap: 8px;
             pointer-events: auto;
             padding: 8px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(7, 12, 24, 0.74);
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(9, 12, 19, 0.82);
             border-radius: 999px;
             box-shadow: 0 12px 34px rgba(0,0,0,0.38);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
         }
 
         .ar-control-btn {
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.065);
             color: #f8fafc;
             font-size: 15px;
             font-weight: 800;
@@ -641,8 +815,8 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255,255,255,0.065);
             color: #f8fafc;
             display: flex;
             align-items: center;
@@ -655,9 +829,9 @@
         .dock-btn.primary {
             width: 58px;
             height: 58px;
-            background: linear-gradient(135deg, #0284c7, #0f766e);
+            background: linear-gradient(135deg, #0ea5e9, #0f766e);
             border-color: rgba(56, 189, 248, 0.55);
-            box-shadow: 0 0 22px rgba(2,132,199,0.38);
+            box-shadow: 0 0 22px rgba(14,165,233,0.32);
         }
 
         .dock-btn:active {
@@ -775,10 +949,10 @@
 
             header {
                 max-width: none;
-                min-height: 56px;
-                padding: 8px 10px;
+                min-height: 54px;
+                padding: 8px 9px 8px 12px;
                 gap: 8px;
-                border-radius: 14px;
+                border-radius: 12px;
             }
 
             .header-title {
@@ -787,11 +961,14 @@
 
             .header-title h1 {
                 font-size: 12px;
-                letter-spacing: 1px;
+                letter-spacing: 0.5px;
                 white-space: nowrap;
             }
 
-            .header-title p,
+            .header-title p {
+                display: none;
+            }
+
             header .status-indicator {
                 display: none;
             }
@@ -807,8 +984,8 @@
             }
 
             .btn-camera {
-                min-width: 46px;
-                min-height: 46px;
+                min-width: 44px;
+                min-height: 44px;
                 justify-content: center;
                 border-radius: 50%;
                 padding: 0;
@@ -873,6 +1050,21 @@
 
             .ar-control-sheet {
                 display: flex;
+            }
+
+            .ar-start-panel {
+                width: calc(100vw - 24px);
+                bottom: max(18px, env(safe-area-inset-bottom));
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .ar-start-title {
+                font-size: 17px;
+            }
+
+            .ar-start-copy {
+                font-size: 12.5px;
             }
 
             .chat-form {
@@ -1168,21 +1360,92 @@
             display: none;
             align-items: center;
             gap: 8px;
-            padding: 9px 14px;
+            padding: 9px 13px;
             border-radius: 999px;
-            background: rgba(10, 15, 30, 0.86);
-            border: 1px solid rgba(34, 197, 94, 0.45);
+            background: rgba(9, 12, 19, 0.88);
+            border: 1px solid rgba(34, 197, 94, 0.36);
             color: #dcfce7;
             font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 20px rgba(34, 197, 94, 0.18);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.34), 0 0 20px rgba(34, 197, 94, 0.14);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .ar-detection-pill::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-success);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.62);
         }
 
         .ar-detection-pill.active {
             display: flex;
+        }
+
+        .viewer-toast-stack {
+            position: fixed;
+            top: max(86px, calc(env(safe-area-inset-top) + 70px));
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 90;
+            width: min(420px, calc(100vw - 28px));
+            display: grid;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .viewer-toast {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 12px;
+            border-radius: 10px;
+            background: rgba(9, 12, 19, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #f8fafc;
+            font-size: 12px;
+            line-height: 1.35;
+            font-weight: 700;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.36);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            opacity: 0;
+            transform: translateY(-8px);
+            animation: toastIn 0.18s ease forwards;
+        }
+
+        .viewer-toast::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            margin-top: 4px;
+            border-radius: 50%;
+            flex: 0 0 auto;
+            background: var(--color-docker);
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.52);
+        }
+
+        .viewer-toast.success::before {
+            background: var(--color-success);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.52);
+        }
+
+        .viewer-toast.error::before {
+            background: var(--color-error);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.52);
+        }
+
+        .viewer-toast.warning::before {
+            background: #f59e0b;
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.52);
+        }
+
+        @keyframes toastIn {
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes scanOverlay {
@@ -1218,6 +1481,7 @@
     <!-- LÁSER DE ESCANEO DE VISIÓN MÁQUINA -->
     <div id="scanner-laser" class="scanner-laser"></div>
     <div id="ar-detection-pill" class="ar-detection-pill">Target AR detectado</div>
+    <div id="viewer-toast-stack" class="viewer-toast-stack" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Flash de cámara -->
     <div id="camera-flash" class="camera-flash"></div>
@@ -1247,8 +1511,8 @@
         <!-- Cabecera Superior -->
         <header>
             <div class="header-title">
-                <h1>Moby Studio AR</h1>
-                <p>Experiencia WebAR con tracking MindAR</p>
+                <h1>Moby Studio Viewer</h1>
+                <p>Tracking de imagen AR</p>
                 <div class="mobile-status-row">
                     <span id="mobile-client-state">AR listo</span>
                 </div>
@@ -1263,7 +1527,7 @@
                 <span>Cámara RA</span>
             </button>
 
-            <button type="button" id="btn-presentation-toggle" class="btn-camera" onclick="togglePresentationMode()" title="Modo presentación">
+            <button type="button" id="btn-presentation-toggle" class="btn-camera viewer-secondary-control" onclick="togglePresentationMode()" title="Modo presentación">
                 <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
                     <path d="M3 4h18v12H3z"/>
                     <path d="M8 20h8M12 16v4"/>
@@ -1271,7 +1535,7 @@
                 <span>Presentar</span>
             </button>
 
-            <button type="button" class="btn-camera" onclick="abrirManualVisor()" title="Manual de uso del visor">
+            <button type="button" class="btn-camera viewer-secondary-control" onclick="abrirManualVisor()" title="Manual de uso del visor">
                 <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M9.1 9a3 3 0 1 1 4.7 2.5c-.9.6-1.8 1.2-1.8 2.5"/>
@@ -1282,9 +1546,26 @@
 
             <div class="status-indicator">
                 <div class="status-dot"></div>
-                <span class="status-text">MindAR</span>
+                <span class="status-text">Listo</span>
             </div>
         </header>
+
+        <section class="ar-start-panel" id="ar-start-panel" data-mode="idle" aria-live="polite">
+            <div>
+                <div class="ar-start-title">Iniciar experiencia AR</div>
+                <div class="ar-start-copy">Acepta la camara y apunta al target publicado desde el editor. El contenido aparecera anclado sobre la imagen.</div>
+            </div>
+            <div class="ar-start-status" id="ar-start-status">Cargando configuracion del visor...</div>
+            <div class="ar-start-actions">
+                <button type="button" class="ar-start-button" id="btn-ar-start" onclick="activarCamaraRA()">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    <span>Iniciar AR</span>
+                </button>
+            </div>
+        </section>
 
         <!-- Panel de control de Chat inferior -->
         <div class="chat-panel" id="chat-panel">
@@ -1443,10 +1724,12 @@
     <!-- Escena A-Frame WebXR con soporte de transparencia para la cámara -->
     <a-scene 
         webxr="optionalFeatures: dom-overlay; overlayElement: #hud-container;" 
+        color-space="sRGB"
         renderer="colorManagement: true; antialias: true; alpha: true;"
         background="transparent: true"
         cursor="rayOrigin: mouse"
         vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false"
         gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;">
         
@@ -1476,11 +1759,11 @@
         <!-- Luz Puntual Neón debajo del Holograma -->
         <a-entity id="neon-light" light="type: point; color: #00f3ff; intensity: 2.5; distance: 4.5; decay: 1.2;" position="0 0.15 -3.0"></a-entity>
         
-        <!-- Fondo futurista oscuro para previsualización en Escritorio (Desktop) -->
-        <a-sky color="#05070e"></a-sky>
+        <!-- Fondo virtual oculto por defecto: el visor final debe priorizar la camara real. -->
+        <a-sky color="#05070e" visible="false"></a-sky>
 
         <!-- PLATAFORMA DE PROYECCIÓN HOLOGRÁFICA (Anillos Concéntricos Rotatorios) -->
-        <a-entity position="0 0.05 -3.0">
+        <a-entity position="0 0.05 -3.0" visible="false">
             <!-- Anillo Interior (Celeste) -->
             <a-ring 
                 color="#00f3ff" 
@@ -1511,15 +1794,15 @@
         </a-entity>
 
         <!-- SISTEMA DE PARTÍCULAS / NODOS DE DATOS FLOTANTES -->
-        <a-entity position="0 0 -3.0">
+        <a-entity position="0 0 -3.0" visible="false">
             <a-sphere color="#00f3ff" radius="0.04" position="-0.9 1.4 0.3" material="transparent: true; opacity: 0.85; emissive: #00f3ff; emissiveIntensity: 2;" animation="property: position; to: -0.9 1.6 0.3; dir: alternate; dur: 3500; easing: easeInOutSine; loop: true"></a-sphere>
             <a-sphere color="#22c55e" radius="0.035" position="0.95 0.9 -0.4" material="transparent: true; opacity: 0.85; emissive: #22c55e; emissiveIntensity: 2;" animation="property: position; to: 0.95 0.7 -0.4; dir: alternate; dur: 4200; easing: easeInOutSine; loop: true"></a-sphere>
             <a-sphere color="#0284c7" radius="0.045" position="-0.7 0.6 -0.6" material="transparent: true; opacity: 0.8; emissive: #0284c7; emissiveIntensity: 1.5;" animation="property: position; to: -0.7 0.8 -0.6; dir: alternate; dur: 2800; easing: easeInOutSine; loop: true"></a-sphere>
             <a-sphere color="#a855f7" radius="0.03" position="0.65 1.5 -0.7" material="transparent: true; opacity: 0.9; emissive: #a855f7; emissiveIntensity: 2;" animation="property: position; to: 0.65 1.3 -0.7; dir: alternate; dur: 3100; easing: easeInOutSine; loop: true"></a-sphere>
         </a-entity>
 
-        <!-- CÁMARA PRINCIPAL -->
-        <a-entity camera position="0 1.6 0" look-controls></a-entity>
+        <!-- Camara principal controlada por MindAR. No usar look-controls en tracking por imagen. -->
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <!-- ESCENARIO AJUSTABLE HOLOGRÁFICO (REJILLA DE TRABAJO EN RA) -->
         <a-plane id="workspace-grid" 
@@ -1529,7 +1812,7 @@
                  height="3" 
                  color="#0284c7"
                  material="shader: flat; wireframe: true; transparent: true; opacity: 0.4; side: double;" 
-                 visible="true">
+                 visible="false">
         </a-plane>
 
         <!-- CONTENEDOR PARA CARGA DINÁMICA DEL ESCENARIO -->
@@ -1668,6 +1951,7 @@
         let voiceContextUnlocked = false;
         let recording = false;
         let recognition = null;
+        let arUserGestureReady = false;
         const markerRegistry = new Map();
 
         function esDispositivoMovil() {
@@ -1698,7 +1982,98 @@
 
         function setMobileClientState(text) {
             const stateEl = document.getElementById("mobile-client-state");
+            const headerStateEl = document.querySelector(".status-text");
             if (stateEl) stateEl.textContent = text;
+            if (headerStateEl) headerStateEl.textContent = text;
+        }
+
+        function mostrarNotificacion(texto, tipo = "") {
+            const stack = document.getElementById("viewer-toast-stack");
+            if (!stack || !texto) return;
+            const toast = document.createElement("div");
+            toast.className = `viewer-toast ${tipo || ""}`.trim();
+            toast.textContent = texto;
+            stack.appendChild(toast);
+            while (stack.children.length > 3) {
+                stack.removeChild(stack.firstElementChild);
+            }
+            window.setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(-8px)";
+                window.setTimeout(() => toast.remove(), 220);
+            }, tipo === "error" ? 5200 : 3200);
+        }
+
+        function configurarVideoAR(videoEl, obj) {
+            const audioEnabled = obj.mute !== true;
+            videoEl.setAttribute('playsinline', '');
+            videoEl.setAttribute('webkit-playsinline', '');
+            videoEl.setAttribute('preload', 'auto');
+            videoEl.setAttribute('crossorigin', 'anonymous');
+            videoEl.dataset.arVideoAudio = audioEnabled ? 'on' : 'off';
+            videoEl.dataset.arVideoAutoplay = obj.autoplay === false ? 'off' : 'on';
+            if (obj.loop !== false) {
+                videoEl.setAttribute('loop', '');
+            } else {
+                videoEl.removeAttribute('loop');
+            }
+            if (audioEnabled) {
+                videoEl.removeAttribute('muted');
+                videoEl.muted = false;
+                videoEl.defaultMuted = false;
+                videoEl.volume = Number.isFinite(Number(obj.volume)) ? Math.max(0, Math.min(1, Number(obj.volume))) : 1;
+            } else {
+                videoEl.setAttribute('muted', '');
+                videoEl.muted = true;
+                videoEl.defaultMuted = true;
+            }
+            videoEl.load();
+        }
+
+        async function reproducirVideoAR(videoEl, obj) {
+            const audioEnabled = obj.mute !== true;
+            if (audioEnabled) {
+                videoEl.removeAttribute('muted');
+                videoEl.muted = false;
+                videoEl.defaultMuted = false;
+                videoEl.volume = Number.isFinite(Number(obj.volume)) ? Math.max(0, Math.min(1, Number(obj.volume))) : 1;
+            }
+            try {
+                await videoEl.play();
+                if (audioEnabled) {
+                    mostrarNotificacion("Video AR reproduciendo con audio.", "success");
+                }
+            } catch (err) {
+                console.warn("[Video AR] El navegador bloqueo la reproduccion con audio:", err);
+                if (audioEnabled) {
+                    mostrarNotificacion("El navegador bloqueo el audio. Toca la pantalla y vuelve a enfocar el target.", "warning");
+                    const retryOnce = async () => {
+                        document.removeEventListener("click", retryOnce);
+                        document.removeEventListener("touchstart", retryOnce);
+                        try {
+                            videoEl.muted = false;
+                            videoEl.defaultMuted = false;
+                            videoEl.removeAttribute('muted');
+                            await videoEl.play();
+                            mostrarNotificacion("Audio del video activado.", "success");
+                        } catch (retryErr) {
+                            console.warn("[Video AR] Reintento de audio fallido:", retryErr);
+                        }
+                    };
+                    document.addEventListener("click", retryOnce, { once: true });
+                    document.addEventListener("touchstart", retryOnce, { once: true });
+                }
+            }
+        }
+
+        function prepararAudioVideosAR() {
+            arUserGestureReady = true;
+            document.querySelectorAll('video[data-ar-video-audio="on"]').forEach(videoEl => {
+                videoEl.muted = false;
+                videoEl.defaultMuted = false;
+                videoEl.removeAttribute('muted');
+                videoEl.load();
+            });
         }
 
         function togglePresentationMode() {
@@ -1983,13 +2358,152 @@
 
         // --- GESTIÓN DE CÁMARA PARA REALIDAD AUMENTADA REAL ---
         let cameraStream = null;
+        let mindARActive = false;
+        let mindARStarting = false;
+
+        function setARStartStatus(message, mode = "idle") {
+            const panel = document.getElementById("ar-start-panel");
+            const status = document.getElementById("ar-start-status");
+            if (panel) panel.dataset.mode = mode;
+            if (status) status.textContent = message;
+        }
+
+        function setARStartButtonLoading(isLoading) {
+            const buttons = [
+                document.getElementById("btn-ar-start"),
+                document.getElementById("btn-camera-toggle")
+            ].filter(Boolean);
+            buttons.forEach(button => {
+                button.disabled = isLoading;
+            });
+            const startButton = document.getElementById("btn-ar-start");
+            if (startButton) {
+                startButton.querySelector("span").textContent = isLoading ? "Iniciando..." : "Iniciar AR";
+            }
+        }
+
+        function setARSessionActive(active) {
+            document.body.classList.toggle("ar-session-active", active);
+        }
+
+        function obtenerTargetsMindARConfigurados() {
+            return Array.from(markerRegistry.values()).filter(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+        }
+
+        async function validarArchivoMindAR(mindTargetUrl) {
+            if (!mindTargetUrl) {
+                throw new Error("No hay archivo .mind configurado para el target.");
+            }
+            let response;
+            try {
+                response = await fetch(mindTargetUrl, { cache: "no-store" });
+            } catch (err) {
+                throw new Error(`No se pudo descargar ${mindTargetUrl}. Revisa que el visor y los assets se abran desde el mismo servidor.`);
+            }
+            if (!response.ok) {
+                throw new Error(`No se pudo cargar ${mindTargetUrl}. Respuesta HTTP ${response.status}.`);
+            }
+            const blob = await response.blob();
+            if (blob.size < 1024) {
+                throw new Error(`El archivo ${mindTargetUrl} parece invalido o vacio.`);
+            }
+            return blob.size;
+        }
+
+        function esperarEscenaLista(sceneEl) {
+            if (!sceneEl || sceneEl.hasLoaded) return Promise.resolve();
+            return new Promise(resolve => sceneEl.addEventListener('loaded', resolve, { once: true }));
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => window.setTimeout(resolve, ms));
+        }
+
+        async function esperarSistemaMindAR(sceneEl, timeoutMs = 12000) {
+            const startedAt = performance.now();
+            while (performance.now() - startedAt < timeoutMs) {
+                const mindSystem = sceneEl?.systems?.['mindar-image-system'];
+                if (mindSystem && typeof mindSystem.start === 'function') {
+                    return mindSystem;
+                }
+                await delay(120);
+            }
+            throw new Error("MindAR no se inicializo. Revisa que la libreria MindAR cargue y que el .mind sea valido.");
+        }
+
+        async function iniciarSistemaMindAR() {
+            const sceneEl = document.querySelector('a-scene');
+            if (mindARStarting) return;
+            mindARStarting = true;
+            let mindSystem = null;
+            try {
+                await esperarEscenaLista(sceneEl);
+                mindSystem = await esperarSistemaMindAR(sceneEl);
+                await Promise.race([
+                    mindSystem.start(),
+                    new Promise((_, reject) => {
+                        window.setTimeout(() => reject(new Error("MindAR tardo demasiado en iniciar. Revisa permisos de camara, HTTPS y el archivo .mind.")), 30000);
+                    })
+                ]);
+                mindARActive = true;
+                setARSessionActive(true);
+                setARStartStatus("Camara activa. Apunta al target fisico.", "success");
+            } catch (err) {
+                mindARActive = false;
+                setARSessionActive(false);
+                try {
+                    if (mindSystem && typeof mindSystem.stop === 'function') await mindSystem.stop();
+                } catch (stopErr) {
+                    console.warn("[MindAR] No se pudo detener tras fallo de inicio:", stopErr);
+                }
+                throw err;
+            } finally {
+                mindARStarting = false;
+            }
+        }
+
+        async function detenerSistemaMindAR() {
+            const sceneEl = document.querySelector('a-scene');
+            const mindSystem = sceneEl?.systems?.['mindar-image-system'];
+            if (mindSystem && typeof mindSystem.stop === 'function') {
+                await mindSystem.stop();
+            }
+            mindARActive = false;
+            mindARStarting = false;
+            setARSessionActive(false);
+        }
 
         async function activarCamaraRA() {
             feedbackMovil(22);
+            prepararAudioVideosAR();
             const videoEl = document.getElementById("camera-stream");
             const skyEl = document.querySelector("a-sky");
             const btnCamara = document.getElementById("btn-camera-toggle");
             let cameraStarted = false;
+
+            if (mindARActive) {
+                await detenerTrackingImagenAR();
+                document.body.classList.remove("camera-active-body");
+                document.body.style.backgroundColor = "#05070f";
+                if (skyEl) {
+                    skyEl.setAttribute("visible", "false");
+                    skyEl.setAttribute("material", "transparent: true; opacity: 0;");
+                }
+                if (btnCamara) {
+                    btnCamara.classList.remove("camera-active");
+                    btnCamara.innerHTML = `
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                        <span>Cámara RA</span>
+                    `;
+                }
+                setARStartStatus("AR detenida. Pulsa Iniciar AR para volver a probar.", "idle");
+                escribirTexto("Tracking MindAR desactivado.", 15);
+                hablar("Tracking desactivado.");
+                return;
+            }
 
             if (cameraStream) {
                 // Si ya está activa, la apagamos (toggle off)
@@ -2008,11 +2522,13 @@
                 // Restaurar fondo del body removiendo la clase transparente
                 document.body.classList.remove("camera-active-body");
                 document.body.style.backgroundColor = "#05070f";
-                detenerTrackingImagenAR();
+                await detenerTrackingImagenAR();
                 
                 // Hacer visible el cielo virtual
-                skyEl.setAttribute("visible", "true");
-                skyEl.setAttribute("material", "transparent: false; opacity: 1;");
+                if (skyEl) {
+                    skyEl.setAttribute("visible", "false");
+                    skyEl.setAttribute("material", "transparent: true; opacity: 0;");
+                }
                 
                 // Cambiar estado visual del botón
                 btnCamara.classList.remove("camera-active");
@@ -2042,8 +2558,63 @@
                 const detalle = isLocalhost
                     ? "localhost sí puede usar cámara, pero solo desde este mismo equipo."
                     : `Estás entrando desde ${window.location.origin}; en celular la cámara requiere HTTPS.`;
+                setARStartStatus(`Camara bloqueada. ${detalle}`, "error");
                 escribirTexto(`Error: el navegador bloqueó la cámara por contexto inseguro. ${detalle} Abre la experiencia con HTTPS o un túnel seguro hacia este servidor. 🐳🔒`, 15);
                 hablar("Acceso denegado. Se requiere una conexión segura HTTPS.");
+                return;
+            }
+
+            const imageTargets = obtenerTargetsMindARConfigurados();
+            if (imageTargets.length > 0) {
+                try {
+                    setARStartButtonLoading(true);
+                    setARStartStatus("Solicitando camara...", "idle");
+                    document.body.classList.add("camera-active-body");
+                    document.body.style.backgroundColor = "transparent";
+                    if (skyEl) {
+                        skyEl.setAttribute("visible", "false");
+                        skyEl.setAttribute("material", "transparent: true; opacity: 0;");
+                    }
+                    if (videoEl) {
+                        videoEl.style.display = "none";
+                        videoEl.style.opacity = "0";
+                        videoEl.srcObject = null;
+                    }
+                    if (btnCamara) {
+                        btnCamara.classList.add("camera-active");
+                        btnCamara.innerHTML = `
+                            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/>
+                            </svg>
+                            <span>MindAR On</span>
+                        `;
+                    }
+                    await iniciarTrackingImagenAR();
+                    setARSessionActive(true);
+                    escribirTexto("Tracking MindAR activo. Apunta la camara al target fisico entrenado.", 15);
+                    hablar("Tracking activo. Apunta al target.");
+                } catch (err) {
+                    console.error("[MindAR] No se pudo iniciar el tracking:", err);
+                    mindARActive = false;
+                    setARSessionActive(false);
+                    setMobileClientState("Error MindAR");
+                    setARStartStatus(err.message || err.name || "No se pudo iniciar AR.", "error");
+                    if (btnCamara) {
+                        btnCamara.classList.remove("camera-active");
+                        btnCamara.innerHTML = `
+                            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                <circle cx="12" cy="13" r="4"/>
+                            </svg>
+                            <span>Cámara RA</span>
+                        `;
+                    }
+                    mostrarNotificacion(`No se pudo iniciar MindAR: ${err.message || err.name}`, "error");
+                    escribirTexto(`No se pudo iniciar MindAR: ${err.message || err.name}. Revisa HTTPS, permisos de camara y que el .mind cargue correctamente.`, 15);
+                } finally {
+                    setARStartButtonLoading(false);
+                }
                 return;
             }
 
@@ -2149,7 +2720,7 @@
                     panel.classList.add('collapsed');
                     document.body.classList.add('chat-panel-collapsed');
                 }
-                iniciarTrackingImagenAR();
+                await iniciarTrackingImagenAR();
 
             } catch (err) {
                 console.error("Error al acceder a la cámara:", err);
@@ -2168,19 +2739,34 @@
             }
         }
 
-        function iniciarTrackingImagenAR() {
-            const imageTargets = Array.from(markerRegistry.values()).filter(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
+        async function iniciarTrackingImagenAR() {
+            const imageTargets = obtenerTargetsMindARConfigurados();
             if (imageTargets.length === 0) {
                 setMobileClientState("Falta .mind");
+                setARStartStatus("No hay archivo .mind publicado para este visor.", "error");
                 mostrarNotificacion("No hay target MindAR compilado. Sube un archivo .mind en el editor para tracking tipo Vuforia.");
-                return;
+                throw new Error("No hay archivo .mind publicado para este visor.");
             }
+            const mindTargets = new Set(imageTargets.map(marker => marker.mindTargetUrl));
+            if (mindTargets.size > 1) {
+                setMobileClientState("MindAR invalido");
+                setARStartStatus("La escena tiene varios archivos .mind. Publica un solo .mind con todos los targets.", "error");
+                mostrarNotificacion("La escena usa varios archivos .mind. Compila todos los targets en un solo .mind y usa indices distintos.");
+                throw new Error("La escena tiene varios archivos .mind. Publica un solo .mind con todos los targets.");
+            }
+            setARStartStatus("Iniciando tracking de imagen...", "idle");
+            setARStartStatus("Verificando base de targets...", "idle");
+            await validarArchivoMindAR(imageTargets[0].mindTargetUrl);
+            await iniciarSistemaMindAR();
             setMobileClientState("Buscando imagen");
+            setARStartStatus("Camara activa. Apunta al target fisico.", "success");
             mostrarNotificacion("Tracking de imagen activo: apunta la camara al target fisico entrenado.");
         }
 
-        function detenerTrackingImagenAR() {
+        async function detenerTrackingImagenAR() {
+            await detenerSistemaMindAR();
             setMobileClientState("AR listo");
+            setARStartStatus("AR detenida. Pulsa Iniciar AR para volver a probar.", "idle");
         }
 
         function setMarkerDetected(markerId, detected, source = "manual") {
@@ -2209,7 +2795,7 @@
             } else if (!detected && alreadyDetected) {
                 markerContainer.dataset.detected = "false";
                 markerContainer.dispatchEvent(new CustomEvent('targetLost', { detail: { source } }));
-                setMobileClientState(cameraStream ? "Buscando target" : "AR listo");
+                setMobileClientState(mindARActive || cameraStream ? "Buscando target" : "AR listo");
                 const pill = document.getElementById('ar-detection-pill');
                 if (pill) pill.classList.remove('active');
             }
@@ -2863,7 +3449,17 @@
             return frame;
         }
 
-        // Cargar escenario de forma dinámica desde output/layout.json o escenario panorámico por defecto
+        function aplicarOpcionesVisor(rawData) {
+            const params = new URLSearchParams(window.location.search);
+            const viewerConfig = rawData?.viewer || rawData?.stage?.viewer || {};
+            const chatEnabled = viewerConfig.chatEnabled === true || params.get('chat') === '1';
+            document.body.classList.toggle('viewer-chat-enabled', chatEnabled);
+            if (!chatEnabled) {
+                document.body.classList.add('chat-panel-collapsed');
+            }
+        }
+
+        // Cargar escenario de forma dinámica desde output/layout.json
         async function cargarEscenarioDinamico() {
             // Limpiar entidades interactivas previas en todos los contenedores para evitar duplicados
             document.querySelectorAll('.interactive-entity').forEach(el => el.parentNode.removeChild(el));
@@ -2878,6 +3474,7 @@
                 const response = await fetch('output/layout.json', { cache: 'no-store' });
                 if (response.ok) {
                     const rawData = await response.json();
+                    aplicarOpcionesVisor(rawData);
                     
                     // Soporte para el nuevo formato estructurado { stage, entities }
                     if (rawData && rawData.stage) {
@@ -2897,39 +3494,13 @@
             if (grid) {
                 grid.setAttribute('width', stageConfig.width);
                 grid.setAttribute('height', stageConfig.height);
-                grid.setAttribute('visible', stageConfig.gridVisible);
+                grid.setAttribute('visible', 'false');
             }
 
-            // Si no hay datos guardados o está vacío, usar el escenario panorámico por defecto
+            // Si no hay datos guardados, mantener el visor limpio.
             if (!Array.isArray(datosLienzo) || datosLienzo.length === 0) {
-                datosLienzo = [
-                    {
-                        uuid: "demo-target-oira",
-                        nombre: "Target OIRA Demo",
-                        isMarker: true,
-                        posicion: { x: 0, y: 0.02, z: -3.0 },
-                        rotacion: { y: 0 },
-                        escala: 1.0,
-                        markerImage: "",
-                        mindTargetUrl: null,
-                        mindTargetIndex: 0,
-                        trackingMode: "image",
-                        arAnchor: "base"
-                    },
-                    {
-                        uuid: "demo-node-oira",
-                        nombre: "Nodo OIRA Demo",
-                        mediaType: "oira-node",
-                        oiraLabel: "OIRA Demo",
-                        oiraColor: "#0369a1",
-                        oiraNarration: "Este nodo demuestra una capa flotante sin depender de modelos base heredados.",
-                        posicion: { x: 0, y: 0.55, z: 0.05 },
-                        rotacion: { y: 0 },
-                        escala: 0.95,
-                        relativeToAnchor: true,
-                        arAnchor: "demo-target-oira"
-                    }
-                ];
+                datosLienzo = [];
+                setARStartStatus("No hay una experiencia publicada. Publica desde el editor antes de abrir el visor.", "error");
             }
 
             // 1. Identificar todos los marcadores en los datos del escenario
@@ -2966,19 +3537,23 @@
             // 2. Instanciar dinámicamente cada marcador en la escena
             const sceneEl = document.querySelector('a-scene');
             const imageMarkers = marcadores.filter(marker => marker.trackingMode === 'image' && marker.mindTargetUrl);
-            const markerMind = imageMarkers[0];
+            const mindUrls = [...new Set(imageMarkers.map(marker => marker.mindTargetUrl).filter(Boolean))];
+            const hasInvalidMindConfig = mindUrls.length > 1;
+            const markerMind = hasInvalidMindConfig ? null : imageMarkers[0];
             if (sceneEl) {
                 sceneEl.removeAttribute('mindar-image');
             }
             if (markerMind && sceneEl) {
-                sceneEl.setAttribute('mindar-image', `imageTargetSrc: ${markerMind.mindTargetUrl}; autoStart: true; uiScanning: yes; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5;`);
+                sceneEl.setAttribute('mindar-image', `imageTargetSrc: ${markerMind.mindTargetUrl}; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5;`);
                 setMobileClientState("Tracking imagen");
-                const differentTargets = new Set(imageMarkers.map(marker => marker.mindTargetUrl)).size;
-                if (differentTargets > 1) {
-                    mostrarNotificacion("MindAR usa un solo archivo .mind por escena. Usa indices distintos dentro del mismo .mind para varios targets.");
-                }
+                setARStartStatus("Pulsa Iniciar AR y apunta la camara a la imagen target.", "idle");
+            } else if (hasInvalidMindConfig) {
+                setMobileClientState("MindAR invalido");
+                setARStartStatus("La escena usa varios archivos .mind. Publica un solo .mind con todos los targets.", "error");
+                mostrarNotificacion("MindAR usa un solo archivo .mind por escena. Corrige la publicacion antes de probar el visor.");
             } else if (marcadores.length > 0) {
                 setMobileClientState("Falta .mind");
+                setARStartStatus("Falta el archivo .mind. Compila y publica el target desde el editor.", "error");
                 mostrarNotificacion("La escena tiene targets sin archivo .mind. Compila y sube el target para tracking real.");
             }
 
@@ -2993,7 +3568,7 @@
                 markerContainer.setAttribute('position', `${marker.posicion.x} ${marker.posicion.y} ${marker.posicion.z}`);
                 markerContainer.setAttribute('rotation', `0 ${marker.rotacion.y || 0} 0`);
                 markerContainer.setAttribute('scale', `${marker.escala} ${marker.escala} ${marker.escala}`);
-                markerContainer.setAttribute('visible', marker.trackingMode === 'image' && marker.mindTargetUrl ? 'true' : 'false');
+                markerContainer.setAttribute('visible', 'false');
                 if (marker.trackingMode === 'image' && marker.mindTargetUrl && marker.mindTargetUrl === markerMind?.mindTargetUrl) {
                     markerContainer.setAttribute('mindar-image-target', `targetIndex: ${marker.mindTargetIndex || 0}`);
                 }
@@ -3094,35 +3669,12 @@
                         videoEl = document.createElement('video');
                         videoEl.setAttribute('id', videoId);
                         videoEl.setAttribute('src', mediaUrl);
-                        videoEl.setAttribute('playsinline', '');
-                        videoEl.setAttribute('webkit-playsinline', '');
-                        if (obj.loop !== false) {
-                            videoEl.setAttribute('loop', '');
-                        }
-                        if (obj.mute !== false) {
-                            videoEl.setAttribute('muted', '');
-                            videoEl.muted = true;
-                        } else {
-                            videoEl.removeAttribute('muted');
-                            videoEl.muted = false;
-                        }
-                        videoEl.setAttribute('crossorigin', 'anonymous');
                         videoEl.style.display = 'none';
                         document.body.appendChild(videoEl);
                     } else {
-                        if (obj.loop !== false) {
-                            videoEl.setAttribute('loop', '');
-                        } else {
-                            videoEl.removeAttribute('loop');
-                        }
-                        if (obj.mute !== false) {
-                            videoEl.setAttribute('muted', '');
-                            videoEl.muted = true;
-                        } else {
-                            videoEl.removeAttribute('muted');
-                            videoEl.muted = false;
-                        }
+                        videoEl.setAttribute('src', mediaUrl);
                     }
+                    configurarVideoAR(videoEl, obj);
                     
                     const pWidth = Number(obj.panelWidth) || 1.6;
                     const pHeight = Number(obj.panelHeight) || 0.9;
@@ -3139,7 +3691,7 @@
                             console.log(`🎯 targetFound: Reproduciendo video ${videoId}`);
                             el.setAttribute('visible', 'true');
                             if (obj.autoplay !== false) {
-                                videoEl.play().catch(e => console.warn(e));
+                                reproducirVideoAR(videoEl, obj);
                             }
                         });
                         targetContainer.addEventListener('targetLost', () => {
@@ -3215,7 +3767,7 @@
                 const existingClass = el.getAttribute('class');
                 el.setAttribute('class', existingClass ? `${existingClass} ${contentClass}` : contentClass);
                 el.setAttribute('visible', anchor === 'base' ? 'true' : 'false');
-                if (anchor !== 'base' && mediaType === '3d') {
+                if (anchor !== 'base' && mediaType === '3d' && targetContainer) {
                     targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
                     targetContainer.addEventListener('targetLost', () => el.setAttribute('visible', 'false'));
                 }

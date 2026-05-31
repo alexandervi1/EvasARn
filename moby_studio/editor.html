@@ -2830,6 +2830,10 @@
                             <span>Guías MindAR</span>
                             <input type="checkbox" id="check-ar-guides" checked onchange="toggleGuiasAR()" style="accent-color: var(--color-docker); width: 14px; height: 14px; cursor: pointer; pointer-events: auto;">
                         </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; color: #cbd5e1;">
+                            <span>Mostrar chatbot en visor</span>
+                            <input type="checkbox" id="check-viewer-chat" onchange="toggleChatVisor()" style="accent-color: var(--color-docker); width: 14px; height: 14px; cursor: pointer; pointer-events: auto;">
+                        </div>
                     </div>
 
                     <div class="panel-section-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
@@ -6164,16 +6168,21 @@
                 stageSize = {
                     width: Number(stage.width) || 3,
                     height: Number(stage.height) || 3,
-                    gridVisible: stage.gridVisible !== false
+                    gridVisible: stage.gridVisible !== false,
+                    viewer: {
+                        chatEnabled: stage.viewer?.chatEnabled === true
+                    }
                 };
             }
 
             const slideW = document.getElementById('slide-stage-w');
             const slideH = document.getElementById('slide-stage-h');
             const checkGrid = document.getElementById('check-stage-grid');
+            const checkViewerChat = document.getElementById('check-viewer-chat');
             if (slideW) slideW.value = stageSize.width;
             if (slideH) slideH.value = stageSize.height;
             if (checkGrid) checkGrid.checked = stageSize.gridVisible;
+            if (checkViewerChat) checkViewerChat.checked = stageSize.viewer?.chatEnabled === true;
 
             const valW = document.getElementById('val-stage-w');
             const valH = document.getElementById('val-stage-h');
@@ -7057,7 +7066,7 @@
         }
 
         // --- ESCENARIO: Actualizar dinámicamente las dimensiones de la mesa de trabajo ---
-        let stageSize = { width: 3.0, height: 3.0, gridVisible: true };
+        let stageSize = { width: 3.0, height: 3.0, gridVisible: true, viewer: { chatEnabled: false } };
 
         function actualizarTamanoEscenario() {
             registrarEstadoHistorial('Cambiar escenario', { coalesceMs: 500 });
@@ -7091,6 +7100,14 @@
             if (grid) {
                 grid.setAttribute('visible', visible);
             }
+        }
+
+        function toggleChatVisor() {
+            registrarEstadoHistorial('Alternar chatbot del visor');
+            const check = document.getElementById('check-viewer-chat');
+            stageSize.viewer = stageSize.viewer || {};
+            stageSize.viewer.chatEnabled = check ? check.checked : false;
+            marcarCambiosSinGuardar();
         }
 
         function toggleGuiasAR() {
@@ -7428,12 +7445,19 @@
                     
                     let entidadesACargar = [];
                     if (data && data.stage) {
-                        stageSize = data.stage;
+                        stageSize = {
+                            width: Number(data.stage.width) || 3,
+                            height: Number(data.stage.height) || 3,
+                            gridVisible: data.stage.gridVisible !== false,
+                            viewer: { chatEnabled: data.stage.viewer?.chatEnabled === true }
+                        };
                         entidadesACargar = data.entities || [];
                         
                         document.getElementById('slide-stage-w').value = stageSize.width;
                         document.getElementById('slide-stage-h').value = stageSize.height;
                         document.getElementById('check-stage-grid').checked = stageSize.gridVisible;
+                        const checkViewerChat = document.getElementById('check-viewer-chat');
+                        if (checkViewerChat) checkViewerChat.checked = stageSize.viewer?.chatEnabled === true;
                         document.getElementById('val-stage-w').innerText = `${Number(stageSize.width).toFixed(2)}m`;
                         document.getElementById('val-stage-h').innerText = `${Number(stageSize.height).toFixed(2)}m`;
                         
@@ -7507,13 +7531,20 @@
                 
                 // 1. Cargar configuración de límites del escenario si existe (formato unificado nuevo)
                 if (data && data.stage) {
-                    stageSize = data.stage;
+                    stageSize = {
+                        width: Number(data.stage.width) || 3,
+                        height: Number(data.stage.height) || 3,
+                        gridVisible: data.stage.gridVisible !== false,
+                        viewer: { chatEnabled: data.stage.viewer?.chatEnabled === true }
+                    };
                     entidadesACargar = data.entities || [];
                     
                     // Actualizar sliders y labels del escenario en la UI
                     document.getElementById('slide-stage-w').value = stageSize.width;
                     document.getElementById('slide-stage-h').value = stageSize.height;
                     document.getElementById('check-stage-grid').checked = stageSize.gridVisible;
+                    const checkViewerChat = document.getElementById('check-viewer-chat');
+                    if (checkViewerChat) checkViewerChat.checked = stageSize.viewer?.chatEnabled === true;
                     
                     document.getElementById('val-stage-w').innerText = `${Number(stageSize.width).toFixed(2)}m`;
                     document.getElementById('val-stage-h').innerText = `${Number(stageSize.height).toFixed(2)}m`;

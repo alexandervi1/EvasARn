@@ -1,11 +1,64 @@
 {
-  "project": "default",
-  "version": 3,
-  "stage": {
-    "width": 3,
-    "height": 3,
-    "gridVisible": true
-  },
-  "entities": [],
-  "updatedAt": "2026-05-30 16:10:00"
+    "project": "default",
+    "version": 14,
+    "stage": {
+        "width": 4.2,
+        "height": 4.2,
+        "gridVisible": true,
+        "viewer": {
+            "chatEnabled": false
+        }
+    },
+    "entities": [
+        {
+            "uuid": "objeto-marcador-9",
+            "nombre": "OIRA1 Voz Docker",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/Gemini_Generated_Image_i34api34api34api.png",
+            "recognitionKey": "OIRA1",
+            "trackingMode": "image",
+            "mindTargetUrl": "output/targets.mind",
+            "mindTargetIndex": 0,
+            "arAnchor": "base",
+            "comments": [],
+            "oiraType": "oira1",
+            "oiraIntro": "OIRA uno activo. Puedes hacer consultas por voz sobre Docker y recibir respuesta en texto y audio dentro de la experiencia."
+        },
+        {
+            "uuid": "objeto-asistente-de-voz-docker-10",
+            "modelId": null,
+            "nombre": "Asistente de Voz Docker #10",
+            "posicion": {
+                "x": 0,
+                "y": 0.55,
+                "z": 0.05
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 0.95,
+            "glbUrl": null,
+            "arAnchor": "objeto-marcador-9",
+            "mediaType": "video",
+            "mediaUrl": "output/¿Qué es Docker 🐳 Explicación para PRINCIPIANTES.mp4",
+            "comments": [],
+            "relativeToAnchor": true,
+            "oiraLabel": "Asistente de Voz Docker",
+            "oiraColor": "#0369a1",
+            "oiraNarration": "Este disparador activa el asistente de voz para consultas sobre Docker, contenedores, imagenes y volumenes.",
+            "oiraAutoNarrate": false
+        }
+    ],
+    "status": "borrador",
+    "history": [],
+    "updatedAt": "2026-05-31 14:27:28"
 }

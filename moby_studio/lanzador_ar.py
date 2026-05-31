@@ -1375,30 +1375,27 @@ def main():
         print(f"URL de destino por defecto: {url_servicio}")
     print("-" * 80)
 
-    # 2. Generar Código QR
-    try:
-        print("Generando código QR de presentación...")
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
-        )
-        qr.add_data(url_servicio)
-        qr.make(fit=True)
+    # 2. Generar QR opcional de acceso. No participa en tracking AR.
+    ruta_qr = None
+    if qrcode is not None:
+        try:
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(url_servicio)
+            qr.make(fit=True)
 
-        # Crear y guardar la imagen
-        img = qr.make_image(fill_color="black", back_color="white")
-        ruta_qr = os.path.abspath("qr_presentacion.png")
-        img.save(ruta_qr)
-        
-        print("[OK] Código QR generado y guardado exitosamente.")
-        print(f"Ruta física del QR: {ruta_qr}")
-        print("-" * 80)
-    except Exception as e:
-        print(f"[ERROR] No se pudo generar el código QR: {str(e)}", file=sys.stderr)
-        # Continuar con el servidor de todos modos
-        pass
+            img = qr.make_image(fill_color="black", back_color="white")
+            ruta_qr = os.path.abspath("qr_presentacion.png")
+            img.save(ruta_qr)
+            print(f"QR opcional de acceso generado: {ruta_qr}")
+            print("Nota: el tracking AR real usa MindAR con archivo .mind, no QR.")
+            print("-" * 80)
+        except Exception as e:
+            print(f"[WARN] No se pudo generar el QR opcional de acceso: {str(e)}", file=sys.stderr)
 
     # 3. Lanzar Servidor HTTP
     ThreadedARServer.allow_reuse_address = True
@@ -1420,8 +1417,10 @@ def main():
             print("-" * 80)
             print("Acceso Móvil (Celular):")
             print(f"   -> {url_servicio}")
+            print("Tracking AR: sube imagen fisica + archivo .mind desde el editor.")
+            if ruta_qr:
+                print(f"QR opcional para abrir la URL: {ruta_qr}")
             print("-" * 80)
-            print("ESCANEE EL ARCHIVO 'qr_presentacion.png' CON SU CELULAR PARA INGRESAR")
             print("=" * 80)
             print("Presione Ctrl+C para detener el servidor de despliegue.")
             

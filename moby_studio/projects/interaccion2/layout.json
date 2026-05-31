@@ -1,0 +1,57 @@
+{
+    "project": "interaccion2",
+    "version": 6,
+    "stage": {
+        "width": 4.2,
+        "height": 4.2,
+        "gridVisible": true,
+        "viewer": {
+            "chatEnabled": false
+        }
+    },
+    "entities": [
+        {
+            "uuid": "objeto-marcador-1",
+            "nombre": "Marcador AR #1",
+            "isMarker": true,
+            "posicion": {
+                "x": 0,
+                "y": 0.02,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 0
+            },
+            "escala": 1,
+            "markerImage": "output/Captura de pantalla 2026-05-31 144336.png",
+            "recognitionKey": "objeto-marcador-1",
+            "trackingMode": "image",
+            "mindTargetUrl": "output/targets (2).mind",
+            "mindTargetIndex": 0,
+            "arAnchor": "base",
+            "comments": []
+        },
+        {
+            "uuid": "objeto-white-sports-car-3d-model-2",
+            "modelId": "modelo-white_sports_car_3d_model",
+            "nombre": "white sports car 3d model #2",
+            "posicion": {
+                "x": 0,
+                "y": 0.9,
+                "z": -3.5
+            },
+            "rotacion": {
+                "y": 244
+            },
+            "escala": 1.55,
+            "glbUrl": null,
+            "arAnchor": "objeto-marcador-1",
+            "comments": [],
+            "mediaType": "3d",
+            "mediaUrl": "output/white sports car 3d model.glb"
+        }
+    ],
+    "status": "borrador",
+    "history": [],
+    "updatedAt": "2026-05-31 15:01:08"
+}
