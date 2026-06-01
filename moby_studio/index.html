@@ -1370,9 +1370,33 @@
             animation: pulseMic 1.2s infinite alternate !important;
         }
 
-        @keyframes pulseMic {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 243, 255, 0.4); }
-            100% { transform: scale(1.15); box-shadow: 0 0 15px 5px rgba(0, 243, 255, 0.6); }
+        /* --- EVOLUCIÓN: CONTROL DE AMBIGÜEDAD Y FLUIDEZ UX --- */
+        /* Ocultar el botón secundario de cámara del header por defecto */
+        #btn-camera-toggle {
+            display: none !important;
+        }
+
+        /* Mostrarlo con diseño premium y color de advertencia rojo cuando el AR esté activo */
+        body.ar-session-active #btn-camera-toggle {
+            display: inline-flex !important;
+        }
+
+        body.ar-session-active .btn-camera.camera-active {
+            background: rgba(239, 68, 68, 0.16) !important;
+            border-color: rgba(239, 68, 68, 0.48) !important;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.32) !important;
+            color: #fca5a5 !important;
+        }
+
+        body.ar-session-active .btn-camera.camera-active:hover {
+            background: rgba(239, 68, 68, 0.28) !important;
+            border-color: rgba(239, 68, 68, 0.6) !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important;
+        }
+
+        /* Mostrar la barra lateral de control 3D (escala y distancia) en PC y móvil al activar AR */
+        body.ar-session-active .ar-control-sheet {
+            display: flex !important;
         }
     </style>
 </head>
@@ -1426,22 +1450,6 @@
                 <span>Cámara RA</span>
             </button>
 
-            <button type="button" id="btn-presentation-toggle" class="btn-camera viewer-secondary-control" onclick="togglePresentationMode()" title="Modo presentación">
-                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
-                    <path d="M3 4h18v12H3z"/>
-                    <path d="M8 20h8M12 16v4"/>
-                </svg>
-                <span>Presentar</span>
-            </button>
-
-            <button type="button" class="btn-camera viewer-secondary-control" onclick="abrirManualVisor()" title="Manual de uso del visor">
-                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M9.1 9a3 3 0 1 1 4.7 2.5c-.9.6-1.8 1.2-1.8 2.5"/>
-                    <path d="M12 17h.01"/>
-                </svg>
-                <span>Ayuda</span>
-            </button>
 
             <div class="status-indicator">
                 <div class="status-dot"></div>
@@ -2400,9 +2408,8 @@
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                         <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2.5"/>
                     </svg>
-                    <span>Cámara RA On</span>
+                    <span>Apagar Cámara</span>
                 `;
-
                 // Obtener detalles del stream enlazado con éxito para diagnóstico en pantalla
                 const activeTrack = cameraStream.getVideoTracks()[0];
                 const settings = activeTrack ? activeTrack.getSettings() : {};
