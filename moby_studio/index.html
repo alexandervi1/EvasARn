@@ -38,15 +38,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body:not(.viewer-chat-enabled) .chat-panel,
-        body:not(.viewer-chat-enabled) .mobile-action-dock {
-            display: none !important;
-        }
-
-        body:not(.viewer-chat-enabled) .viewer-chat-control {
-            display: none !important;
-        }
-
         body.ar-session-active .ar-start-panel {
             opacity: 0;
             transform: translate(-50%, 14px);
@@ -1475,7 +1466,7 @@
             </div>
         </section>
 
-        <!-- Panel de control de Chat inferior -->
+        <!-- Panel de control de Narración e Instrucciones inferior -->
         <div class="chat-panel" id="chat-panel">
             <!-- Botón de Colapso Flotante -->
             <button type="button" class="btn-collapse" id="btn-collapse-panel" onclick="toggleChatPanel()" title="Minimizar panel">
@@ -1492,39 +1483,11 @@
                 </p>
             </div>
 
-            <!-- Entrada de Texto y Controles -->
-            <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
-
-                <form class="chat-form" id="chat-form" onsubmit="enviarPregunta(event)">
-                    <!-- Botón de Grabación por Voz (STT) -->
-                    <button type="button" class="btn-mic" id="btn-mic" onclick="toggleReconocimientoVoz()" title="Hablar por voz">
-                        <svg viewBox="0 0 24 24" id="mic-icon">
-                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                            <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v4M8 23h8"/>
-                        </svg>
-                    </button>
-
-                    <!-- Input de Texto -->
-                    <input 
-                        type="text" 
-                        id="chat-input" 
-                        class="chat-input" 
-                        placeholder="Pregunta sobre lo que ves o sobre la experiencia AR..."
-                        autocomplete="off">
-                    
-                    <!-- Botón de Envío -->
-                    <button type="submit" class="btn-send" id="btn-submit">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                        </svg>
-                        <span>Preguntar</span>
-                    </button>
-                </form>
-
-                <!-- Checkbox de Voz (Texto a Voz) -->
-                <label class="voice-control">
-                    <input type="checkbox" id="voice-toggle" checked>
-                    <span>Habilitar respuestas por voz alta</span>
+            <!-- Controles de Audio Narración -->
+            <div style="display: flex; justify-content: flex-end; align-items: center; pointer-events: auto;">
+                <label class="voice-control" style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--color-muted); cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="voice-toggle" checked style="accent-color: var(--color-docker); cursor: pointer;">
+                    <span>Habilitar voz narradora</span>
                 </label>
             </div>
         </div>
@@ -1538,6 +1501,7 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 1 1 4.7 2.5c-.9.6-1.8 1.2-1.8 2.5"/><path d="M12 17h.01"/></svg>
         </button>
     </div>
+
 
     <div class="ar-control-sheet" aria-label="Controles del contenido AR">
         <button type="button" class="ar-control-btn" onclick="ajustarContenidoAR('scale', 1.12)" title="Aumentar contenido">
@@ -1809,10 +1773,7 @@
             }
         });
 
-        const elInput = document.getElementById("chat-input");
         const elDisplay = document.getElementById("dialogue-display");
-        const elSubmitBtn = document.getElementById("btn-submit");
-        const elMicBtn = document.getElementById("btn-mic");
         const elSpeaker = document.getElementById("speaker-label");
         const elVoiceToggle = document.getElementById("voice-toggle");
         const elNeonLight = document.getElementById("neon-light");
@@ -1834,9 +1795,8 @@
         let modeloActivo = "defecto";
         let timeoutRetorno = null;
         let voiceContextUnlocked = false;
-        let recording = false;
-        let recognition = null;
         let arUserGestureReady = false;
+
         const markerRegistry = new Map();
 
         function esDispositivoMovil() {
@@ -2022,37 +1982,6 @@
             }
         }
 
-        // --- SPATIAL UX: Máquina de Estados de Inferencia ---
-        function setInferenceState(state) {
-            const dialogueDisplay = document.getElementById('dialogue-display');
-            const speakerLabel = document.getElementById('speaker-label');
-            const laser = document.getElementById('scanner-laser');
-            const panel = document.getElementById('chat-panel');
-            const micBtn = document.getElementById('btn-mic');
-            
-            // Limpieza
-            panel.classList.remove('hud-thinking');
-            laser.classList.remove('active');
-            if (micBtn) micBtn.classList.remove('mic-active-glow');
-
-            switch (state) {
-                case 'idle':
-                    speakerLabel.innerText = "Moby (Ballena)";
-                    setMobileClientState("AR listo");
-                    break;
-                case 'thinking':
-                    speakerLabel.innerText = "Asistente del visor";
-                    setMobileClientState("Preparando respuesta");
-                    dialogueDisplay.innerHTML = `<span style="color: #eab308; font-weight: bold;">[Visor]</span> Preparando una respuesta local sobre la experiencia AR...`;
-                    panel.classList.add('hud-thinking');
-                    break;
-                case 'speaking':
-                    speakerLabel.innerText = "🐳 Moby (Hablando)";
-                    setMobileClientState("Hablando");
-                    if (micBtn) micBtn.classList.add('mic-active-glow');
-                    break;
-            }
-        }
 
         // --- Efecto visual al detectar un target ---
         function lanzarContenedorEnMarcador(marcadorId) {
@@ -2124,110 +2053,6 @@
             }, 700);
         }
 
-        // Inicializar Reconocimiento de Voz (STT) de alta fidelidad
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRec();
-            recognition.lang = 'es-ES';
-            recognition.interimResults = true; // Transcripción en tiempo real en pantalla
-            recognition.continuous = false;    // Detiene al detectar silencio natural
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = function() {
-                recording = true;
-                elMicBtn.classList.add("recording");
-                elInput.placeholder = "🎤 Escuchando... habla ahora";
-                elInput.value = ""; // Limpiar para nueva entrada
-                escribirTexto("Te estoy escuchando. Pregunta sobre la experiencia AR o el target.", 20);
-                
-                // Moby reacciona físicamente balanceándose más rápido denotando escucha activa
-                if (modeloActivo === "defecto") {
-                    entities.defecto.setAttribute("animation__float", {
-                        property: 'position',
-                        to: '0 1.25 -3.0',
-                        dir: 'alternate',
-                        dur: 800, // Balanceo rápido (latido de atención)
-                        easing: 'easeInOutSine',
-                        loop: true
-                    });
-                }
-            };
-
-            recognition.onresult = function(event) {
-                let interimTranscript = '';
-                let finalTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
-
-                // Inyectar texto provisional mientras habla
-                if (interimTranscript) {
-                    elInput.value = interimTranscript;
-                }
-
-                // Al consolidar el texto final
-                if (finalTranscript) {
-                    elInput.value = finalTranscript;
-                    console.log(`Transcripción final de voz: ${finalTranscript}`);
-                    
-                    recognition.stop();
-                    
-                    // Enviar automáticamente con leve delay para naturalidad
-                    setTimeout(() => {
-                        enviarPregunta(new Event('submit'));
-                    }, 500);
-                }
-            };
-
-            recognition.onerror = function(event) {
-                console.error("Error en Speech Recognition: ", event.error);
-                if (event.error === 'no-speech') {
-                    escribirTexto("No logré escuchar nada. ¡Haz clic en el micrófono e inténtalo de nuevo! 🐳🎙️", 15);
-                } else {
-                    escribirTexto("¡Uy! Ocurrió un inconveniente con el micrófono. Inténtalo de nuevo o escríbelo en la caja. 🐳🔌", 15);
-                }
-                resetMicButton();
-            };
-
-            recognition.onend = function() {
-                resetMicButton();
-                // Restaurar animación de flotación suave de Moby
-                if (modeloActivo === "defecto") {
-                    entities.defecto.setAttribute("animation__float", {
-                        property: 'position',
-                        to: '0 1.3 -3.0',
-                        dir: 'alternate',
-                        dur: 3000,
-                        easing: 'easeInOutSine',
-                        loop: true
-                    });
-                }
-            };
-        } else {
-            elMicBtn.style.display = "none"; // Ocultar si el navegador no lo soporta
-            console.warn("Speech Recognition no soportado en este navegador.");
-        }
-
-        function toggleReconocimientoVoz() {
-            if (!recognition) return;
-            if (recording) {
-                recognition.stop();
-            } else {
-                unlockAudioContext();
-                recognition.start();
-            }
-        }
-
-        function resetMicButton() {
-            recording = false;
-            elMicBtn.classList.remove("recording");
-            elInput.placeholder = "Pregunta sobre la experiencia AR...";
-        }
 
         // --- GESTIÓN DE CÁMARA PARA REALIDAD AUMENTADA REAL ---
         let cameraStream = null;
@@ -2834,68 +2659,6 @@
             }, 1600);
         }
 
-        async function enviarPregunta(event) {
-            if (event) event.preventDefault();
-            
-            const pregunta = elInput.value.trim();
-            if (!pregunta) return;
-
-            // Bloquear controles de UI
-            elInput.disabled = true;
-            elSubmitBtn.disabled = true;
-            elInput.value = "";
-            
-            setInferenceState('thinking');
-            
-            escribirTexto("Revisando la experiencia AR...", 30);
-            hablar("Revisando la experiencia AR");
-
-            // --- DETECTOR Y ENRUTADOR DE METÁFORAS VISUALES ---
-            const queryLower = pregunta.toLowerCase();
-            let temaDetectado = "defecto";
-
-            if (queryLower.includes("barco") || queryLower.includes("buque") || queryLower.includes("transporte") || queryLower.includes("carga") || queryLower.includes("marítimo") || queryLower.includes("carguero") || queryLower.includes("navegar")) {
-                temaDetectado = "buque";
-            } else if (queryLower.includes("servidor") || queryLower.includes("rack") || queryLower.includes("producción") || queryLower.includes("despliegue") || queryLower.includes("cloud") || queryLower.includes("nube") || queryLower.includes("caos") || queryLower.includes("error") || queryLower.includes("problema") || queryLower.includes("inconsistencia") || queryLower.includes("mi máquina")) {
-                temaDetectado = "servidor";
-            }
-
-            // Cambiar de modelo 3D según el tema de la pregunta
-            activarModeloReactivo(temaDetectado);
-            if (temaDetectado === "defecto") {
-                animarMoby();
-            }
-
-            try {
-                await new Promise(resolve => setTimeout(resolve, 220));
-                let respuestaMoby = "El visor ya no usa IA externa. Para probar la escena, activa la cámara RA, apunta al target físico y verifica que el contenido aparezca anclado.";
-                
-                // Mostrar respuesta y hablarla en voz alta
-                setInferenceState('speaking');
-                escribirTexto(respuestaMoby, 15);
-                hablar(respuestaMoby);
-
-            } catch (error) {
-                console.error(error);
-                setInferenceState('idle');
-                const msgError = "No pude procesar la pregunta localmente.";
-                escribirTexto(msgError, 15);
-                hablar("No pude procesar la pregunta.");
-            } finally {
-                // Desbloquear controles de UI
-                elInput.disabled = false;
-                elSubmitBtn.disabled = false;
-                elInput.focus();
-                
-                // Retornar a idle después de un tiempo
-                setTimeout(() => {
-                    const speakerLbl = document.getElementById('speaker-label');
-                    if (speakerLbl && speakerLbl.innerText.includes("Hablando")) {
-                        setInferenceState('idle');
-                    }
-                }, 8000);
-            }
-        }
 
         // --- LOGICA DE TRUCOS Y GAMIFICACIÓN (POKÉMON GO STYLE) ---
         
@@ -3287,15 +3050,7 @@
             return wrapper;
         }
 
-        function aplicarOpcionesVisor(rawData) {
-            const params = new URLSearchParams(window.location.search);
-            const viewerConfig = rawData?.viewer || rawData?.stage?.viewer || {};
-            const chatEnabled = viewerConfig.chatEnabled === true || params.get('chat') === '1';
-            document.body.classList.toggle('viewer-chat-enabled', chatEnabled);
-            if (!chatEnabled) {
-                document.body.classList.add('chat-panel-collapsed');
-            }
-        }
+
 
         // Cargar escenario de forma dinámica desde output/layout.json
         async function cargarEscenarioDinamico() {
@@ -3312,7 +3067,7 @@
                 const response = await fetch('output/layout.json', { cache: 'no-store' });
                 if (response.ok) {
                     const rawData = await response.json();
-                    aplicarOpcionesVisor(rawData);
+
                     
                     // Soporte para el nuevo formato estructurado { stage, entities }
                     if (rawData && rawData.stage) {
