@@ -17,7 +17,7 @@ Implementado:
 - Backend local en `moby_studio/lanzador_ar.py`.
 - Servidor HTTP threaded en el puerto `8000`.
 - Proyectos versionados en `moby_studio/projects/<proyecto>/layout.json`.
-- Runtime activo en `moby_studio/output/layout.json`.
+- Runtime activo en `moby_studio/output/layout.json` generado al guardar.
 - Mediateca para modelos, imagenes, videos y targets `.mind`.
 - Targets MindAR con `markerImage`, `mindTargetUrl` y `mindTargetIndex`.
 - Contenido AR anclado a targets mediante `arAnchor`.
@@ -41,6 +41,11 @@ Retirado o no principal:
 - `/api/vision`, Ollama y Gemma fueron retirados del runtime porque generaban errores y no aportaban al tracking AR.
 - QR, BarcodeDetector y simulaciones fueron retirados del flujo AR principal.
 - La compilacion local de `.mind` todavia esta pendiente; por ahora se suben archivos `.mind` ya generados.
+
+Nota de repositorio:
+
+- `moby_studio/output/` se genera localmente y esta ignorado por Git.
+- Los proyectos creados desde la app se ignoran por defecto; solo `moby_studio/projects/default/layout.json` y `moby_studio/projects/users.json` quedan como base versionada.
 
 ## Estructura
 
@@ -73,7 +78,8 @@ mcpBlender/
 Primera instalacion despues de clonar:
 
 ```powershell
-cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender
+git clone <url-del-repositorio>
+cd mcpBlender
 python -m venv moby_studio\venv
 .\moby_studio\venv\Scripts\python.exe -m pip install --upgrade pip
 .\moby_studio\venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -82,7 +88,7 @@ python -m venv moby_studio\venv
 Desde PowerShell:
 
 ```powershell
-cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender\moby_studio
+cd moby_studio
 .\venv\Scripts\python.exe lanzador_ar.py
 ```
 
@@ -97,6 +103,8 @@ Para probar en telefono se necesita una URL HTTPS. Puedes usar Cloudflare Tunnel
 Dependencias externas opcionales:
 
 - Blender: necesario solo para comprimir GLB con Draco desde `/api/compress-model`.
+
+El runtime base usa librerias estandar de Python; `requirements.txt` se mantiene para que la instalacion sea reproducible si luego se agregan dependencias.
 
 ## Flujo Recomendado
 
@@ -153,7 +161,7 @@ Funciones principales:
 - Reproducir contenido de video con audio cuando el navegador lo permite tras interaccion del usuario.
 - Ajustar escala y distancia del contenido desde controles flotantes.
 - Entrar en modo presentacion.
-- Mostrar chatbot, voz/texto y analisis de camara solo si `stage.viewer.chatEnabled` esta habilitado desde el editor.
+- Mostrar controles de chat local y voz/texto solo si `stage.viewer.chatEnabled` esta habilitado desde el editor.
 
 El visor tambien tiene un icono de ayuda con instrucciones de uso y problemas comunes.
 
