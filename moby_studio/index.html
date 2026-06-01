@@ -3244,6 +3244,49 @@
             return frame;
         }
 
+        function crearPlaceholderModelo3DViewer(obj) {
+            const wrapper = document.createElement('a-entity');
+            wrapper.setAttribute('id', obj.uuid);
+
+            const placeholder = document.createElement('a-entity');
+            placeholder.setAttribute('data-model-placeholder', 'true');
+
+            const base = document.createElement('a-cylinder');
+            base.setAttribute('radius', '0.26');
+            base.setAttribute('height', '0.035');
+            base.setAttribute('position', '0 -0.32 0');
+            base.setAttribute('material', 'color: #0ea5e9; shader: flat; opacity: 0.35; transparent: true');
+
+            const body = document.createElement('a-box');
+            body.setAttribute('width', '0.42');
+            body.setAttribute('height', '0.42');
+            body.setAttribute('depth', '0.42');
+            body.setAttribute('rotation', '0 45 0');
+            body.setAttribute('material', 'color: #38bdf8; roughness: 0.45; metalness: 0.15; opacity: 0.72; transparent: true');
+
+            const label = document.createElement('a-text');
+            label.setAttribute('value', obj.nombre || 'Modelo 3D');
+            label.setAttribute('align', 'center');
+            label.setAttribute('color', '#e0f2fe');
+            label.setAttribute('width', '2.1');
+            label.setAttribute('position', '0 0.42 0');
+
+            placeholder.appendChild(base);
+            placeholder.appendChild(body);
+            placeholder.appendChild(label);
+            wrapper.appendChild(placeholder);
+
+            const source = obj.mediaUrl || obj.glbUrl || (obj.modelId ? `#${obj.modelId}` : null);
+            if (source) {
+                const model = document.createElement('a-entity');
+                model.setAttribute('gltf-model', source);
+                model.addEventListener('model-loaded', () => placeholder.setAttribute('visible', 'false'));
+                model.addEventListener('model-error', () => placeholder.setAttribute('visible', 'true'));
+                wrapper.appendChild(model);
+            }
+            return wrapper;
+        }
+
         function aplicarOpcionesVisor(rawData) {
             const params = new URLSearchParams(window.location.search);
             const viewerConfig = rawData?.viewer || rawData?.stage?.viewer || {};
@@ -3545,9 +3588,7 @@
                         });
                     }
                 } else {
-                    el = document.createElement('a-entity');
-                    el.setAttribute('id', obj.uuid);
-                    el.setAttribute('gltf-model', mediaUrl || `#${obj.modelId}`);
+                    el = crearPlaceholderModelo3DViewer(obj);
                     
                     if (obj.modelId === "modelo-ballena" && anchor === 'base') {
                         el.setAttribute('animation__float', `property: position; to: ${posX} ${posY + 0.15} ${posZ}; dir: alternate; dur: 3000; easing: easeInOutSine; loop: true`);

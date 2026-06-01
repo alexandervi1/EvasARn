@@ -4492,7 +4492,7 @@
             // Rellenar valores de los campos
             document.getElementById('ar-marker-image').value = objeto.markerImage || '';
             document.getElementById('ar-media-type').value = objeto.mediaType || '3d';
-            document.getElementById('ar-media-url').value = objeto.mediaUrl || '';
+            document.getElementById('ar-media-url').value = objeto.mediaUrl || objeto.glbUrl || '';
             const recognitionKeyInput = document.getElementById('ar-recognition-key');
             if (recognitionKeyInput) recognitionKeyInput.value = objeto.recognitionKey || objeto.uuid || '';
             document.getElementById('ar-tracking-mode').value = objeto.trackingMode || 'image';
@@ -4677,16 +4677,19 @@
             const select = document.getElementById('ar-content-anchor');
             if (!select) return;
 
-            const current = objeto?.arAnchor || 'base';
+            const markers = escenaObjetos.filter(item => item.isMarker);
+            let current = objeto?.arAnchor || 'base';
+            if (objeto && !objeto.isMarker && current === 'base' && markers.length === 1) {
+                current = markers[0].uuid;
+                objeto.arAnchor = current;
+            }
             select.innerHTML = '<option value="base">Mesa / sin disparador</option>';
-            escenaObjetos
-                .filter(item => item.isMarker)
-                .forEach(marker => {
-                    const option = document.createElement('option');
-                    option.value = marker.uuid;
-                    option.innerText = `Target: ${marker.nombre || marker.uuid}`;
-                    select.appendChild(option);
-                });
+            markers.forEach(marker => {
+                const option = document.createElement('option');
+                option.value = marker.uuid;
+                option.innerText = `Target: ${marker.nombre || marker.uuid}`;
+                select.appendChild(option);
+            });
 
             select.value = [...select.options].some(option => option.value === current) ? current : 'base';
         }
@@ -4903,7 +4906,7 @@
             const recognitionKey = document.getElementById('ar-recognition-key')?.value.trim() || objetoEnConfiguracionAR.recognitionKey || objetoEnConfiguracionAR.uuid || '';
             const mindTargetUrl = document.getElementById('ar-mind-target-url')?.value.trim() || objetoEnConfiguracionAR.mindTargetUrl || '';
             const mediaType = document.getElementById('ar-media-type')?.value || objetoEnConfiguracionAR.mediaType || '3d';
-            const mediaUrl = document.getElementById('ar-media-url')?.value.trim() || objetoEnConfiguracionAR.mediaUrl || '';
+            const mediaUrl = document.getElementById('ar-media-url')?.value.trim() || objetoEnConfiguracionAR.mediaUrl || objetoEnConfiguracionAR.glbUrl || '';
             const selectedAnchor = document.getElementById('ar-content-anchor')?.value || objetoEnConfiguracionAR.arAnchor || 'base';
             const selectedMarker = escenaObjetos.find(obj => obj.uuid === selectedAnchor);
             const markerName = objetoEnConfiguracionAR.isMarker ? objetoEnConfiguracionAR.nombre : selectedMarker?.nombre;
@@ -5068,6 +5071,12 @@
                 const data = await response.json();
                 if (data.status === 'success') {
                     document.getElementById('ar-media-url').value = data.src;
+                    if (objetoEnConfiguracionAR && document.getElementById('ar-media-type')?.value === '3d') {
+                        objetoEnConfiguracionAR.mediaType = '3d';
+                        objetoEnConfiguracionAR.mediaUrl = data.src;
+                        objetoEnConfiguracionAR.glbUrl = data.src;
+                        objetoEnConfiguracionAR.modelId = null;
+                    }
                     actualizarResumenModalAR();
                     mostrarNotificacion("¡Recurso multimedia subido con éxito!");
                 } else {
@@ -5153,15 +5162,23 @@
                 objetoEnConfiguracionAR.mediaType = mediaType;
                 objetoEnConfiguracionAR.mediaUrl = mediaUrl || null;
                 objetoEnConfiguracionAR.arAnchor = contentAnchor;
-                const el = document.getElementById(objetoEnConfiguracionAR.uuid);
-                if (el && (mediaType === 'image' || mediaType === 'video' || mediaType === 'oira-node')) {
-                    const parent = el.parentNode;
-                    if (parent) {
-                        parent.removeChild(el);
-                        renderizarEntidad3D(objetoEnConfiguracionAR);
-                        seleccionarObjeto(objetoEnConfiguracionAR);
+                if (mediaType === '3d') {
+                    if (mediaUrl) {
+                        objetoEnConfiguracionAR.glbUrl = mediaUrl;
+                        objetoEnConfiguracionAR.modelId = null;
+                    } else {
+                        objetoEnConfiguracionAR.glbUrl = null;
+                        objetoEnConfiguracionAR.modelId = objetoEnConfiguracionAR.modelId || 'modelo-ballena';
+                    }
+                } else {
+                    objetoEnConfiguracionAR.glbUrl = null;
+                    if (mediaType === 'image' || mediaType === 'video') {
+                        objetoEnConfiguracionAR.modelId = null;
                     }
                 }
+                sincronizarContenidoConTarget(objetoEnConfiguracionAR, contentAnchor, { force: true });
+                renderizarEntidad3D(objetoEnConfiguracionAR);
+                seleccionarObjeto(objetoEnConfiguracionAR);
             } else {
                 actualizarOpcionesAnclaje(); // Refrescar los selects para que muestren la nueva imagen
             }
@@ -5316,6 +5333,7 @@
                 nuevoObjeto.modelId = modelId || 'modelo-ballena';
                 nuevoObjeto.escala = nuevoObjeto.modelId === 'modelo-ballena' ? 1.5 : 1.0;
             }
+            sincronizarContenidoConTarget(nuevoObjeto, arAnchor, { force: true });
 
             escenaObjetos.push(nuevoObjeto);
             renderizarEntidad3D(nuevoObjeto);
@@ -5331,6 +5349,26 @@
             el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
             el.setAttribute('rotation', `0 ${obj.rotacion.y || 0} 0`);
             el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
+        }
+
+        function sincronizarContenidoConTarget(obj, anchorId, options = {}) {
+            if (!obj || obj.isMarker || !anchorId || anchorId === 'base') return false;
+            const marker = escenaObjetos.find(item => item.isMarker && item.uuid === anchorId);
+            if (!marker) return false;
+
+            const mediaType = obj.mediaType || '3d';
+            const altura = mediaType === '3d' ? 0.72 : 0.58;
+            obj.arAnchor = anchorId;
+            obj.relativeToAnchor = false;
+            obj.posicion = {
+                x: Number(marker.posicion?.x || 0),
+                y: Number(marker.posicion?.y || 0) + altura,
+                z: Number(marker.posicion?.z || -3.5) + 0.05
+            };
+            if (options.force && mediaType !== '3d') {
+                obj.rotacion = { y: 0 };
+            }
+            return true;
         }
 
         // Crear un nuevo Marcador AR dinámico en el escenario
@@ -6468,6 +6506,37 @@
             agregarTextoBillboard(el, `Anclado a ${marker.nombre || 'Target'}`, '0 0.5 0', '#7dd3fc', '2.0');
         }
 
+        function crearPlaceholderModelo3D(obj) {
+            const fallback = document.createElement('a-entity');
+            fallback.setAttribute('data-model-placeholder', 'true');
+
+            const base = document.createElement('a-cylinder');
+            base.setAttribute('radius', '0.28');
+            base.setAttribute('height', '0.035');
+            base.setAttribute('position', '0 -0.34 0');
+            base.setAttribute('material', 'color: #0ea5e9; shader: flat; opacity: 0.35; transparent: true');
+
+            const body = document.createElement('a-box');
+            body.setAttribute('width', '0.42');
+            body.setAttribute('height', '0.42');
+            body.setAttribute('depth', '0.42');
+            body.setAttribute('position', '0 0 0');
+            body.setAttribute('rotation', '0 45 0');
+            body.setAttribute('material', 'color: #38bdf8; roughness: 0.45; metalness: 0.15; opacity: 0.72; transparent: true');
+
+            const label = document.createElement('a-text');
+            label.setAttribute('value', obj.modelId ? 'Modelo 3D' : 'Modelo no seleccionado');
+            label.setAttribute('align', 'center');
+            label.setAttribute('color', '#e0f2fe');
+            label.setAttribute('width', '2.1');
+            label.setAttribute('position', '0 0.42 0');
+
+            fallback.appendChild(base);
+            fallback.appendChild(body);
+            fallback.appendChild(label);
+            return fallback;
+        }
+
         function renderizarEntidad3D(obj) {
             const container = document.getElementById('entities-container');
             const existente = document.getElementById(obj.uuid);
@@ -6554,11 +6623,17 @@
                     el.appendChild(panel);
                     el.appendChild(accent);
                     el.appendChild(label);
-                } else if (obj.glbUrl) {
-                    // Si hay URL directa (ej. Poly Pizza CDN), usarla directamente
-                    el.setAttribute('gltf-model', obj.glbUrl);
                 } else {
-                    el.setAttribute('gltf-model', `#${obj.modelId}`);
+                    const placeholder = crearPlaceholderModelo3D(obj);
+                    el.appendChild(placeholder);
+                    const modelSource = obj.glbUrl || (obj.modelId ? `#${obj.modelId}` : null);
+                    if (modelSource) {
+                        const model = document.createElement('a-entity');
+                        model.setAttribute('gltf-model', modelSource);
+                        model.addEventListener('model-loaded', () => placeholder.setAttribute('visible', 'false'));
+                        model.addEventListener('model-error', () => placeholder.setAttribute('visible', 'true'));
+                        el.appendChild(model);
+                    }
                 }
             }
             if (guiasARVisibles) {
@@ -7015,6 +7090,7 @@
             registrarEstadoHistorial('Cambiar anclaje AR');
             const nuevoAnclaje = document.getElementById('select-ar-anchor').value;
             entidadSeleccionada.arAnchor = nuevoAnclaje;
+            sincronizarContenidoConTarget(entidadSeleccionada, nuevoAnclaje, { force: true });
             
             let nombreAnclaje = '📍 Mesa / Escenario Base (Hit Test)';
             if (nuevoAnclaje !== 'base') {
@@ -7028,6 +7104,8 @@
             
             mostrarNotificacion(`🔗 Anclaje AR actualizado: ${nombreAnclaje}`, "success");
             
+            renderizarEntidad3D(entidadSeleccionada);
+            seleccionarObjeto(entidadSeleccionada);
             renderOutliner();
             marcarCambiosSinGuardar();
             actualizarEstadoInspectorObjeto(entidadSeleccionada);
