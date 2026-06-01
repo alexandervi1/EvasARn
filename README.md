@@ -75,7 +75,7 @@ mcpBlender/
 Primera instalacion despues de clonar:
 
 ```powershell
-cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender
+cd C:\Users\ALEXANDER VILLALVA\Desktop\EvasARn
 python -m venv moby_studio\venv
 .\moby_studio\venv\Scripts\python.exe -m pip install --upgrade pip
 .\moby_studio\venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -84,7 +84,7 @@ python -m venv moby_studio\venv
 Desde PowerShell:
 
 ```powershell
-cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender\moby_studio
+cd C:\Users\ALEXANDER VILLALVA\Desktop\EvasARn\moby_studio
 .\venv\Scripts\python.exe lanzador_ar.py
 ```
 
