@@ -6,9 +6,7 @@ import socket
 import http.server
 import socketserver
 import json
-import urllib.request
 import urllib.parse
-import urllib.error
 
 import base64
 import subprocess
@@ -385,114 +383,6 @@ def get_local_ip():
 
     return "127.0.0.1"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PIPELINE DE VISIÓN: Gemma4:e2b Multimodal (ve la imagen directamente)
-# ─────────────────────────────────────────────────────────────────────────────
-# Gemma4:e2b se usa como vision principal porque puede leer objetos, texto e interfaces.
-#  - Gemma4:e2b ve la imagen completa y la explica con contexto Docker educativo
-
-SYSTEM_PROMPT_DOCKER = """Eres Moby, la mascota oficial de Docker — una ballena simpática, didáctica y entusiasta.
-Tu misión es analizar imágenes del entorno real o de pantallas de computadora y explicar Docker de forma pedagógica.
-
-Reglas:
-- Responde SIEMPRE en español.
-- Máximo 3 oraciones cortas y claras.
-- Si ves objetos físicos (laptop, teclado, ratón, taza, cables, pantalla, teléfono): haz una analogía Docker creativa con cada objeto.
-- Si ves interfaces de software (Docker Desktop, terminal, dashboard, código, navegador, contenedores corriendo): explica lo que ves de forma educativa y menciona conceptos Docker relevantes (imagen, contenedor, volumen, red, compose, registry, Dockerfile).
-- Si ves una terminal con comandos docker: lee los comandos visibles y explica qué hacen.
-- Si ves Docker Desktop: describe el estado de los contenedores visibles y explica qué significa cada sección.
-- Si la imagen está borrosa o vacía: invita al usuario a enfocar la cámara hacia algo relacionado con Docker o computación.
-- Nunca menciones que eres una IA o un modelo de lenguaje. Eres Moby, la ballena.
-- Usa 1 emoji por respuesta máximo. Preferir 🐳."""
-
-def query_gemma_vision(base64_image_data: str) -> str:
-    """
-    Pipeline de visión: envía la imagen directamente a Gemma4:e2b
-    (modelo multimodal local via Ollama) para análisis visual completo.
-    Funciona con objetos físicos E interfaces de computadora (Docker Desktop,
-    terminales, código, dashboards).
-    """
-    # Limpiar prefijo data URI si existe
-    if "," in base64_image_data:
-        base64_image_data = base64_image_data.split(",")[1]
-
-    # Asegurar padding correcto
-    missing_padding = len(base64_image_data) % 4
-    if missing_padding:
-        base64_image_data += '=' * (4 - missing_padding)
-
-    print("[GEMMA VISION] Enviando imagen a gemma4:e2b para análisis multimodal...")
-
-    try:
-        url_ollama = "http://localhost:11434/api/chat"
-        payload = {
-            "model": "gemma4:e2b",
-            "stream": False,
-            "think": False,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": SYSTEM_PROMPT_DOCKER + "\n\nAnaliza esta imagen y responde como Moby:",
-                    "images": [base64_image_data]
-                }
-            ],
-            "options": {
-                "temperature": 0.7,
-                "top_p": 0.9,
-                "num_predict": 700
-            }
-        }
-
-        req = urllib.request.Request(
-            url_ollama,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-
-        with urllib.request.urlopen(req, timeout=180) as response:
-            res_data = json.loads(response.read().decode("utf-8"))
-            message = res_data.get("message", {})
-            content = (
-                message.get("content", "")
-                or res_data.get("response", "")
-                or message.get("thinking", "")
-            ).strip()
-            if content:
-                print(f"[GEMMA VISION] Análisis completado: {len(content)} caracteres.")
-                return content
-            return None
-
-    except urllib.error.HTTPError as e:
-        try:
-            detail = e.read().decode("utf-8", errors="replace")
-        except Exception:
-            detail = str(e)
-        print(f"[GEMMA VISION] HTTP {e.code}: {detail}")
-        return None
-    except Exception as e:
-        print(f"[GEMMA VISION] Error: {str(e)}")
-        return None
-
-
-def analizar_vision(base64_image_data: str) -> str:
-    """
-    Pipeline de visión usando Gemma4:e2b (multimodal).
-    Si Ollama no está disponible, devuelve un mensaje de ayuda claro.
-    La vision local anterior fue eliminada; Gemma puede leer interfaces y explicar contexto.
-    """
-    resultado = query_gemma_vision(base64_image_data)
-    if resultado:
-        return resultado
-
-    print("[VISION] Gemma4:e2b no disponible. Ollama no está corriendo o el modelo no está descargado.")
-    return (
-        "¡Ups! Mi cerebro de visión no está activo. "
-        "Asegúrate de que Ollama esté corriendo y de haber descargado el modelo "
-        "con: ollama pull gemma4:e2b 🐳"
-    )
-
-
 class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(200)
@@ -502,45 +392,7 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        if self.path == '/api/vision':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            
-            try:
-                # 1. Leer JSON del cliente
-                data = json.loads(post_data.decode('utf-8'))
-                image_base64 = data.get("image")
-                
-                if not image_base64:
-                    self.send_response(400)
-                    self.send_header('Content-Type', 'application/json')
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.end_headers()
-                    response_body = json.dumps({"error": "Falta la imagen para analizar."})
-                    self.wfile.write(response_body.encode('utf-8'))
-                    return
-
-                # 2. Ejecutar pipeline de visión: Gemma4:e2b multimodal via Ollama
-                print("[VISION] Iniciando pipeline de visión inteligente...")
-                analisis = analizar_vision(image_base64)
-                print("[VISION] Análisis completado.")
-
-                # 3. Enviar Respuesta
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({"response": analisis})
-                self.wfile.write(response_body.encode('utf-8'))
-                
-            except Exception as e:
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                response_body = json.dumps({"error": f"Falla en el procesamiento de visión: {str(e)}"})
-                self.wfile.write(response_body.encode('utf-8'))
-        elif self.path.startswith('/api/save-layout'):
+        if self.path.startswith('/api/save-layout'):
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             

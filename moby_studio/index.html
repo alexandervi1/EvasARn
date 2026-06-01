@@ -850,85 +850,6 @@
             transform: translateY(0);
         }
 
-        /* Animación de Escáner con tarjeta de estado */
-        .scanner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(to bottom, rgba(0, 243, 255, 0.8), rgba(0, 243, 255, 0));
-            box-shadow: 0 0 20px #00f3ff, 0 0 40px #0284c7;
-            z-index: 50;
-            pointer-events: none;
-            animation: scan-sweep 2.2s ease-in-out infinite;
-        }
-
-        /* Tarjeta de estado visible durante el análisis */
-        /* Flash de cámara */
-        .camera-flash {
-            position: fixed;
-            inset: 0;
-            background: white;
-            z-index: 999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.05s;
-        }
-        .camera-flash.fire {
-            opacity: 1;
-        }
-
-        /* Panel de preview de foto capturada */
-        .photo-preview-panel {
-            position: absolute;
-            bottom: 85px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 80;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            pointer-events: none;
-        }
-        .photo-preview-img {
-            width: 160px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 2px solid rgba(0,243,255,0.7);
-            box-shadow: 0 0 18px rgba(0,243,255,0.4), 0 4px 20px rgba(0,0,0,0.6);
-        }
-        .photo-preview-label {
-            background: rgba(0,0,0,0.8);
-            border: 1px solid rgba(0,243,255,0.4);
-            border-radius: 20px;
-            padding: 5px 14px;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            backdrop-filter: blur(8px);
-        }
-        .photo-preview-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: #00f3ff;
-            box-shadow: 0 0 6px #00f3ff;
-            animation: dot-blink 0.9s ease-in-out infinite;
-        }
-        .photo-preview-text {
-            color: #e0f2fe;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        @keyframes dot-blink {
-            0%, 100% { opacity: 1; } 50% { opacity: 0.15; }
-        }
-        @keyframes preview-in {
-            from { opacity: 0; transform: translateX(-50%) scale(0.85); }
-            to   { opacity: 1; transform: translateX(-50%) scale(1); }
-        }
         @keyframes scan-sweep {
             0% { top: 0%; opacity: 0.3; }
             50% { top: 100%; opacity: 1; }
@@ -1483,19 +1404,6 @@
     <div id="ar-detection-pill" class="ar-detection-pill">Target AR detectado</div>
     <div id="viewer-toast-stack" class="viewer-toast-stack" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Flash de cámara -->
-    <div id="camera-flash" class="camera-flash"></div>
-    <!-- Animación de Escáner de Radar Holográfico -->
-    <div id="scanner-overlay" class="scanner-overlay" style="display: none;"></div>
-    <!-- Preview de foto capturada + estado de envío a Gemma4 -->
-    <div id="photo-preview-panel" class="photo-preview-panel">
-        <img id="photo-preview-img" class="photo-preview-img" src="" alt="Foto capturada" />
-        <div class="photo-preview-label">
-            <div class="photo-preview-dot"></div>
-            <span class="photo-preview-text" id="photo-preview-text">Enviando a Gemma4...</span>
-        </div>
-    </div>
-
     <!-- Indicadores de Radar Estilo Pokémon Go (Para orientar al usuario hacia Moby) -->
     <div id="radar-left" class="radar-arrow radar-left" style="display: none;">
         <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
@@ -1580,20 +1488,12 @@
             <div class="dialogue-box">
                 <span class="speaker-tag" id="speaker-label">Moby (Ballena)</span>
                 <p class="dialogue-text" id="dialogue-display">
-                    Activa la cámara RA y apunta al target físico entrenado. También puedes analizar la cámara con visión IA o hacer una pregunta por voz.
+                    Activa la cámara RA y apunta al target físico entrenado. El contenido aparecerá cuando MindAR detecte la imagen publicada.
                 </p>
             </div>
 
             <!-- Entrada de Texto y Controles -->
             <div style="display: flex; flex-direction: column; gap: 8px; pointer-events: auto;">
-                
-                <!-- Acciones rápidas útiles para el visor final -->
-                <div class="quick-actions">
-                    <button type="button" class="btn-action" id="btn-scan" onclick="escanearEntorno()" title="Analizar la imagen actual de la cámara con visión IA">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        Analizar Cámara
-                    </button>
-                </div>
 
                 <form class="chat-form" id="chat-form" onsubmit="enviarPregunta(event)">
                     <!-- Botón de Grabación por Voz (STT) -->
@@ -1631,10 +1531,7 @@
     </div>
 
     <div class="mobile-action-dock" aria-label="Acciones AR">
-        <button type="button" class="dock-btn primary" onclick="escanearEntorno()" title="Analizar cámara">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 18v4M4 12h4M16 12h4"/></svg>
-        </button>
-        <button type="button" class="dock-btn" onclick="togglePresentationMode()" title="Modo presentación">
+        <button type="button" class="dock-btn primary" onclick="togglePresentationMode()" title="Modo presentación">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
         </button>
         <button type="button" class="dock-btn" onclick="abrirManualVisor()" title="Manual de uso">
@@ -1684,15 +1581,11 @@
                     <p>Cuando MindAR detecta el target, el contenido anclado aparece sobre la imagen. Usa los controles flotantes para acercar, alejar o ajustar escala durante la prueba.</p>
                 </section>
                 <section class="help-card">
-                    <h3>5. Vision IA opcional</h3>
-                    <p>Analizar Camara envia un fotograma al servicio de vision local. Si ese servicio no responde, el tracking AR sigue funcionando; solo falla el analisis inteligente.</p>
-                </section>
-                <section class="help-card">
-                    <h3>6. Modo presentacion</h3>
+                    <h3>5. Modo presentacion</h3>
                     <p>Presentar oculta la interfaz para dejar limpia la demostracion. Vuelve a presionarlo para recuperar botones, chat y estado.</p>
                 </section>
                 <section class="help-card">
-                    <h3>7. Preguntas y voz</h3>
+                    <h3>6. Preguntas y voz</h3>
                     <p>Puedes escribir o dictar preguntas sobre la escena. La respuesta por voz se activa con el checkbox inferior y depende del navegador.</p>
                 </section>
                 <section class="help-card">
@@ -1701,7 +1594,6 @@
                         <li>Sin camara: revisa HTTPS, permisos y que otro programa no la tenga ocupada.</li>
                         <li>No detecta: valida que el `.mind` corresponda a la imagen fisica.</li>
                         <li>Se pierde el tracking: mejora luz, distancia y estabilidad del telefono.</li>
-                        <li>IA no conecta: prueba primero la experiencia AR sin Analizar Camara.</li>
                     </ul>
                 </section>
             </div>
@@ -1822,7 +1714,7 @@
 
     </a-scene>
 
-    <!-- Script de interactividad, voz, vision IA y visor WebAR -->
+    <!-- Script de interactividad, voz y visor WebAR -->
     <script>
         // Consola de QA opcional: visible solo con ?debugConsole=1.
         (function() {
@@ -1916,13 +1808,6 @@
                 this.el.object3D.lookAt(this.cameraWorldPos);
             }
         });
-
-        // API Local de Ollama
-        const isProd = window.location.hostname.includes("alexandervillalva.uk");
-        const OLLAMA_API_URL = isProd 
-            ? "https://ollama.alexandervillalva.uk/api/generate" 
-            : "http://localhost:11434/api/generate";
-        const OLLAMA_MODEL = "qwen"; // qwen o deepseek
 
         const elInput = document.getElementById("chat-input");
         const elDisplay = document.getElementById("dialogue-display");
@@ -2155,22 +2040,10 @@
                     speakerLabel.innerText = "Moby (Ballena)";
                     setMobileClientState("AR listo");
                     break;
-                case 'capturing':
-                    speakerLabel.innerText = "📸 Capturando";
-                    setMobileClientState("Capturando");
-                    dialogueDisplay.innerHTML = `<span style="color: #00f3ff;">[Captura]</span> Enfocando visor y tomando captura de pantalla real...`;
-                    break;
-                case 'gemma_vision':
-                    speakerLabel.innerText = "🧠 Gemma4 Vision";
-                    setMobileClientState("Analizando con IA");
-                    dialogueDisplay.innerHTML = `<span style="color: #00f3ff; font-weight: bold;">[Gemma4:e2b]</span> Analizando la imagen con visión IA local... la primera carga puede tardar.`;
-                    laser.classList.add('active');
-                    panel.classList.add('hud-thinking');
-                    break;
-                case 'ollama_reasoning':
-                    speakerLabel.innerText = "🧠 Razonamiento LLM";
-                    setMobileClientState("Pensando");
-                    dialogueDisplay.innerHTML = `<span style="color: #eab308; font-weight: bold;">[Ollama]</span> Pensando respuesta Docker en el servidor local...`;
+                case 'thinking':
+                    speakerLabel.innerText = "Asistente del visor";
+                    setMobileClientState("Preparando respuesta");
+                    dialogueDisplay.innerHTML = `<span style="color: #eab308; font-weight: bold;">[Visor]</span> Preparando una respuesta local sobre la experiencia AR...`;
                     panel.classList.add('hud-thinking');
                     break;
                 case 'speaking':
@@ -2265,7 +2138,7 @@
                 elMicBtn.classList.add("recording");
                 elInput.placeholder = "🎤 Escuchando... habla ahora";
                 elInput.value = ""; // Limpiar para nueva entrada
-                escribirTexto("Te estoy escuchando con atención... ¡Háblame sobre Docker! 🐳🎙️", 20);
+                escribirTexto("Te estoy escuchando. Pregunta sobre la experiencia AR o el target.", 20);
                 
                 // Moby reacciona físicamente balanceándose más rápido denotando escucha activa
                 if (modeloActivo === "defecto") {
@@ -2353,7 +2226,7 @@
         function resetMicButton() {
             recording = false;
             elMicBtn.classList.remove("recording");
-            elInput.placeholder = "Pregúntame sobre imágenes, contenedores, volúmenes...";
+            elInput.placeholder = "Pregunta sobre la experiencia AR...";
         }
 
         // --- GESTIÓN DE CÁMARA PARA REALIDAD AUMENTADA REAL ---
@@ -2961,43 +2834,6 @@
             }, 1600);
         }
 
-        // Filtro híbrido: validador léxico del cliente para mantener el tema 100% sobre Docker
-        function esTematicaDockerValida(texto) {
-            const t = texto.toLowerCase();
-            
-            // Palabras clave requeridas de tecnología/infraestructura
-            const palabrasClave = [
-                "docker", "contenedor", "imagen", "volume", "compose", "kubernetes", "k8s", 
-                "devops", "despliegue", "deploy", "server", "servidor", "caos", "error", 
-                "dependencia", "port", "puerto", "moby", "ballena", "barco", "buque", "carga",
-                "virtual", "hola", "quién eres", "quien eres", "saludo", "presentación", "presentacion",
-                "ayuda", "ayúdame", "duda", "pregunta"
-            ];
-            
-            // Palabras explícitamente excluidas (fuera de foco)
-            const palabrasExcluidas = [
-                "receta", "cocina", "pizza", "comida", "futbol", "fútbol", "deporte", "chiste", 
-                "musica", "música", "canción", "cantante", "película", "cine", "amor", "clima",
-                "tiempo", "juego", "videojuego", "política", "politica", "historia", "geografía",
-                "matemáticas", "química", "física"
-            ];
-            
-            // 1. Si contiene alguna palabra explícitamente excluida, es inválido
-            for (const p of palabrasExcluidas) {
-                if (t.includes(p)) return false;
-            }
-            
-            // 2. Si contiene al menos una palabra clave, es válido
-            for (const c of palabrasClave) {
-                if (t.includes(c)) return true;
-            }
-            
-            // 3. Saludos y frases ultra cortas de cortesía son válidas
-            if (t.length < 15) return true;
-            
-            return false;
-        }
-
         async function enviarPregunta(event) {
             if (event) event.preventDefault();
             
@@ -3009,26 +2845,10 @@
             elSubmitBtn.disabled = true;
             elInput.value = "";
             
-            // Estado: Capturando / Iniciando
-            setInferenceState('ollama_reasoning');
+            setInferenceState('thinking');
             
-            // --- VALIDAR TEMA STRICTLY DOCKER ---
-            if (!esTematicaDockerValida(pregunta)) {
-                const declinacion = "¡Ups! Como la ballena mascota de Docker, mi cerebro solo tiene espacio para contenedores y barcos de carga. 🐳💙 ¡Pregúntame lo que quieras sobre Docker, imágenes, volúmenes o Kubernetes!";
-                escribirTexto(declinacion, 15);
-                hablar("Ups, como la ballena de Docker, mi cerebro solo tiene espacio para contenedores y barcos.");
-                
-                // Desbloquear controles inmediatamente y salir sin llamar al LLM
-                setTimeout(() => {
-                    elInput.disabled = false;
-                    elSubmitBtn.disabled = false;
-                    elInput.focus();
-                }, 1000);
-                return;
-            }
-
-            escribirTexto("Analizando tu consulta sobre Docker... 🐳💭", 30);
-            hablar("Analizando tu consulta");
+            escribirTexto("Revisando la experiencia AR...", 30);
+            hablar("Revisando la experiencia AR");
 
             // --- DETECTOR Y ENRUTADOR DE METÁFORAS VISUALES ---
             const queryLower = pregunta.toLowerCase();
@@ -3046,34 +2866,9 @@
                 animarMoby();
             }
 
-            // --- RESTRICCIÓN OBLIGATORIA DEL TEMA: SOLO DOCKER ---
-            const promptMoby = `Eres Moby, la ballena mascota oficial de Docker. Responde de forma muy breve (máximo 2 oraciones, de manera simplificada y alegre).
-            IMPORTANTE: Tu conocimiento está estrictamente limitado a Docker, contenedores, virtualización, imágenes, volúmenes y DevOps.
-            Si la siguiente pregunta de usuario NO está relacionada directamente con Docker, contenedores o infraestructura, debes declinar responder de forma extremadamente simpática y amigable. Debes decir que, como mascota de Docker, tu cerebro solo tiene contenedores y barcos, e invitar al usuario a preguntarte sobre Docker.
-            Pregunta del usuario: ${pregunta}`;
-
             try {
-                const response = await fetch(OLLAMA_API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: OLLAMA_MODEL,
-                        prompt: promptMoby,
-                        stream: false
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error en API de Ollama: ${response.status}`);
-                }
-
-                const data = await response.json();
-                let respuestaMoby = data.response || "¡Lo siento! No pude procesar tu respuesta en este momento.";
-                
-                // Limpiar la respuesta de posibles formatos Markdown (**negrita**, *cursiva*, etc.)
-                respuestaMoby = limpiarMarkdown(respuestaMoby);
+                await new Promise(resolve => setTimeout(resolve, 220));
+                let respuestaMoby = "El visor ya no usa IA externa. Para probar la escena, activa la cámara RA, apunta al target físico y verifica que el contenido aparezca anclado.";
                 
                 // Mostrar respuesta y hablarla en voz alta
                 setInferenceState('speaking');
@@ -3083,9 +2878,9 @@
             } catch (error) {
                 console.error(error);
                 setInferenceState('idle');
-                const msgError = "¡Oh no! Parece que tengo problemas para conectarme a mi motor local de Inteligencia Artificial (Ollama). Por favor, asegúrate de tener Ollama activo en el puerto 11434 con CORS habilitado. 🐳🔌";
+                const msgError = "No pude procesar la pregunta localmente.";
                 escribirTexto(msgError, 15);
-                hablar("Oh no, tengo un error de conexión.");
+                hablar("No pude procesar la pregunta.");
             } finally {
                 // Desbloquear controles de UI
                 elInput.disabled = false;
@@ -3799,137 +3594,6 @@
             });
 
             inicializarEventosInteractivos();
-        }
-
-        // --- FUNCIÓN DE ESCANEO DE VISIÓN COMPUTACIONAL (GEMINI VISION) ---
-        function mostrarEscanerAnimacion(active) {
-            const scanner = document.getElementById('scanner-overlay');
-            scanner.style.display = active ? 'block' : 'none';
-        }
-
-        // Muestra/oculta el panel de preview con la foto capturada
-        function mostrarFotoPreview(base64, label) {
-            const panel = document.getElementById('photo-preview-panel');
-            const img   = document.getElementById('photo-preview-img');
-            const txt   = document.getElementById('photo-preview-text');
-            if (base64) {
-                img.src = base64;
-                if (txt) txt.textContent = label || 'Enviando a Gemma4...';
-                panel.style.display = 'flex';
-                panel.style.animation = 'preview-in 0.3s ease';
-            } else {
-                panel.style.display = 'none';
-                img.src = '';
-            }
-        }
-
-        // Dispara el flash blanco de cámara
-        function dispararFlash() {
-            const flash = document.getElementById('camera-flash');
-            flash.classList.add('fire');
-            setTimeout(() => flash.classList.remove('fire'), 180);
-        }
-
-        async function escanearEntorno() {
-            feedbackMovil(24);
-            const video   = document.getElementById('camera-stream');
-            const btnScan = document.getElementById('btn-scan');
-
-            if (!cameraStream) {
-                escribirTexto('¡Activa primero la Cámara RA para usar la Visión IA! 🐳📸', 15);
-                hablar('Activa primero la cámara.');
-                return;
-            }
-
-            try {
-                btnScan.disabled = true;
-                setInferenceState('capturing');
-
-                // ── PASO 1: Tomar la foto ──────────────────────────────────
-                dispararFlash();                          // flash blanco visual
-                mostrarEscanerAnimacion(true);             // barra de scan
-
-                const canvas = document.createElement('canvas');
-                canvas.width  = video.videoWidth  || 1280;
-                canvas.height = video.videoHeight || 720;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    throw new Error('No se pudo preparar el canvas de captura.');
-                }
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const base64Image = canvas.toDataURL('image/jpeg', 0.90);
-
-                // Mostrar preview de la foto al usuario
-                mostrarFotoPreview(base64Image, '📤 Enviando a Gemma4 Vision...');
-                mostrarEscanerAnimacion(false);
-                setInferenceState('gemma_vision');
-
-                // ── PASO 2: Enviar foto a Gemma4 ──────────────────────────
-                const controller = new AbortController();
-                const timeoutId  = setTimeout(() => controller.abort(), 180000);
-
-                let response;
-                try {
-                    response = await fetch('/api/vision', {
-                        method:  'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body:    JSON.stringify({ image: base64Image }),
-                        signal:  controller.signal
-                    });
-                } finally {
-                    clearTimeout(timeoutId);
-                }
-
-                let data = {};
-                try {
-                    data = await response.json();
-                } catch (jsonErr) {
-                    throw new Error(`Respuesta inválida del servidor de visión (${response.status}).`);
-                }
-
-                if (!response.ok) {
-                    throw new Error(data.error || `Servidor de visión respondió HTTP ${response.status}.`);
-                }
-
-                // ── PASO 3: Mostrar resultado ──────────────────────────
-                mostrarFotoPreview(null);              // ocultar preview
-
-                if (data.error) {
-                    setInferenceState('idle');
-                    escribirTexto(data.error, 15);
-                    hablar('No pude analizar la imagen.');
-                } else if (data.response) {
-                    hacerSaltarMoby();
-                    const respuestaLimpia = limpiarMarkdown(data.response);
-                    setInferenceState('speaking');
-                    escribirTexto(respuestaLimpia, 15);
-                    hablar(respuestaLimpia);
-                }
-
-            } catch (err) {
-                console.error('Error en visión IA:', err);
-                setInferenceState('idle');
-                mostrarFotoPreview(null);
-                mostrarEscanerAnimacion(false);
-                if (err.name === 'AbortError') {
-                    escribirTexto('⏱️ Tiempo agotado. Verifica que Ollama esté corriendo con gemma4:e2b; la primera carga puede tardar varios minutos. 🐳', 15);
-                } else if (err.message && err.message.includes('HTTP')) {
-                    escribirTexto(`Error del servidor de visión: ${err.message}`, 15);
-                } else if (err instanceof TypeError) {
-                    escribirTexto('No pude conectar con /api/vision. Verifica que el servidor Python esté corriendo y que el celular use la misma URL/túnel del servidor. 🐳🔌', 15);
-                } else {
-                    escribirTexto(`Error en visión IA: ${err.message || 'fallo desconocido'}`, 15);
-                }
-                hablar('No pude conectar con el servidor de visión.');
-            } finally {
-                btnScan.disabled = false;
-                setTimeout(() => {
-                    const speakerLbl = document.getElementById('speaker-label');
-                    if (speakerLbl && speakerLbl.innerText.includes('Hablando')) {
-                        setInferenceState('idle');
-                    }
-                }, 8000);
-            }
         }
 
         // Iniciar carga del escenario dinámico al cargar la página

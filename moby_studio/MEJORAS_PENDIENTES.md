@@ -6,10 +6,7 @@ Este documento deja el contexto actual del proyecto para poder continuar aunque 
 
 Continuar el proyecto `mcpBlender / Moby Studio` desde este contexto:
 
-Estamos convirtiendo Moby Studio en un editor y visor WebAR profesional tipo Vuforia, pero usando MindAR en navegador. La decision tecnica actual es separar claramente dos sistemas:
-
-- El AR real y obligatorio funciona con MindAR: imagen fisica entrenada, archivo `.mind`, `mindTargetIndex` y contenido anclado al target.
-- La vision IA con Ollama/Gemma (`/api/vision`) es solo una herramienta opcional de "Analizar Camara". No debe bloquear publicacion, tracking ni experiencia AR.
+Estamos convirtiendo Moby Studio en un editor y visor WebAR profesional tipo Vuforia, pero usando MindAR en navegador. El AR real y obligatorio funciona con MindAR: imagen fisica entrenada, archivo `.mind`, `mindTargetIndex` y contenido anclado al target.
 
 No volver al flujo antiguo de QR/BarcodeDetector/simulacion como sistema principal. El acceso al visor debe resolverse con URL HTTPS o instrucciones de publicacion, no con QR dentro del runtime.
 
@@ -19,8 +16,6 @@ Estado actual importante:
 - `index.html` ya esta limpiado para presentarse como visor WebAR/MindAR.
 - Se oculto la consola debug salvo `?debugConsole=1`.
 - El simulador visual de marcadores solo aparece con `?debugMarkers=1`.
-- `/api/vision` ya fue corregido para `gemma4:e2b` usando `"think": false`.
-- `localhost:8000/api/vision` y el tunel Cloudflare funcionaron despues del arreglo.
 - El servidor se ejecuta con `moby_studio/venv/Scripts/python.exe lanzador_ar.py` desde la carpeta `moby_studio`.
 
 Lo siguiente que toca hacer:
@@ -39,15 +34,10 @@ Lo siguiente que toca hacer:
    - Probar en `index.html` por localhost y Cloudflare HTTPS.
 
 3. Refinar publicacion profesional.
-   - La publicacion debe validar MindAR, no vision IA.
+   - La publicacion debe validar MindAR y recursos reales.
    - Generar entrega clara para cliente: target imprimible, URL, instrucciones y checklist.
 
-4. Mantener vision IA como modulo opcional.
-   - El boton "Analizar Camara" debe funcionar si Ollama esta activo.
-   - Si falla, mostrar error claro sin romper AR.
-   - No mezclar vision IA con deteccion del target.
-
-5. Limpiar legado restante.
+4. Limpiar legado restante.
    - Evitar textos de Docker/demo si no aportan al visor final.
 
 Cuando retomes, empieza revisando:
@@ -66,14 +56,6 @@ Si el servidor no esta activo:
 cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender\moby_studio
 .\venv\Scripts\python.exe lanzador_ar.py
 ```
-
-Si la vision IA falla, comprobar primero:
-
-```powershell
-Invoke-WebRequest -UseBasicParsing http://localhost:11434/api/tags
-```
-
-Debe existir `gemma4:e2b`. El backend ya manda `"think": false`; no quitar eso.
 
 ## Contexto actual
 
@@ -105,7 +87,7 @@ La zona de trabajo del editor es el taller de composicion: ahi se colocan, escal
 - La mediateca tiene filtro visible `Targets`.
 - Los archivos `.mind` se asignan a un target seleccionado; no se agregan como objetos sueltos a la escena.
 - El buscador de Poly Pizza fue corregido para llamar a `buscarEnPolyPizza()`.
-- La API de vision fue ajustada con timeout mas largo y mas tokens para respuestas de Gemma/Ollama.
+- `/api/vision`, Ollama y Gemma fueron retirados del runtime porque no aportaban al tracking AR y generaban errores de uso.
 
 ## Pruebas realizadas
 
@@ -117,7 +99,6 @@ La zona de trabajo del editor es el taller de composicion: ahi se colocan, escal
 - El tunel Cloudflare usado en esta sesion fue `https://lodging-won-dressing-color.trycloudflare.com`.
 - `editor.html` por ese tunel respondio `200 OK`.
 - `index.html` por ese tunel respondio `200 OK`.
-- `/api/vision` funciono por localhost y por Cloudflare.
 
 Nota: los tuneles rapidos de Cloudflare pueden cambiar de URL al reiniciarse. Al retomar, verificar la URL activa antes de probar en telefono.
 

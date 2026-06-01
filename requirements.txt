@@ -1,2 +1,2 @@
 # Core runtime uses the Python standard library.
-# Optional external tools such as Blender and Ollama are documented in README.md.
+# Optional external tools such as Blender are documented in README.md.

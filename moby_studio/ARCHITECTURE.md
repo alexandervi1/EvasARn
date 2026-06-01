@@ -7,15 +7,12 @@ Este documento describe la arquitectura actual de Moby Studio segun el codigo ac
 ```mermaid
 flowchart TD
     Editor[editor.html\nEditor 3D + AR]
-    Client[index.html\nCliente movil AR + IA]
+    Client[index.html\nCliente movil AR]
     Server[lanzador_ar.py\nHTTP + API local]
     Output[(output/\nlayout + assets)]
     Projects[(projects/\nlayouts versionados)]
     Collab[(COLLAB_STATE\npresencia + locks)]
     Blender[Blender headless\nscripts/*.py]
-    Gemma[Gemma4:e2b vision\nvia Ollama]
-    Ollama[Ollama\nlocalhost:11434]
-
     Editor -->|fetch /api/save-layout?project&version| Server
     Editor -->|fetch /api/load-layout| Server
     Editor -->|fetch /api/list-projects| Server
@@ -23,13 +20,10 @@ flowchart TD
     Editor -->|fetch /api/list-assets| Server
     Editor -->|fetch /api/upload-media| Server
     Client -->|fetch output/layout.json| Output
-    Client -->|POST /api/vision| Server
     Server --> Output
     Server --> Projects
     Server --> Collab
     Server --> Blender
-    Server --> Gemma
-    Server --> Ollama
 ```
 
 ## 2. Frontend
@@ -92,7 +86,6 @@ Responsabilidades:
 - Mostrar contenido flotante para imagenes y videos.
 - Mostrar nodos OIRA generados desde layout.
 - Exponer controles compactos para telefono.
-- Capturar frames de camara para `/api/vision`.
 
 El cliente soporta:
 
@@ -114,7 +107,6 @@ Responsabilidades:
 - Subir y eliminar assets.
 - Listar assets con metadata.
 - Ejecutar scripts de Blender.
-- Procesar vision local con Gemma4:e2b via Ollama.
 
 Endpoints activos:
 
@@ -135,7 +127,6 @@ Endpoints activos:
 | `/api/delete-model?name=...` | POST | Elimina modelos. |
 | `/api/generate-model?script=...` | POST | Endpoint retirado; la generacion procedural fue eliminada. |
 | `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
-| `/api/vision` | POST | Procesa imagen base64 con Gemma4:e2b via Ollama. |
 
 ## 4. Persistencia
 

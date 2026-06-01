@@ -8,8 +8,6 @@ El objetivo actual es trabajar como un flujo tipo Vuforia, pero ejecutado en nav
 Crear target -> subir imagen fisica -> subir .mind -> agregar contenido -> anclar -> validar -> probar en telefono
 ```
 
-La vision IA con Ollama/Gemma es opcional. Sirve para el boton `Analizar Camara`, pero no participa en el tracking AR ni debe bloquear la publicacion.
-
 ## Estado Actual
 
 Implementado:
@@ -32,7 +30,6 @@ Implementado:
 - Gestion de proyectos con crear, duplicar, renombrar, archivar, restaurar y eliminar.
 - Visor simplificado: solo muestra controles necesarios para AR; chatbot y acciones extra se habilitan desde el editor.
 - Compresion Draco de modelos GLB usando Blender mediante `scripts/compress_model.py`.
-- Vision IA opcional mediante `/api/vision` con Ollama y `gemma4:e2b`.
 
 Retirado o no principal:
 
@@ -41,6 +38,7 @@ Retirado o no principal:
 - El `Banco 3D` ya no aparece como paso principal; queda como busqueda externa opcional desde `Importar GLB`.
 - La carpeta legacy de `dataset/` y vision local anterior ya no forma parte del flujo.
 - `/api/generate-model` queda retirado y responde como endpoint obsoleto.
+- `/api/vision`, Ollama y Gemma fueron retirados del runtime porque generaban errores y no aportaban al tracking AR.
 - QR, BarcodeDetector y simulaciones fueron retirados del flujo AR principal.
 - La compilacion local de `.mind` todavia esta pendiente; por ahora se suben archivos `.mind` ya generados.
 
@@ -99,7 +97,6 @@ Para probar en telefono se necesita una URL HTTPS. Puedes usar Cloudflare Tunnel
 Dependencias externas opcionales:
 
 - Blender: necesario solo para comprimir GLB con Draco desde `/api/compress-model`.
-- Ollama con `gemma4:e2b`: necesario solo para `Analizar Camara` y vision IA opcional.
 
 ## Flujo Recomendado
 
@@ -170,7 +167,6 @@ Reglas importantes:
 - Si hay varios targets, deben estar compilados dentro del mismo `.mind`.
 - Cada target usa `mindTargetIndex` para decidir que imagen del `.mind` lo activa.
 - El contenido se vincula al target con `arAnchor`.
-- La vision IA no reemplaza MindAR y no detecta targets.
 
 Estado de un target:
 
@@ -234,32 +230,6 @@ Caracteristicas:
 - Aviso de version remota disponible.
 - Sincronizacion al guardar, no edicion granular en tiempo real.
 
-## Vision IA Opcional
-
-`/api/vision` envia un frame base64 a Ollama:
-
-```text
-http://localhost:11434/api/chat
-```
-
-Modelo esperado:
-
-```text
-gemma4:e2b
-```
-
-Comprobar Ollama:
-
-```powershell
-Invoke-WebRequest -UseBasicParsing http://localhost:11434/api/tags
-```
-
-Si la vision IA falla:
-
-- El tracking MindAR debe seguir funcionando.
-- El visor solo debe mostrar error en `Analizar Camara`.
-- No se debe bloquear publicacion ni prueba AR.
-
 ## API Principal
 
 | Endpoint | Metodo | Uso |
@@ -284,7 +254,6 @@ Si la vision IA falla:
 | `/api/list-models` | GET | Lista modelos para compatibilidad. |
 | `/api/export-experience?name=...` | POST | Genera ZIP de experiencia. |
 | `/api/compress-model` | POST | Comprime GLB con Blender/Draco. |
-| `/api/vision` | POST | Analiza frame con Ollama/Gemma. |
 | `/api/generate-model?script=...` | POST | Retirado; generacion procedural eliminada. |
 | `/api/connection-info` | GET | Devuelve informacion de conexion local. |
 
@@ -364,8 +333,7 @@ Prioridad actual:
 2. Implementar asistente/compilador local de targets `.mind`.
 3. Refinar publicacion profesional para cliente.
 4. Validar experiencia en telefono por HTTPS.
-5. Mantener vision IA como modulo opcional controlado desde el editor.
-6. Limpiar compatibilidad OIRA interna restante.
+5. Limpiar compatibilidad OIRA interna restante.
 
 ## Documentacion Relacionada
 
