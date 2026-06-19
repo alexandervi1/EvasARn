@@ -1,38 +1,16 @@
-# Tutorial para usuarios primerizos
+# Tutorial de primeros pasos
 
-Este tutorial explica como crear una experiencia WebAR basica en Moby Studio usando una imagen fisica como target y contenido proyectado encima.
+Este tutorial crea una experiencia WebAR que reconoce una imagen fisica y muestra contenido asociado.
 
-## Que vas a crear
+## 1. Preparar el entorno
 
-Una escena donde la camara reconoce una imagen fisica, por ejemplo una tarjeta, etiqueta, poster o foto impresa, y muestra encima:
-
-- un modelo 3D;
-- una imagen;
-- un video;
-- o un rotulo informativo.
-
-## Antes de empezar
-
-Necesitas:
-
-1. Moby Studio corriendo en tu PC.
-2. Una imagen fisica que funcionara como target.
-3. Un archivo `.mind` generado para esa imagen.
-4. Un contenido para mostrar encima: imagen, video o modelo 3D.
-5. Un telefono con navegador moderno si quieres probar con camara real.
-
-Importante: Moby Studio usa MindAR. Eso significa que la camara no reconoce objetos genericos como "una PC" o "una mesa" por si sola. Reconoce imagenes entrenadas en un archivo `.mind`.
-
-## 1. Abrir Moby Studio
-
-Desde PowerShell:
+Desde la raiz del repositorio:
 
 ```powershell
-cd "C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender\moby_studio"
-.\venv\Scripts\python.exe lanzador_ar.py
+python moby_studio\lanzador_ar.py
 ```
 
-Abre el editor:
+Abre:
 
 ```text
 http://localhost:8000/editor.html
@@ -44,250 +22,199 @@ El visor final esta en:
 http://localhost:8000/index.html
 ```
 
-## 2. Crear un proyecto
+Al entrar desde la misma PC, el editor usa el perfil administrador local. En una conexion remota, inicia sesion o registra un usuario.
 
-1. Abre el editor.
-2. Usa el selector de proyecto si quieres crear o cambiar de proyecto.
-3. Guarda con frecuencia.
+## 2. Preparar el target
 
-Cada proyecto guarda su escena en:
+Necesitas dos archivos relacionados:
 
-```text
-moby_studio/projects/<nombre-del-proyecto>/layout.json
-```
+1. La imagen fisica que mostraras impresa o en otra pantalla.
+2. El archivo `.mind` generado a partir de esa imagen.
 
-El visor usa el layout activo publicado en:
+Moby Studio no compila `.mind` actualmente. Debes generarlo con una herramienta compatible con MindAR antes de configurar la escena.
 
-```text
-moby_studio/output/layout.json
-```
+Un buen target tiene detalle, contraste y rasgos no repetitivos. Evita imagenes borrosas, superficies lisas, patrones repetidos y reflejos fuertes.
 
-## 3. Crear un target AR
+## 3. Crear o seleccionar un proyecto
 
-Un target AR es la imagen que la camara debe reconocer.
+1. Abre `Gestionar proyectos` desde el engranaje de la barra izquierda.
+2. Crea un proyecto o selecciona uno existente.
+3. Cierra el gestor y confirma el nombre activo en la barra superior.
 
-Ejemplos de buenos targets:
-
-- una tarjeta con mucho detalle;
-- una portada;
-- una etiqueta con texto e imagen;
-- un poster;
-- una foto con contraste.
-
-Evita:
-
-- imagenes muy borrosas;
-- superficies lisas sin detalles;
-- patrones repetidos;
-- imagenes con reflejos fuertes;
-- objetos 3D sin una imagen plana clara.
-
-En el editor:
-
-1. Ve a `Crear`.
-2. Elige `Flujo AR` o `Marcador AR`.
-3. Selecciona el target creado.
-4. En el inspector o modal AR, sube la imagen fisica del target.
-
-## 4. Subir el archivo `.mind`
-
-El archivo `.mind` es el target compilado para MindAR.
-
-Por ahora Moby Studio no compila `.mind` localmente. Debes generarlo fuera de la app y luego subirlo.
-
-Cuando ya tengas el archivo:
-
-1. Selecciona el target en el editor.
-2. Busca `Target MindAR (.mind)`.
-3. Pulsa `Subir`.
-4. Selecciona tu archivo `.mind`.
-5. Verifica que el campo `mindTargetUrl` quede lleno.
-
-Si solo tienes un target, deja:
+El proyecto se guarda en:
 
 ```text
-mindTargetIndex = 0
+moby_studio/projects/<proyecto>/layout.json
 ```
 
-## 5. Caso con varios targets
+## 4. Elegir una plantilla
 
-Si quieres reconocer varias tarjetas, por ejemplo 12 tarjetas:
+Abre `Agregar contenido` en la barra izquierda. Las plantillas actuales son:
 
-1. Compila las 12 imagenes dentro de un solo archivo `.mind`.
-2. Crea 12 targets en Moby Studio.
-3. A todos les asignas el mismo `.mind`.
-4. A cada target le asignas un indice distinto:
+- `Marcador + Imagen`
+- `Marcador + Video`
+- `Marcador + Audio`
+- `Marcador + Modelo 3D`
+
+Cada plantilla crea un target y un contenido ya vinculado. Para empezar desde cero tambien puedes crear un `Marcador AR` y agregar recursos manualmente.
+
+## 5. Configurar el target
+
+En el modal de configuracion AR:
+
+1. Sube la imagen fisica del target.
+2. Sube el archivo `.mind` correspondiente.
+3. Deja `mindTargetIndex` en `0` si el `.mind` contiene una sola imagen.
+4. Comprueba que el resumen muestre el target y el archivo compilado.
+
+Para varios targets, compila todas las imagenes en un solo `.mind`, asigna ese mismo archivo a cada target y usa indices distintos:
 
 ```text
-Tarjeta 1  -> mindTargetIndex 0
-Tarjeta 2  -> mindTargetIndex 1
-Tarjeta 3  -> mindTargetIndex 2
-...
-Tarjeta 12 -> mindTargetIndex 11
+Target A -> mindTargetIndex 0
+Target B -> mindTargetIndex 1
+Target C -> mindTargetIndex 2
 ```
 
-No uses 12 archivos `.mind` distintos en la misma escena. MindAR usa un solo `.mind` por escena.
+El visor rechaza una escena que intente usar varios archivos `.mind` diferentes.
 
-## 6. Agregar contenido AR
+## 6. Agregar contenido
 
-Puedes agregar contenido desde `Crear` o desde la mediateca.
+Puedes subir el archivo desde el modal AR o desde `Recursos`.
 
-Tipos comunes:
+| Contenido | Formatos comunes |
+|---|---|
+| Modelo 3D | `.glb`, `.gltf` |
+| Imagen | `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` |
+| Video | `.mp4`, `.webm`, `.mov` |
+| Audio | `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac` |
 
-- Modelo 3D: `.glb` o `.gltf`.
-- Imagen: `.png`, `.jpg`, `.jpeg`, `.webp` o `.gif`.
-- Video: `.mp4`, `.webm` o `.mov`.
-- Nodo OIRA: rotulo o panel informativo dentro de la escena.
+Al usar la mediateca:
 
-Pasos:
+1. Sube el recurso.
+2. Filtra por su tipo si es necesario.
+3. Pulsa agregar para crear contenido o asignalo al objeto seleccionado.
+4. Para un `.mind`, selecciona primero el target y usa la accion de asignacion.
 
-1. Sube o selecciona el contenido.
-2. Agrégalo a la escena.
-3. Selecciona el contenido.
-4. En el inspector, busca la opcion de anclaje.
-5. Asigna el contenido al target correcto.
+Los `.mind` no se agregan como objetos visuales independientes.
 
-Si un contenido queda en `Mesa base`, aparecera como contenido no anclado. Para AR real debe estar anclado a un target.
+## 7. Revisar el anclaje
 
-## 7. Acomodar el holograma
+Selecciona el contenido en `Escena` y revisa el inspector derecho.
 
-En el lienzo central:
+- Si `arAnchor` apunta al target, el contenido aparecera cuando MindAR lo detecte.
+- Si aparece como `Mesa base`, no esta vinculado a un marcador.
+
+Las plantillas crean este vinculo automaticamente, pero debes revisarlo si mueves o reasignas contenido.
+
+## 8. Componer en el lienzo
+
+Usa el lienzo para ajustar el resultado relativo al target:
 
 1. Selecciona el contenido.
-2. Usa mover, rotar y escalar.
-3. Colocalo encima del target.
-4. Ajusta su altura para que no quede pegado a la imagen.
+2. Usa los controles de mover, rotar o escalar.
+3. Ajusta valores precisos desde el inspector.
+4. Usa el visor movil integrado como referencia de encuadre.
+5. Guarda cuando el resultado sea correcto.
 
-Recomendacion inicial:
+En pantallas estrechas, abre los paneles desde la barra lateral y cierralos al trabajar sobre el lienzo.
 
-- Para imagenes o videos, empieza con escala pequena.
-- Para modelos 3D, revisa que no sean demasiado grandes.
-- Guarda despues de ajustar.
+## 9. Particularidades por tipo
 
-## 8. Validar antes de publicar
+### Imagen y video
 
-Ve a `Publicar` y ejecuta la validacion.
+Ajusta ancho y alto del panel desde el inspector. Para video, revisa autoplay, loop, volumen y silencio. Los navegadores pueden exigir una interaccion antes de habilitar audio.
 
-La escena debe cumplir:
+### Audio
 
-1. Tener al menos un target.
-2. Cada target debe tener imagen fisica.
-3. Cada target debe tener archivo `.mind`.
-4. Todos los targets deben usar el mismo `.mind`.
-5. Los indices `mindTargetIndex` no deben repetirse.
-6. El contenido debe estar anclado a un target.
-7. Las imagenes/videos/modelos deben tener archivo asignado.
-8. El proyecto debe estar guardado.
+El visor crea un reproductor espacial con play/pausa y barras animadas. El audio se pausa cuando se pierde el target. Si autoplay es bloqueado, toca el reproductor.
 
-Si la validacion marca errores, corrígelos antes de abrir el visor.
+### Modelo 3D
 
-## 9. Probar en PC
+Prefiere GLB optimizados. Si Blender esta instalado, la mediateca permite comprimir GLB con Draco. Comprueba siempre la escala porque los modelos externos usan unidades diferentes.
 
-Guarda el proyecto y abre:
+## 10. Validar y guardar
 
-```text
-http://localhost:8000/index.html
-```
+Abre `Validar`. Una experiencia lista debe cumplir:
 
-Pulsa `Camara RA`.
+1. Existe al menos un target.
+2. Cada target tiene imagen fisica y `.mind`.
+3. Todos los targets usan el mismo `.mind`.
+4. Los indices no se repiten.
+5. Cada contenido AR esta anclado.
+6. Cada contenido multimedia tiene un archivo.
+7. El proyecto no tiene cambios pendientes de guardar.
 
-Si estas en la misma PC, `localhost` puede usar camara. Apunta la camara al target fisico o a la imagen mostrada en otra pantalla.
+Corrige los errores, guarda y vuelve a ejecutar la validacion.
 
-## 10. Probar en telefono
+## 11. Probar en la PC
 
-En telefono, la camara suele requerir HTTPS.
+1. Abre `http://localhost:8000/index.html`.
+2. Pulsa `Iniciar AR`.
+3. Concede acceso a la camara.
+4. Apunta al target impreso o mostrado en otro dispositivo.
 
-Usa Cloudflare Tunnel, ngrok u otra herramienta similar apuntando al puerto:
+El contenido aparece en `targetFound` y se oculta o pausa en `targetLost`.
 
-```text
-8000
-```
+## 12. Probar en telefono
 
-Luego abre la URL HTTPS en el telefono.
+La camara movil normalmente requiere HTTPS. Publica el puerto `8000` mediante un tunel HTTPS y abre en el telefono la ruta `/index.html`.
 
-Pasos:
+Comprueba:
 
-1. Abre la URL HTTPS del visor.
-2. Pulsa `Camara RA`.
-3. Acepta permisos de camara.
-4. Apunta al target fisico.
-5. Espera a que MindAR detecte la imagen.
+- permiso de camara;
+- carga del `.mind`;
+- iluminacion y reflejos;
+- indice correcto;
+- escala del contenido;
+- reproduccion de video o audio tras tocar la pantalla.
 
-Si no detecta:
+No uses una URL de tunel antigua: estas direcciones suelen cambiar al reiniciar el servicio.
 
-- mejora la luz;
-- evita reflejos;
-- aleja o acerca la camara;
-- revisa que el `.mind` corresponda a esa imagen;
-- confirma que el `mindTargetIndex` sea correcto;
-- confirma que todos los targets usen el mismo `.mind`.
+## 13. Transferir el proyecto a otra PC
 
-## 11. Ejemplo rapido: tarjeta con video
+1. Guarda el proyecto.
+2. Abre `Gestionar proyectos`.
+3. En `Transferir entre PCs`, pulsa `Exportar proyecto`.
+4. Lleva el ZIP a la otra PC.
+5. En la segunda instalacion, pulsa `Importar ZIP`.
+6. Indica otro nombre si ya existe un proyecto igual.
 
-Objetivo: al ver una tarjeta, aparece un video encima.
+El ZIP conserva el layout editable y los assets locales utilizados. Las URLs externas se conservan como referencias y requieren red en la PC de destino.
 
-1. Prepara la imagen de la tarjeta.
-2. Genera el archivo `.mind`.
-3. Crea un target en Moby Studio.
-4. Sube la imagen fisica al target.
-5. Sube el `.mind`.
-6. Sube el video `.mp4`.
-7. Agrega el video a la escena.
-8. Ancla el video al target.
-9. Ajusta posicion y escala.
-10. Guarda.
-11. Valida en `Publicar`.
-12. Abre `index.html` y prueba con la camara.
+## 14. Entregar una experiencia
 
-## 12. Ejemplo rapido: rotulo encima de una PC
+Usa `Exportar experiencia` cuando quieras un paquete para ejecucion, no para continuar editando. Antes de entregarlo:
 
-Objetivo: al mirar una imagen asociada a la PC, aparece un rotulo con especificaciones.
+1. valida y guarda;
+2. prueba el target real;
+3. revisa el ZIP exportado;
+4. confirma que el entorno final sirve los archivos por HTTPS;
+5. incluye el target fisico y las instrucciones para el usuario.
 
-1. Crea una etiqueta o imagen target para pegar cerca de la PC.
-2. Genera el `.mind` de esa etiqueta.
-3. Crea un target en Moby Studio.
-4. Sube la imagen de la etiqueta.
-5. Sube el `.mind`.
-6. Crea un nodo OIRA o una imagen con texto, por ejemplo:
+## Solucion de problemas
 
-```text
-PC Principal
-CPU: Ryzen 7
-RAM: 32 GB
-GPU: RTX
-Almacenamiento: 1 TB SSD
-```
+### El lienzo queda cargando
 
-7. Ancla el rotulo al target.
-8. Ajusta para que parezca colocado encima o al lado de la PC.
-9. Guarda y prueba desde el visor.
+- Abre la consola del navegador.
+- Confirma que A-Frame carga desde CDN.
+- Recarga sin cache.
+- Verifica que `editor.html` responda desde el servidor, no como archivo local.
 
-## Problemas comunes
+### El target no se detecta
 
-### La camara no abre en telefono
+- Confirma que `.mind` corresponde a la imagen mostrada.
+- Revisa `mindTargetIndex`.
+- Usa buena luz y evita reflejos.
+- Verifica que todos los targets compartan el mismo `.mind`.
 
-Usa HTTPS. En movil, HTTP normal suele bloquear la camara.
+### La camara no abre
 
-### El target no detecta
+- Concede permisos al navegador.
+- Usa `localhost` en la PC o HTTPS en el telefono.
+- Cierra otras aplicaciones que esten usando la camara.
 
-Revisa que el `.mind` fue generado desde la misma imagen fisica que estas mostrando.
+### El audio no inicia
 
-### Tengo varios targets y algunos no funcionan
-
-Todos deben estar dentro del mismo `.mind`. Luego usa `mindTargetIndex` diferente para cada uno.
-
-### El contenido aparece en el editor pero no en el visor
-
-Revisa que este anclado a un target y que el proyecto este guardado.
-
-### El video no se reproduce
-
-Prueba con `.mp4` optimizado para web. En algunos telefonos el autoplay puede depender de permisos o interaccion del usuario.
-
-## Flujo recomendado
-
-```text
-Crear target -> subir imagen fisica -> subir .mind -> agregar contenido -> anclar -> ajustar -> validar -> guardar -> probar en visor
-```
-
-Ese es el flujo principal para crear experiencias WebAR con Moby Studio.
+- Toca el reproductor AR.
+- Comprueba el volumen del objeto y del dispositivo.
+- Verifica que el formato sea compatible con el navegador.

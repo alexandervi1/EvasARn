@@ -1,181 +1,93 @@
 # Mejoras pendientes
 
-Este documento deja el contexto actual del proyecto para poder continuar aunque se cierre la sesion.
+Backlog vigente de Moby Studio. Este archivo contiene trabajo no implementado; las funciones terminadas se documentan en `README.md` y `ARCHITECTURE.md`.
 
-## Prompt para continuar despues
+## Prioridad 1: prueba AR real
 
-Continuar el proyecto `mcpBlender / Moby Studio` desde este contexto:
+- Ejecutar un ciclo completo con target impreso, `.mind` y cada tipo de contenido.
+- Probar imagen, video, audio y GLB en Android e iOS compatibles.
+- Medir tiempo de deteccion, estabilidad de `targetFound/targetLost` y consumo de memoria.
+- Verificar autoplay, recuperacion de audio y pausa al perder el target.
+- Definir una matriz de navegadores y dispositivos soportados.
 
-Estamos convirtiendo Moby Studio en un editor y visor WebAR profesional tipo Vuforia, pero usando MindAR en navegador. El AR real y obligatorio funciona con MindAR: imagen fisica entrenada, archivo `.mind`, `mindTargetIndex` y contenido anclado al target.
+## Prioridad 2: compilacion de targets
 
-No volver al flujo antiguo de QR/BarcodeDetector/simulacion como sistema principal. El acceso al visor debe resolverse con URL HTTPS o instrucciones de publicacion, no con QR dentro del runtime.
+- Integrar un asistente para compilar una o varias imagenes en un unico `.mind`.
+- Mostrar calidad estimada del target antes de compilar.
+- Mantener el orden de imagenes y asignar `mindTargetIndex` automaticamente.
+- Permitir recompilar sin romper las relaciones `arAnchor` existentes.
+- Documentar o empaquetar la dependencia de compilacion elegida.
 
-Estado actual importante:
+Hasta implementar este modulo, los `.mind` se generan externamente.
 
-- `editor.html` ya esta orientado a targets MindAR.
-- `index.html` ya esta limpiado para presentarse como visor WebAR/MindAR.
-- Se oculto la consola debug salvo `?debugConsole=1`.
-- El simulador visual de marcadores solo aparece con `?debugMarkers=1`.
-- El servidor se ejecuta con `moby_studio/venv/Scripts/python.exe lanzador_ar.py` desde la carpeta `moby_studio`.
+## Prioridad 3: publicacion y entrega
 
-Lo siguiente que toca hacer:
+- Generar una pagina de entrega con URL, target imprimible e instrucciones breves.
+- Validar automaticamente el ZIP exportado antes de ofrecer la descarga.
+- Añadir version y checksum de assets al manifiesto de experiencia.
+- Crear perfiles de publicacion para local, LAN y hosting HTTPS.
+- Añadir un checklist final probado en telefono.
 
-1. Mejorar la zona de trabajo del editor.
-   - El lienzo debe sentirse como taller de composicion AR.
-   - El target debe verse como superficie fisica de referencia.
-   - El contenido debe poder acomodarse claramente encima del target.
-   - Si un contenido no esta anclado a un target, debe verse como incompleto.
+## Prioridad 4: pruebas automatizadas
 
-2. Probar ciclo real con target.
-   - Subir imagen fisica.
-   - Compilar `.mind`.
-   - Subir `.mind`.
-   - Anclar contenido.
-   - Probar en `index.html` por localhost y Cloudflare HTTPS.
+- Extraer logica JavaScript critica a modulos comprobables.
+- Cubrir creacion de plantillas y relaciones target-contenido.
+- Probar auditoria de publicacion y reconstruccion del visor.
+- Añadir pruebas de API para proyectos, conflictos de version y assets.
+- Añadir round-trip de exportacion/importacion, conflictos de nombres y ZIP invalidos.
+- Ejecutar las verificaciones en CI.
 
-3. Refinar publicacion profesional.
-   - La publicacion debe validar MindAR y recursos reales.
-   - Generar entrega clara para cliente: target imprimible, URL, instrucciones y checklist.
+## Prioridad 5: colaboracion
 
-4. Limpiar legado restante.
-   - Evitar textos de Docker/demo si no aportan al visor final.
+- Sustituir polling por WebSocket si se necesita respuesta inmediata.
+- Transmitir operaciones o patches en lugar del layout completo.
+- Diseñar resolucion de conflictos por campo u operacion.
+- Mostrar cursores y seleccion remota en el lienzo.
+- Persistir auditoria de cambios si el producto pasa de uso local a equipos grandes.
 
-Cuando retomes, empieza revisando:
+La colaboracion actual por version y locks debe conservarse como fallback hasta que el reemplazo tenga pruebas de concurrencia.
+
+## Prioridad 6: seguridad y despliegue
+
+- Separar modo desarrollo local de modo servidor compartido.
+- Revisar roles y autorizacion de cada endpoint, no solo autenticacion visual.
+- Añadir sesiones seguras y almacenamiento de usuarios adecuado para despliegue publico.
+- Configurar limites de subida por tipo de asset y validar contenido, no solo extension.
+- Documentar reverse proxy, HTTPS, cabeceras y estrategia de backups.
+- Revisar dependencias CDN y ofrecer una opcion versionada/offline si es necesaria.
+
+## Prioridad 7: rendimiento y assets
+
+- Generar thumbnails de modelos, video y audio sin bloquear la mediateca.
+- Validar dimensiones, duracion, codecs y peso antes de publicar.
+- Añadir recomendaciones o conversion automatica para formatos moviles.
+- Medir escenas con varios targets y assets grandes.
+- Liberar recursos de audio/video y objetos Three.js al cambiar de proyecto.
+
+## Prioridad 8: limpieza tecnica
+
+- Renombrar internamente `stage.viewer.chatEnabled` y clases `chat-panel` a terminologia de narracion, manteniendo migracion de layouts anteriores.
+- Retirar textos y nombres heredados de demos Docker/OIRA donde no correspondan.
+- Reducir JavaScript y estilos embebidos mediante modulos sin alterar el despliegue simple.
+- Centralizar iconos, notificaciones y componentes repetidos.
+- Definir una migracion explicita para futuras versiones del layout.
+
+## Criterio para cerrar una mejora
+
+Una tarea se considera terminada cuando:
+
+1. funciona en editor y visor cuando corresponde;
+2. conserva proyectos existentes o incluye migracion;
+3. tiene validacion automatizada o un procedimiento reproducible;
+4. actualiza los Markdown afectados;
+5. no deja archivos de prueba en `output/`, `projects/` o `_archive/`.
+
+## Comandos de control
 
 ```powershell
+python -m py_compile moby_studio\lanzador_ar.py
+Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
+Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html
 git status --short
-python -m py_compile moby_studio/lanzador_ar.py
 git diff --check
-Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html
-Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
-```
-
-Si el servidor no esta activo:
-
-```powershell
-cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender\moby_studio
-.\venv\Scripts\python.exe lanzador_ar.py
-```
-
-## Contexto actual
-
-Moby Studio debe funcionar como un editor WebAR tipo Vuforia usando tracking por imagen entrenada con MindAR. El flujo principal ya no debe depender de QR, BarcodeDetector ni simulaciones falsas de deteccion.
-
-El flujo esperado es:
-
-1. En el editor se crea un target AR.
-2. El target tiene una imagen fisica imprimible.
-3. Esa imagen debe convertirse en un target entrenado `.mind`; la compilacion local queda como modulo pendiente.
-4. El `.mind` se sube al editor y se asigna al target.
-5. El contenido AR se ancla a ese target.
-6. En `index.html`, MindAR detecta la imagen real con la camara y muestra el contenido.
-
-La zona de trabajo del editor es el taller de composicion: ahi se colocan, escalan y rotan target y contenido. La deteccion real ocurre en el visor final, no en el lienzo del editor.
-
-## Estado implementado
-
-- `index.html` usa MindAR como flujo principal para targets con `trackingMode: "image"` y `mindTargetUrl`.
-- Se quitaron rutas activas de QR, BarcodeDetector y simulacion como camino principal del visor.
-- El visor final avisa si falta el archivo `.mind`.
-- El visor final bloquea el flujo si hay varios `.mind` distintos; MindAR debe usar un solo archivo `.mind` por escena y varios indices cuando hay varios targets.
-- El editor crea targets nuevos con `trackingMode: "image"`, `mindTargetUrl: null` y `mindTargetIndex: 0`.
-- El modal AR ahora guia imagen fisica + `.mind` + contenido anclado.
-- La opcion de generar QR fue retirada del editor.
-- La prueba de camara del editor ya no simula deteccion exitosa; solo sirve como apoyo visual y estado de configuracion.
-- La vista final y la exportacion se bloquean si la escena MindAR no esta lista.
-- La mediateca reconoce assets tipo `target` para archivos `.mind`.
-- La mediateca tiene filtro visible `Targets`.
-- Los archivos `.mind` se asignan a un target seleccionado; no se agregan como objetos sueltos a la escena.
-- El buscador de Poly Pizza fue corregido para llamar a `buscarEnPolyPizza()`.
-- `/api/vision`, Ollama y Gemma fueron retirados del runtime porque no aportaban al tracking AR y generaban errores de uso.
-
-## Pruebas realizadas
-
-- `python -m py_compile moby_studio/lanzador_ar.py`
-- Validacion de sintaxis JavaScript embebida de `editor.html` con Node.
-- `git diff --check`
-- `http://localhost:8000/editor.html` responde `200 OK`.
-- `http://localhost:8000/index.html` responde `200 OK`.
-- El tunel Cloudflare usado en esta sesion fue `https://lodging-won-dressing-color.trycloudflare.com`.
-- `editor.html` por ese tunel respondio `200 OK`.
-- `index.html` por ese tunel respondio `200 OK`.
-
-Nota: los tuneles rapidos de Cloudflare pueden cambiar de URL al reiniciarse. Al retomar, verificar la URL activa antes de probar en telefono.
-
-## Pendientes prioritarios
-
-1. Probar el ciclo completo con un target real
-   - Subir una imagen fisica al target.
-   - Compilarla en `.mind`.
-   - Subir el `.mind`.
-   - Asignar contenido 3D, imagen o video.
-   - Abrir `index.html` por localhost o Cloudflare HTTPS.
-   - Apuntar la camara al target impreso o mostrado en otra pantalla.
-
-2. Mejorar la zona de trabajo del editor
-   - Mostrar claramente el target como superficie fisica de referencia.
-   - Añadir guias visuales de anclaje para contenido encima del target.
-   - Separar mejor "Mesa / sin disparador" de contenido listo para AR.
-   - Hacer que mover, rotar y escalar contenido sea mas evidente en relacion al target.
-   - Mostrar advertencias visuales si un contenido no esta anclado a ningun target.
-
-3. Mejorar el asistente de targets
-   - Mostrar estado por target: falta imagen, falta `.mind`, falta contenido, listo.
-   - Explicar cuando usar `mindTargetIndex`.
-   - Advertir si dos targets usan el mismo indice.
-   - Implementar compilacion local de uno o varios targets dentro de un solo `.mind`.
-
-4. Prueba movil real
-   - Probar en telefono con Cloudflare HTTPS.
-   - Verificar permisos de camara.
-   - Verificar que MindAR cargue el `.mind` sin errores CORS.
-   - Medir tiempo de deteccion y estabilidad.
-   - Ajustar escala/posicion inicial del contenido segun resultado real.
-
-5. Publicacion profesional
-   - Generar una pagina de entrega para cliente con instrucciones minimas.
-   - Incluir target imprimible, URL del visor y checklist de compatibilidad.
-   - Validar paquete exportado en telefono antes de entregar.
-
-7. OIRA avanzado
-   - OCR real para palabras clave.
-   - Reconocimiento de objetos entrenados.
-   - Navegacion manual avanzada para pipeline OIRA3.
-   - Secuencias guiadas con pasos y progreso.
-
-8. Sincronizacion granular en vivo
-   - Enviar patches de crear, mover, borrar y asignar sin guardar layout completo.
-   - WebSocket para cambios inmediatos.
-   - Indicadores de cursor y seleccion en viewport.
-   - Resolver conflictos por operacion si hay edicion simultanea real.
-
-## Archivos clave
-
-- `moby_studio/editor.html`: editor 3D, modal AR, mediateca, validacion de publicacion y exportacion.
-- `moby_studio/index.html`: visor final WebAR con MindAR y llamada a vision.
-- `moby_studio/lanzador_ar.py`: servidor local, APIs, subida de assets, vision, proyectos y exportacion.
-- `moby_studio/output/layout.json`: layout activo servido al visor.
-- `moby_studio/projects/default/layout.json`: proyecto default.
-- `README.md`: documentacion general.
-- `moby_studio/ARCHITECTURE.md`: arquitectura del sistema.
-
-## Recordatorio de arquitectura MindAR
-
-MindAR no funciona igual que Vuforia Cloud Recognition. En esta version:
-
-- El reconocimiento ocurre en el navegador usando `mind-ar`.
-- El archivo `.mind` debe estar disponible por HTTP/HTTPS.
-- Una escena MindAR usa un `imageTargetSrc`.
-- Si hay varios targets, deben estar compilados dentro del mismo `.mind`.
-- Cada marcador usa `mindTargetIndex` para decidir que imagen del `.mind` lo activa.
-- El contenido se muestra cuando MindAR dispara `targetFound` y se oculta con `targetLost`.
-
-## Comandos utiles al retomar
-
-```powershell
-cd C:\Users\ALEXANDER VILLALVA\Desktop\mcpBlender
-python -m py_compile moby_studio/lanzador_ar.py
-git diff --check
-Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
-Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html
 ```

@@ -1,364 +1,252 @@
 # Moby Studio
 
-Moby Studio es un editor local para crear, guardar y probar experiencias WebAR con tracking por imagen usando MindAR. El proyecto incluye un editor 3D para PC, un visor final para telefono, gestion de assets, proyectos versionados, exportacion de experiencias y un backend Python que sirve la aplicacion desde `moby_studio/`.
+Moby Studio es una aplicacion local para crear, organizar y probar experiencias WebAR con tracking de imagen. Incluye un editor visual para escritorio, un visor movil basado en A-Frame y MindAR, gestion de proyectos y assets, y un servidor HTTP escrito con la biblioteca estandar de Python.
 
-El objetivo actual es trabajar como un flujo tipo Vuforia, pero ejecutado en navegador:
-
-```text
-Crear target -> subir imagen fisica -> subir .mind -> agregar contenido -> anclar -> validar -> probar en telefono
-```
-
-## Estado Actual
-
-Implementado:
-
-- Editor 3D en `moby_studio/editor.html`.
-- Visor WebAR/MindAR en `moby_studio/index.html`.
-- Backend local en `moby_studio/lanzador_ar.py`.
-- Servidor HTTP threaded en el puerto `8000`.
-- Proyectos versionados en `moby_studio/projects/<proyecto>/layout.json`.
-- Runtime activo en `moby_studio/output/layout.json` generado al guardar.
-- Mediateca para modelos, imagenes, videos y targets `.mind`.
-- Targets MindAR con `markerImage`, `mindTargetUrl` y `mindTargetIndex`.
-- Contenido AR anclado a targets mediante `arAnchor`.
-- Validador de publicacion orientado a MindAR.
-- Exportacion ZIP de experiencia.
-- Autosave local, Undo/Redo y bloqueo temporal por objeto.
-- Manual de ayuda integrado en el editor y en el visor.
-- Paneles laterales del editor pulidos para guiar el flujo `Target -> Assets -> Anclar -> Probar`.
-- Plantilla principal `Marcador + Modelo 3D` para crear una experiencia AR funcional sin pasos de demo.
-- Gestion de proyectos con crear, duplicar, renombrar, archivar, restaurar y eliminar.
-- Transferencia de proyectos editables entre PCs mediante paquetes ZIP con layout y assets usados.
-- Visor simplificado: solo muestra controles necesarios para AR; chatbot y acciones extra se habilitan desde el editor.
-- Compresion Draco de modelos GLB usando Blender mediante `scripts/compress_model.py`.
-
-Retirado o no principal:
-
-- Los generadores procedurales antiguos de modelos 3D fueron eliminados.
-- Las plantillas `OIRA 1`, `OIRA 2` y `OIRA 3` fueron retiradas del flujo principal.
-- El `Banco 3D` ya no aparece como paso principal; queda como busqueda externa opcional desde `Importar GLB`.
-- La carpeta legacy de `dataset/` y vision local anterior ya no forma parte del flujo.
-- `/api/generate-model` queda retirado y responde como endpoint obsoleto.
-- `/api/vision`, Ollama y Gemma fueron retirados del runtime porque generaban errores y no aportaban al tracking AR.
-- QR, BarcodeDetector y simulaciones fueron retirados del flujo AR principal.
-- La compilacion local de `.mind` todavia esta pendiente; por ahora se suben archivos `.mind` ya generados.
-
-Nota de repositorio:
-
-- `moby_studio/output/` se genera localmente y esta ignorado por Git.
-- Los proyectos creados desde la app se ignoran por defecto; solo `moby_studio/projects/default/layout.json` y `moby_studio/projects/users.json` quedan como base versionada.
-
-## Estructura
+El flujo principal es:
 
 ```text
-mcpBlender/
-├── README.md
-├── medios/
-└── moby_studio/
-    ├── ARCHITECTURE.md
-    ├── MEJORAS_PENDIENTES.md
-    ├── editor.html
-    ├── index.html
-    ├── lanzador_ar.py
-    ├── output/
-    │   ├── layout.json
-    │   ├── *.glb / *.gltf
-    │   ├── *.png / *.jpg / *.webp / *.gif
-    │   ├── *.mp4 / *.webm / *.mov
-    │   └── *.mind
-    ├── projects/
-    │   └── <proyecto>/
-    │       └── layout.json
-    ├── scripts/
-    │   └── compress_model.py
-    └── venv/
+Crear proyecto -> configurar target -> subir .mind -> agregar contenido -> anclar -> validar -> guardar -> probar
 ```
 
-## Ejecucion Local
+## Nivel de preparacion y uso recomendado
 
-Primera instalacion despues de clonar:
+Moby Studio esta listo para desarrollo, demostraciones y trabajo local por personas con conocimientos tecnicos basicos. **Todavia no es un producto de escritorio de instalacion inmediata ni un servicio preparado para exponerse directamente a Internet.**
+
+| Escenario | Estado | Que necesita |
+|---|---|---|
+| Desarrollo en la misma PC | Listo | Python, navegador moderno y ejecutar el lanzador. |
+| Trabajo en una red local confiable | Utilizable con precauciones | Ejecutar el servidor, registrar usuarios y limitar el acceso a la red confiable. |
+| Prueba desde telefono | Requiere configuracion | URL HTTPS mediante tunel o servidor web seguro. |
+| Usuario final sin conocimientos tecnicos | No listo | Falta instalador, lanzador de un clic y compilacion integrada de `.mind`. |
+| Despliegue publico en Internet | No listo | Falta endurecimiento de autenticacion, autorizacion, sesiones, TLS y almacenamiento de produccion. |
+| Uso completamente offline | No listo | A-Frame, MindAR y fuentes se cargan actualmente desde CDN. |
+
+### Pasos obligatorios despues de descargar
+
+1. Instalar Python 3 o usar un entorno virtual existente.
+2. Ejecutar `python moby_studio\lanzador_ar.py`; abrir los HTML directamente desde el disco no es un flujo soportado.
+3. Mantener conexion a Internet para que el navegador cargue A-Frame, MindAR y las fuentes externas.
+4. Abrir el editor, crear o seleccionar un proyecto y **guardarlo al menos una vez**. Esto genera `moby_studio/output/layout.json`, requerido por el visor.
+5. Generar externamente el archivo `.mind` de cada conjunto de targets y subirlo al proyecto.
+6. Para usar la camara desde un telefono, publicar el puerto `8000` mediante HTTPS.
+7. Validar la experiencia y probarla en los dispositivos reales antes de entregarla.
+
+### Aviso sobre cuentas y seguridad
+
+El repositorio incluye cuentas de desarrollo predeterminadas:
+
+| Usuario | Contrasena | Rol |
+|---|---|---|
+| `admin` | `admin123` | Propietario |
+| `viewer` | `viewer123` | Cliente |
+
+En acceso desde la misma PC, el editor inicia automaticamente como administrador. Estas cuentas y el almacenamiento actual de usuarios en `projects/users.json` existen para desarrollo local y LAN confiable. **No deben considerarse credenciales seguras ni utilizarse para publicar el servidor directamente en Internet.** Antes de un despliegue real se debe reemplazar este sistema por autenticacion, sesiones, autorizacion por endpoint y almacenamiento de credenciales adecuados.
+
+### Verificacion antes de entregar a otra persona
+
+- No existe todavia una suite automatizada completa; realiza una prueba manual del flujo principal.
+- Confirma que editor y visor respondan desde el servidor.
+- Prueba el target fisico y su `.mind` en el navegador movil objetivo.
+- Comprueba modelos, video y audio en el dispositivo real.
+- Verifica el ZIP exportado y las instrucciones de acceso HTTPS.
+
+## Funciones actuales
+
+- Editor visual en `moby_studio/editor.html` con barra lateral compacta, lienzo A-Frame e inspector.
+- Visor WebAR en `moby_studio/index.html` para escritorio y telefono.
+- Tracking de imagen real con MindAR y archivos `.mind`.
+- Plantillas `Marcador + Imagen`, `Marcador + Video`, `Marcador + Audio` y `Marcador + Modelo 3D`.
+- Contenido 3D, imagen, video, audio espacial con reproductor animado y nodos informativos heredados.
+- Mediateca con carga, filtros, asignacion, deteccion de uso y eliminacion protegida.
+- Proyectos versionados con crear, duplicar, renombrar, archivar, restaurar y eliminar.
+- Exportacion e importacion de proyectos editables entre PCs mediante ZIP.
+- Exportacion de una experiencia autocontenida para entrega.
+- Autosave local, Undo/Redo, presencia y bloqueo temporal de objetos.
+- Registro e inicio de sesion para acceso remoto; en acceso local se usa el perfil administrador automatico.
+- Validacion previa a publicacion y herramientas de QA movil.
+- Compresion opcional de modelos GLB con Blender y Draco.
+
+## Limitaciones actuales
+
+- Moby Studio no compila imagenes a `.mind`; el archivo debe generarse externamente.
+- Todos los targets de una escena deben pertenecer al mismo `.mind` y usar indices diferentes.
+- La colaboracion sincroniza versiones guardadas y locks en memoria; no es edicion granular en tiempo real.
+- El servidor es local. El acceso movil con camara normalmente requiere publicar el puerto `8000` mediante HTTPS.
+- A-Frame, MindAR y las fuentes se cargan desde CDN, por lo que el primer uso requiere conexion a Internet.
+- El audio con autoplay depende de las restricciones del navegador; el usuario puede iniciarlo tocando el reproductor.
+
+## Requisitos
+
+- Python 3 reciente.
+- Navegador moderno con WebGL y acceso a camara.
+- Git, si se instala desde el repositorio.
+- Blender, solamente para la compresion Draco opcional.
+
+El runtime base no necesita paquetes externos de Python. `requirements.txt` documenta esta condicion.
+
+## Instalacion y ejecucion
 
 ```powershell
-git clone <url-del-repositorio>
-cd mcpBlender
-python -m venv moby_studio\venv
-.\moby_studio\venv\Scripts\python.exe -m pip install --upgrade pip
-.\moby_studio\venv\Scripts\python.exe -m pip install -r requirements.txt
+git clone https://github.com/alexandervi1/EvasARn.git
+cd EvasARn
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe moby_studio\lanzador_ar.py
 ```
 
-Desde PowerShell:
+Tambien puede ejecutarse con un Python ya disponible:
 
 ```powershell
-cd moby_studio
-.\venv\Scripts\python.exe lanzador_ar.py
+python moby_studio\lanzador_ar.py
 ```
 
-Abrir:
+El lanzador cambia internamente su directorio de trabajo a `moby_studio/`.
+
+Abrir en el navegador:
 
 - Editor: `http://localhost:8000/editor.html`
-- Visor final: `http://localhost:8000/index.html`
-- Assets: `http://localhost:8000/api/list-assets`
+- Visor: `http://localhost:8000/index.html`
+- Estado de assets: `http://localhost:8000/api/list-assets`
 
-Para probar en telefono se necesita una URL HTTPS. Puedes usar Cloudflare Tunnel, ngrok u otra herramienta equivalente apuntando al puerto `8000`. La camara movil suele fallar si se abre por HTTP normal.
+Para un telefono, expone `http://localhost:8000` mediante Cloudflare Tunnel, ngrok u otro proxy HTTPS. No guardes en la documentacion una URL temporal porque cambia al reiniciar el tunel.
 
-Dependencias externas opcionales:
+## Flujo rapido
 
-- Blender: necesario solo para comprimir GLB con Draco desde `/api/compress-model`.
+1. Abre el editor y selecciona o crea un proyecto.
+2. En la barra izquierda, abre `Agregar contenido`.
+3. Elige una plantilla AR.
+4. Configura la imagen fisica del target y su archivo `.mind`.
+5. Sube o selecciona el contenido desde la mediateca.
+6. Comprueba que el contenido este anclado al target correcto.
+7. Ajusta posicion, rotacion y escala en el lienzo o inspector.
+8. Abre `Validar`, corrige los errores y guarda.
+9. Abre `Probar y publicar` o carga `index.html` directamente.
+10. Inicia AR, concede permiso de camara y apunta al target fisico.
 
-El runtime base usa librerias estandar de Python; `requirements.txt` se mantiene para que la instalacion sea reproducible si luego se agregan dependencias.
+Consulta [TUTORIAL_PRIMEROS_PASOS.md](moby_studio/TUTORIAL_PRIMEROS_PASOS.md) para el recorrido detallado.
 
-## Flujo Recomendado
+## Interfaz del editor
 
-1. Abre `editor.html`.
-2. Crea o selecciona un proyecto.
-3. En `Crear > Flujo AR`, crea un `Marcador AR`.
-4. Configura el target:
-   - sube la imagen fisica que se va a imprimir o mostrar;
-   - sube el archivo `.mind`;
-   - define `mindTargetIndex` si el `.mind` contiene varios targets.
-5. Sube o selecciona contenido:
-   - modelo `.glb` / `.gltf`;
-   - imagen;
-   - video.
-6. Ancla el contenido al target desde el inspector derecho.
-7. Ajusta posicion, escala y rotacion en el lienzo.
-8. Abre `Publicar` y ejecuta la validacion.
-9. Guarda.
-10. Abre `index.html` en PC o telefono y prueba la deteccion real.
+La barra de actividad izquierda separa las tareas principales:
 
-## Editor
-
-El editor es la herramienta de autoria para PC. Sus zonas principales son:
-
-- Panel izquierdo:
-  - `Escena`: outliner de targets, contenido anclado y objetos de mesa base.
-  - `Crear`: flujo AR, plantilla `Marcador + Modelo 3D`, target MindAR, importar GLB, modelos externos opcionales y mediateca.
-  - `Publicar`: validacion, exportacion y QA movil.
-- Lienzo central:
-  - taller de composicion AR;
-  - superficie de referencia del target;
-  - guias MindAR;
-  - transform toolbar para orbitar, mover, rotar, escalar y borrar.
-- Inspector derecho:
-  - estado del objeto seleccionado;
-  - tipo, estado AR, target y archivo;
-  - nombre, transformacion, anclaje y configuracion AR;
-  - dimensiones de paneles de imagen/video;
-  - comentarios y notas;
-  - acciones rapidas como duplicar y resetear transformacion.
-
-El icono `?` de la barra superior abre el manual interno del editor.
-
-## Visor Final
-
-`index.html` carga `output/layout.json` y reconstruye la experiencia final.
-
-Funciones principales:
-
-- Activar camara RA.
-- Cargar MindAR cuando hay targets con `.mind`.
-- Mostrar contenido al detectar `targetFound`.
-- Ocultar contenido con `targetLost`.
-- Reproducir contenido de video con audio cuando el navegador lo permite tras interaccion del usuario.
-- Ajustar escala y distancia del contenido desde controles flotantes.
-- Entrar en modo presentacion.
-- Mostrar controles de chat local y voz/texto solo si `stage.viewer.chatEnabled` esta habilitado desde el editor.
-
-El visor tambien tiene un icono de ayuda con instrucciones de uso y problemas comunes.
-
-## MindAR
-
-Reglas importantes:
-
-- El reconocimiento ocurre en el navegador con `mind-ar`.
-- El archivo `.mind` debe estar servido por HTTP/HTTPS.
-- Una escena MindAR usa un `imageTargetSrc`.
-- Si hay varios targets, deben estar compilados dentro del mismo `.mind`.
-- Cada target usa `mindTargetIndex` para decidir que imagen del `.mind` lo activa.
-- El contenido se vincula al target con `arAnchor`.
-
-Estado de un target:
-
-- Falta imagen fisica.
-- Falta archivo `.mind`.
-- Target listo.
-- Contenido sin target.
-- Contenido anclado listo.
-
-## Mediateca
-
-La mediateca lista recursos desde `moby_studio/output/` mediante `/api/list-assets`.
-
-Tipos soportados:
-
-| Extension | Tipo |
+| Seccion | Uso |
 |---|---|
-| `.glb`, `.gltf` | Modelo 3D |
-| `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` | Imagen |
-| `.mp4`, `.webm`, `.mov` | Video |
-| `.mind` | Target MindAR |
-| `.json` | Datos |
+| Escena | Ver targets, contenido anclado y objetos de mesa base. |
+| Agregar contenido | Crear plantillas, targets y recursos para la escena. |
+| Recursos | Buscar, filtrar y administrar la mediateca. |
+| Validar | Auditar targets, archivos, anclajes y estado de guardado. |
+| Probar y publicar | Abrir QA movil y exportar la experiencia. |
+| Gestionar proyectos | Administrar y transferir proyectos. |
+| Ayuda | Abrir el manual integrado. |
 
-Funciones:
+El lienzo central permite componer la escena y el inspector derecho contiene transformaciones, anclaje, archivo multimedia, dimensiones y notas del objeto seleccionado. En pantallas estrechas los paneles se compactan para conservar el area de trabajo.
 
-- Subir assets.
-- Buscar y filtrar por tipo.
-- Ver si un asset esta en uso.
-- Agregar modelos, imagenes o videos a la escena.
-- Asignar `.mind` al target seleccionado.
-- Comprimir GLB con Draco.
-- Copiar rutas.
-- Eliminar assets no protegidos.
+## Contenido soportado
 
-`layout.json` esta protegido.
+| Extensiones | Clasificacion | Uso |
+|---|---|---|
+| `.glb`, `.gltf` | `model` | Modelos 3D. |
+| `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` | `image` | Targets visuales e imagenes AR. |
+| `.mp4`, `.webm`, `.mov` | `video` | Paneles de video AR. |
+| `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac` | `audio` | Reproductor de audio AR. |
+| `.mind` | `target` | Targets compilados de MindAR. |
+| `.json` | `data` | Datos internos protegidos. |
 
-## Proyectos Y Colaboracion
+Los recursos se guardan localmente en `moby_studio/output/`. Esta carpeta es runtime generado y no se versiona en Git.
 
-Cada proyecto se guarda en:
+## Targets MindAR
+
+Un target usa estos campos principales:
+
+- `markerImage`: imagen fisica de referencia.
+- `mindTargetUrl`: ruta al archivo `.mind` compilado.
+- `mindTargetIndex`: indice de la imagen dentro de ese `.mind`.
+- `trackingMode: "image"`: modo de tracking activo.
+- `recognitionKey`: identificador del target.
+
+El contenido se vincula mediante `arAnchor`, que contiene el `uuid` del target. Si queda en `base`, pertenece a la mesa de composicion y no se activara como contenido de un marcador.
+
+## Proyectos y archivos
 
 ```text
-moby_studio/projects/<proyecto>/layout.json
+EvasARn/
+|-- README.md
+|-- requirements.txt
+`-- moby_studio/
+    |-- editor.html
+    |-- index.html
+    |-- lanzador_ar.py
+    |-- ARCHITECTURE.md
+    |-- TUTORIAL_PRIMEROS_PASOS.md
+    |-- MEJORAS_PENDIENTES.md
+    |-- scripts/
+    |   `-- compress_model.py
+    |-- projects/
+    |   |-- default/layout.json
+    |   `-- users.json
+    |-- output/             # generado localmente
+    `-- _archive/           # proyectos archivados localmente
 ```
 
-Al guardar, tambien se actualiza:
+Cada proyecto activo se guarda en `moby_studio/projects/<proyecto>/layout.json`. Al guardar, la app tambien actualiza `moby_studio/output/layout.json`, que es el layout cargado por el visor.
 
-```text
-moby_studio/output/layout.json
-```
+El proyecto `default` esta protegido. Los demas proyectos y `output/` se ignoran en Git.
 
-Caracteristicas:
+## Transferencia y exportacion
 
-- Selector de proyecto.
-- Crear, duplicar, renombrar, archivar, restaurar y eliminar proyectos.
-- El proyecto `default` queda protegido para tener siempre una base limpia de trabajo.
-- Version incremental por proyecto.
-- Conflicto `409` si se intenta guardar sobre una version antigua.
-- Usuario local por navegador.
-- Presencia colaborativa.
-- Lock temporal del objeto seleccionado.
-- Aviso de version remota disponible.
-- Sincronizacion al guardar, no edicion granular en tiempo real.
+Hay dos paquetes diferentes:
 
-### Transferir Un Proyecto Entre PCs
+- **Exportar proyecto**: ZIP editable con manifiesto, layout y assets locales usados. Se importa desde `Gestionar proyectos` en otra PC.
+- **Exportar experiencia**: entrega del visor y recursos necesarios para ejecutar la experiencia publicada.
 
-1. Guarda los cambios del proyecto.
-2. Abre `Gestionar proyectos` desde el icono de configuracion de la barra izquierda.
-3. En `Transferir entre PCs`, pulsa `Exportar proyecto` y descarga el ZIP generado.
-4. Copia ese ZIP a la otra PC donde este instalado Moby Studio.
-5. Abre el gestor, escribe opcionalmente un nombre de destino y pulsa `Importar ZIP`.
+La importacion de proyectos no sobrescribe proyectos existentes. Si un asset entrante tiene el mismo nombre y contenido diferente, se renombra y se actualizan sus referencias.
 
-El paquete contiene el layout editable, un manifiesto de version y los assets locales usados. Las URLs externas se conservan como referencias. Si la PC de destino ya tiene un asset con el mismo nombre pero contenido diferente, el importador conserva ambos, renombra el entrante y actualiza las referencias del layout. Un proyecto existente nunca se sobrescribe: se debe indicar otro nombre.
+## API principal
 
-## API Principal
-
-| Endpoint | Metodo | Uso |
+| Endpoint | Metodo | Funcion |
 |---|---:|---|
-| `/api/save-layout?project=...&version=...` | POST | Guarda proyecto versionado y actualiza `output/layout.json`. |
+| `/api/save-layout?project=...&version=...` | POST | Guarda e incrementa la version del proyecto. |
 | `/api/load-layout?project=...` | GET | Carga un proyecto. |
 | `/api/list-projects` | GET | Lista proyectos activos. |
 | `/api/list-archived-projects` | GET | Lista proyectos archivados. |
-| `/api/duplicate-project` | POST | Duplica proyecto. |
-| `/api/rename-project` | POST | Renombra proyecto. |
-| `/api/archive-project` | POST | Archiva proyecto. |
-| `/api/restore-project` | POST | Restaura proyecto archivado. |
-| `/api/delete-project` | POST | Elimina permanentemente un proyecto activo o archivado, excepto `default`. |
-| `/api/export-project?project=...` | POST | Genera un paquete ZIP editable con layout, manifiesto y assets usados. |
-| `/api/import-project?name=...` | POST | Importa un paquete editable como proyecto nuevo; recibe el ZIP binario. |
-| `/api/collab-heartbeat` | POST | Registra presencia y lock temporal. |
+| `/api/duplicate-project` | POST | Duplica un proyecto. |
+| `/api/rename-project` | POST | Renombra un proyecto. |
+| `/api/archive-project` | POST | Archiva un proyecto. |
+| `/api/restore-project` | POST | Restaura un proyecto. |
+| `/api/delete-project` | POST | Elimina un proyecto excepto `default`. |
+| `/api/export-project?project=...` | POST | Genera un ZIP editable. |
+| `/api/import-project?name=...` | POST | Importa un ZIP editable como proyecto nuevo. |
+| `/api/list-assets` | GET | Lista la mediateca y su uso. |
+| `/api/upload-media?name=...` | POST | Sube un recurso multimedia. |
+| `/api/upload-model?name=...` | POST | Sube GLB o GLTF. |
+| `/api/delete-asset?name=...` | POST | Elimina un asset no protegido. |
+| `/api/export-experience?name=...` | POST | Genera el paquete de experiencia. |
+| `/api/compress-model` | POST | Comprime un GLB mediante Blender. |
+| `/api/collab-heartbeat` | POST | Actualiza presencia y lock. |
 | `/api/collab-release` | POST | Libera locks del usuario. |
-| `/api/collab-state?project=...` | GET | Devuelve usuarios, locks y version remota. |
-| `/api/list-assets` | GET | Lista assets de `output/`. |
-| `/api/upload-media?name=...` | POST | Sube imagen, video, `.mind` u otro recurso permitido. |
-| `/api/upload-model?name=...` | POST | Sube GLB/GLTF. |
-| `/api/delete-asset?name=...` | POST | Elimina asset no protegido. |
-| `/api/delete-model?name=...` | POST | Elimina modelo. |
-| `/api/list-models` | GET | Lista modelos para compatibilidad. |
-| `/api/export-experience?name=...` | POST | Genera ZIP de experiencia. |
-| `/api/compress-model` | POST | Comprime GLB con Blender/Draco. |
-| `/api/generate-model?script=...` | POST | Retirado; generacion procedural eliminada. |
-| `/api/connection-info` | GET | Devuelve informacion de conexion local. |
+| `/api/collab-state?project=...` | GET | Consulta colaboracion y version. |
+| `/api/login` | POST | Inicia sesion remota. |
+| `/api/register` | POST | Registra un usuario local del servidor. |
+| `/api/connection-info` | GET | Informa IP y tipo de acceso. |
 
-## Layout
+`/api/generate-model` se conserva solo como respuesta de compatibilidad y no genera modelos.
 
-Ejemplo minimo:
-
-```json
-{
-  "project": "default",
-  "version": 3,
-  "stage": {
-    "width": 3,
-    "height": 3,
-    "gridVisible": true
-  },
-  "entities": [
-    {
-      "uuid": "target-1",
-      "nombre": "Target Producto",
-      "isMarker": true,
-      "posicion": { "x": 0, "y": 0.02, "z": -2.5 },
-      "rotacion": { "y": 0 },
-      "escala": 1,
-      "markerImage": "output/target-producto.png",
-      "recognitionKey": "target-1",
-      "trackingMode": "image",
-      "mindTargetUrl": "output/target-producto.mind",
-      "mindTargetIndex": 0,
-      "arAnchor": "base"
-    },
-    {
-      "uuid": "contenido-1",
-      "nombre": "Panel Producto",
-      "mediaType": "image",
-      "mediaUrl": "output/panel-producto.png",
-      "posicion": { "x": 0, "y": 0.55, "z": 0.05 },
-      "rotacion": { "y": 0 },
-      "escala": 1,
-      "relativeToAnchor": true,
-      "arAnchor": "target-1"
-    }
-  ],
-  "updatedAt": "2026-05-30 16:10:00"
-}
-```
-
-## Comandos Utiles
-
-Validar backend:
+## Diagnostico
 
 ```powershell
-python -m py_compile moby_studio/lanzador_ar.py
-```
-
-Validar servidor local:
-
-```powershell
+python -m py_compile moby_studio\lanzador_ar.py
 Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
 Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html
-```
-
-Revisar cambios:
-
-```powershell
-git status --short
 git diff --check
 ```
 
-## Pendientes Principales
+Opciones del visor para QA:
 
-La lista completa esta en `moby_studio/MEJORAS_PENDIENTES.md`.
+- `?debugConsole=1`: muestra la consola visual.
+- `?debugMarkers=1`: muestra ayudas de diagnostico de marcadores.
 
-Prioridad actual:
+## Documentacion
 
-1. Probar ciclo completo con target real.
-2. Implementar asistente/compilador local de targets `.mind`.
-3. Refinar publicacion profesional para cliente.
-4. Validar experiencia en telefono por HTTPS.
-5. Limpiar compatibilidad OIRA interna restante.
-
-## Documentacion Relacionada
-
-- `moby_studio/ARCHITECTURE.md`: arquitectura interna.
-- `moby_studio/MEJORAS_PENDIENTES.md`: contexto para continuar el desarrollo.
-- Manual interno del editor: boton `?` en `editor.html`.
-- Manual interno del visor: boton `Ayuda` o `?` en `index.html`.
+- [Tutorial de primeros pasos](moby_studio/TUTORIAL_PRIMEROS_PASOS.md)
+- [Arquitectura](moby_studio/ARCHITECTURE.md)
+- [Mejoras pendientes](moby_studio/MEJORAS_PENDIENTES.md)

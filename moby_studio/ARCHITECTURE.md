@@ -1,333 +1,288 @@
-# Moby Studio - Arquitectura
+# Arquitectura de Moby Studio
 
-Este documento describe la arquitectura actual de Moby Studio segun el codigo activo en `moby_studio/`.
+Este documento describe el codigo activo en `moby_studio/`.
 
-## 1. Componentes
+## 1. Vista general
 
 ```mermaid
-flowchart TD
-    Editor[editor.html\nEditor 3D + AR]
-    Client[index.html\nCliente movil AR]
-    Server[lanzador_ar.py\nHTTP + API local]
-    Output[(output/\nlayout + assets)]
+flowchart LR
+    Editor[editor.html\nEditor de escritorio]
+    Viewer[index.html\nVisor WebAR]
+    Server[lanzador_ar.py\nHTTP y API]
     Projects[(projects/\nlayouts versionados)]
-    Collab[(COLLAB_STATE\npresencia + locks)]
-    Blender[Blender headless\nscripts/*.py]
-    Editor -->|fetch /api/save-layout?project&version| Server
-    Editor -->|fetch /api/load-layout| Server
-    Editor -->|fetch /api/list-projects| Server
-    Editor -->|fetch /api/collab-*| Server
-    Editor -->|fetch /api/list-assets| Server
-    Editor -->|fetch /api/upload-media| Server
-    Client -->|fetch output/layout.json| Output
-    Server --> Output
+    Output[(output/\nruntime y assets)]
+    Archive[(_archive/\nproyectos archivados)]
+    Users[(projects/users.json)]
+    Collab[(COLLAB_STATE\npresencia y locks)]
+    CDN[A-Frame + MindAR\nCDN]
+    Blender[Blender opcional]
+
+    Editor --> Server
+    Viewer --> Output
+    Editor --> CDN
+    Viewer --> CDN
     Server --> Projects
+    Server --> Output
+    Server --> Archive
+    Server --> Users
     Server --> Collab
     Server --> Blender
 ```
 
-## 2. Frontend
+El backend sirve `moby_studio/` como raiz HTTP en el puerto `8000`. Es un `ThreadingMixIn` sobre `socketserver.TCPServer`, por lo que atiende solicitudes concurrentes sin un framework externo.
 
-### `editor.html`
+## 2. Editor
 
-Es la herramienta de autoria. El JavaScript activo esta embebido en el propio HTML.
+`editor.html` contiene HTML, CSS y JavaScript embebidos. A-Frame 1.4.2 se carga desde CDN.
 
 Responsabilidades:
 
-- Presentar una interfaz premium de estilo glassmorphic visionOS con combo boxes customizados, glows reactivos y transiciones fluidas.
-- Renderizar e inyectar dinámicamente iconos vectoriales SVG (`stroke="currentColor"`) en jerarquías, outliner, validaciones e inspectores, garantizando nitidez e independencia de emojis.
-- Mostrar una mediateca profesional con un diseño de tarjetas en dos filas (Thumbnail/Metadatos arriba y Badges/Botones abajo) para evitar la compresión en paneles estrechos, libre de scrollbars grises gracias a la utilidad `.no-scrollbar`.
-- Mantener el estado local en `escenaObjetos`.
-- Renderizar entidades A-Frame dentro de `#entities-container`.
-- Editar transformaciones, nombres, anclajes y configuracion AR.
-- Guardar el layout con `/api/save-layout`.
-- Leer proyectos con `/api/load-layout?project=...`.
-- Listar proyectos con `/api/list-projects`.
-- Mantener presencia y locks con `/api/collab-heartbeat`.
-- Administrar autosave local en `localStorage`.
-- Administrar Undo/Redo por snapshots completos.
-- Mostrar outliner, validador de publicacion y mediateca.
-- Detectar versiones remotas y recargar cuando no hay cambios locales.
+- mantener `escenaObjetos`, seleccion, contador y configuracion del escenario;
+- renderizar targets y contenido dentro del lienzo A-Frame;
+- editar transformaciones y relaciones `arAnchor`;
+- crear plantillas de imagen, video, audio y modelo 3D;
+- administrar la mediateca;
+- guardar y cargar proyectos versionados;
+- mantener borradores, Undo/Redo, presencia y locks;
+- validar la escena antes de publicarla;
+- exportar proyectos editables y experiencias finales.
 
-Estado principal:
+Estado principal simplificado:
 
 ```javascript
 let escenaObjetos = [];
 let entidadSeleccionada = null;
 let contadorIds = 0;
-let stageSize = { width: 3.0, height: 3.0, gridVisible: true };
+let stageSize = {
+  width: 3,
+  height: 3,
+  gridVisible: true,
+  viewer: { chatEnabled: false }
+};
 let proyectoActivo = "default";
 let proyectoVersion = 0;
-let usuarioColaboracion = null;
-let collabState = { users: [], locks: {} };
 ```
 
-Subsistemas del editor:
+`stage.viewer.chatEnabled` es un nombre de compatibilidad. En el visor actual controla el panel de narracion e instrucciones, no un servicio de IA ni un chatbot remoto.
 
-- **Creacion AR rapida**: crea marcador + contenido y abre el flujo de configuracion.
-- **Modal de disparador AR**: configura target fisico MindAR y contenido proyectado desde archivo local o URL directa.
-- **Nodos OIRA**: contenido generado (`mediaType: "oira-node"`) sin depender de modelos GLB heredados.
-- **Outliner**: lista targets, objetos anclados y objetos de mesa base.
-- **Colaboracion**: muestra usuarios activos, bloquea objetos seleccionados por otros y avisa versiones remotas.
-- **Validador de publicacion**: revisa targets, recursos, anclajes y guardado.
-- **Mediateca**: lista assets de `output/`, filtra, sube, asigna y elimina.
-- **Autosave**: guarda borradores en `localStorage`.
-- **Undo/Redo**: guarda snapshots de `stage`, `entities`, seleccion y contador.
+### Subsistemas
 
-### `index.html`
+- **Barra de actividad**: escena, creacion, recursos, validacion, publicacion, proyectos y ayuda.
+- **Lienzo**: composicion visual, seleccion, transformaciones y preview movil.
+- **Inspector**: propiedades exactas, anclaje, archivo y notas.
+- **Modal AR**: configura target fisico, `.mind`, indice y contenido.
+- **Outliner**: separa targets, contenido anclado y mesa base.
+- **Mediateca**: carga, filtra, asigna, comprime y elimina assets.
+- **Historial**: snapshots completos con limite de 50 estados.
+- **Borradores**: snapshots por proyecto en `localStorage`.
 
-Es el cliente final para telefono y pruebas AR.
+## 3. Visor
 
-Responsabilidades:
+`index.html` carga A-Frame 1.4.2 y MindAR 1.2.5 desde CDN. Lee `output/layout.json` y reconstruye la escena.
 
-- Leer `output/layout.json`.
-- Reconstruir la escena A-Frame final.
-- Activar contenido por tracking de imagen MindAR.
-- Mostrar contenido flotante para imagenes y videos.
-- Mostrar nodos OIRA generados desde layout.
-- Exponer controles compactos para telefono.
+Flujo:
 
-El cliente soporta:
+1. carga el layout publicado;
+2. valida la configuracion de MindAR;
+3. configura `imageTargetSrc` con el `.mind` comun;
+4. crea un contenedor por target con su `mindTargetIndex`;
+5. agrega el contenido a su contenedor segun `arAnchor`;
+6. inicia camara y tracking tras la accion del usuario;
+7. responde a `targetFound` y `targetLost`.
 
-- MindAR mediante CDN cuando un marcador tiene `trackingMode: "image"` y `mindTargetUrl`.
-- Eventos de target encontrado/perdido para mostrar u ocultar contenido.
+Tipos renderizados:
 
-## 3. Backend
+- `3d`: modelo GLB/GLTF o placeholder;
+- `image`: panel de imagen;
+- `video`: panel de video con control de reproduccion;
+- `audio`: reproductor espacial con ondas animadas;
+- `oira-node`: panel informativo heredado.
 
-### `lanzador_ar.py`
+El raycaster se limita a `.clickable` e `.interactive-entity`. El visor incluye controles de escala/distancia, modo presentacion, narracion, ayuda y mensajes de estado.
 
-Servidor local basado en `http.server.SimpleHTTPRequestHandler`.
+Opciones de QA:
 
-Responsabilidades:
+- `debugConsole=1`
+- `debugMarkers=1`
 
-- Servir archivos estaticos.
-- Guardar layouts.
-- Guardar proyectos versionados.
-- Mantener estado colaborativo en memoria.
-- Subir y eliminar assets.
-- Listar assets con metadata.
-- Ejecutar scripts de Blender.
+## 4. Modelo de datos
 
-Endpoints activos:
-
-| Endpoint | Metodo | Responsabilidad |
-|---|---:|---|
-| `/api/save-layout?project=...&version=...` | POST | Guarda `projects/<project>/layout.json`, incrementa version y actualiza `output/layout.json`. |
-| `/api/list-projects` | GET | Lista proyectos guardados con version y cantidad de entidades. |
-| `/api/load-layout?project=...` | GET | Devuelve el layout versionado de un proyecto. |
-| `/api/collab-heartbeat` | POST | Registra usuario activo, seleccion actual y lock temporal. |
-| `/api/collab-release` | POST | Libera locks del usuario. |
-| `/api/collab-state?project=...` | GET | Devuelve usuarios activos, locks y version remota. |
-| `/api/list-assets` | GET | Lista assets con tipo, tamano, fecha, uso y proteccion. |
-| `/api/delete-asset?name=...` | POST | Elimina assets no protegidos. |
-| `/api/export-experience?name=...` | POST | Empaqueta visor, layout, assets usados y manifiesto en un ZIP. |
-| `/api/export-project?project=...` | POST | Empaqueta un proyecto editable con su layout y assets locales usados. |
-| `/api/import-project?name=...` | POST | Valida e importa un paquete editable como proyecto nuevo. |
-| `/api/list-models` | GET | Lista solo modelos para compatibilidad. |
-| `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia. |
-| `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
-| `/api/delete-model?name=...` | POST | Elimina modelos. |
-| `/api/generate-model?script=...` | POST | Endpoint retirado; la generacion procedural fue eliminada. |
-| `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
-
-## 4. Persistencia
-
-### Paquete Portable De Proyecto
-
-Los paquetes de transferencia usan `format: "moby-studio-project"` y `formatVersion: 1`. El ZIP contiene:
-
-```text
-manifest.json
-project/layout.json
-assets/<archivos usados>
-LEEME.txt
-```
-
-La importacion no extrae rutas arbitrarias. Valida manifiesto, version, cantidad de archivos, tamano total y extensiones permitidas. Si un asset local entra en conflicto con otro archivo distinto, se renombra y el layout importado se reescribe antes de guardarse.
-
-### `projects/<proyecto>/layout.json`
-
-Archivo principal de autoria. Contiene proyecto, version, fecha de actualizacion, escenario y entidades.
+El layout tiene esta forma general:
 
 ```json
 {
   "project": "default",
-  "version": 2,
-  "updatedAt": "2026-05-29 15:03:57",
+  "version": 1,
+  "updatedAt": "2026-06-19 12:00:00",
   "stage": {
     "width": 3,
     "height": 3,
-    "gridVisible": true
+    "gridVisible": true,
+    "viewer": { "chatEnabled": false }
   },
   "entities": []
 }
 ```
 
-### `output/layout.json`
+Campos comunes de entidad:
 
-Archivo de compatibilidad y runtime. Se actualiza cada vez que se guarda un proyecto para que `index.html` y la exportacion sigan leyendo una ruta simple.
-
-Cada entidad puede representar un target AR, modelo 3D, imagen o video.
-
-Campos comunes:
-
-- `uuid`
-- `nombre`
-- `posicion`
-- `rotacion`
-- `escala`
+- `uuid`, `nombre`
+- `posicion`, `rotacion`, `escala`
 - `arAnchor`
-- `hidden`
-- `locked`
+- `relativeToAnchor`
+- `hidden`, `locked`
 
-Campos de marcador:
+Campos de target:
 
 - `isMarker: true`
 - `markerImage`
 - `recognitionKey`
-- `trackingMode`
+- `trackingMode: "image"`
 - `mindTargetUrl`
 - `mindTargetIndex`
 
 Campos de contenido:
 
-- `modelId`
-- `glbUrl`
-- `mediaType`
+- `mediaType`: `3d`, `image`, `video`, `audio` u `oira-node`
 - `mediaUrl`
-- `relativeToAnchor`
-- `oiraLabel`
-- `oiraColor`
-- `oiraNarration`
+- `modelId`, `glbUrl`
+- propiedades de panel, video o audio;
+- `oiraLabel`, `oiraColor`, `oiraNarration` para compatibilidad.
 
-Valores principales de `mediaType`:
+## 5. Persistencia
 
-- `3d`
-- `image`
-- `video`
-- `oira-node`
+### Proyecto editable
 
-## 5. Mediateca
+`projects/<proyecto>/layout.json` es la fuente de autoria versionada. Cada guardado valido incrementa `version`.
 
-La mediateca se basa en `/api/list-assets`.
+El backend devuelve `409` si `expectedVersion` no coincide con la version actual, evitando sobrescritura silenciosa.
 
-El backend clasifica extensiones:
+### Runtime
 
-- `.glb`, `.gltf` -> `model`
-- `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` -> `image`
-- `.mp4`, `.webm`, `.mov` -> `video`
-- `.mind` -> `target`
-- `.json` -> `data`
+`output/layout.json` se actualiza al guardar. Es la ruta estable leida por el visor y por la exportacion de experiencia.
 
-La respuesta incluye:
+### Borrador local
 
-- `name`
-- `friendlyName`
-- `kind`
-- `extension`
-- `size`
-- `sizeBytes`
-- `src`
-- `modelId`
-- `date`
-- `protected`
-- `usedBy`
-- `usedCount`
+El navegador guarda borradores con una clave por proyecto. El borrador no sustituye al guardado del servidor y puede restaurarse o descartarse al recargar.
 
-`layout.json` esta protegido. La deteccion de uso revisa rutas como `mediaUrl`, `markerImage`, `mindTargetUrl`, `glbUrl` y referencias por `modelId`.
+### Archivo
 
-## 6. Autosave
+Los proyectos archivados se mueven a `_archive/`. El proyecto `default` no puede eliminarse.
 
-El autosave del editor usa:
+## 6. Assets
 
-- `moby_studio_editor_draft_v1_<proyecto>`
-- `moby_studio_editor_last_published_v1`
+Clasificacion de `ASSET_EXTENSIONS`:
 
-Guarda un snapshot con:
+| Extensiones | kind |
+|---|---|
+| `.glb`, `.gltf` | `model` |
+| `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` | `image` |
+| `.mp4`, `.webm`, `.mov` | `video` |
+| `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac` | `audio` |
+| `.mind` | `target` |
+| `.json` | `data` |
 
-- `stage`
-- `entities`
-- `savedAt`
-- `version`
-- `project`
+`/api/list-assets` devuelve nombre, etiqueta amigable, tipo, extension, tamanos, ruta, fecha, proteccion y referencias de uso. La deteccion de uso revisa `mediaUrl`, `markerImage`, `mindTargetUrl`, `glbUrl` y `modelId`.
 
-Cuando el editor inicia, compara si hay un borrador local posterior al ultimo guardado y muestra un banner para restaurar o descartar.
+`layout.json` y otros archivos protegidos no se eliminan desde la mediateca.
 
-## 7. Undo/Redo
+## 7. Proyectos portables
 
-El historial usa snapshots completos, no comandos parciales.
+El paquete editable usa:
 
-Cada snapshot guarda:
-
-- `stage`
-- `entities`
-- `selectedUuid`
-- `counter`
-- `label`
-
-Limite actual:
-
-```javascript
-const HISTORIAL_LIMITE = 50;
-```
-
-El sistema registra estado antes de operaciones mutantes y captura el estado actual al primer Undo si hay cambios no sincronizados. Esto permite Redo hacia el resultado real de la accion.
-
-## 8. Colaboracion
-
-La colaboracion actual es local/red LAN y usa estado en memoria del backend.
-
-Estado backend:
-
-```python
-COLLAB_STATE = {
-    "default": {
-        "users": {},
-        "locks": {}
-    }
+```json
+{
+  "format": "moby-studio-project",
+  "formatVersion": 1
 }
 ```
 
-Reglas:
+Contenido:
 
-- Cada navegador crea un `userId`, nombre y color en `localStorage`.
-- Cada 5 segundos envia `/api/collab-heartbeat`.
-- Si el usuario tiene un objeto seleccionado, el servidor crea/renueva un lock temporal.
-- Los locks expiran si no hay heartbeat en aproximadamente 18 segundos.
-- El editor bloquea inputs, transformaciones, duplicar, ocultar y borrar cuando el lock pertenece a otro usuario.
-- El heartbeat tambien devuelve `version`; si es mayor que la version local, el editor sincroniza automaticamente cuando no hay cambios locales.
-- Si hay cambios locales sin guardar, se muestra aviso de version remota pendiente.
+```text
+manifest.json
+project/layout.json
+assets/<assets locales usados>
+LEEME.txt
+```
 
-Limitacion actual: la sincronizacion es por version guardada, no por operacion atomica en tiempo real. Para edicion simultanea fina se requeriria WebSocket + operaciones/patches o CRDT.
+La importacion limita el ZIP a 250 MB, 500 entradas y 600 MB descomprimidos. Valida formato, version, rutas declaradas y extensiones. Lee entradas concretas con `ZipFile.read`; no extrae rutas arbitrarias.
 
-## 9. Flujo AR
+Si existe un asset con igual nombre y diferente contenido, crea otro nombre y reescribe referencias y `modelId` cuando corresponde. Un proyecto existente no se sobrescribe.
 
-1. El usuario presiona una plantilla, por ejemplo `Marcador + Imagen`.
-2. El editor crea un marcador y un contenido asociado.
-3. El modal permite subir la imagen fisica y el target compilado `.mind`.
-4. El modal permite subir archivo local o pegar URL directa del contenido.
-5. El contenido guarda `arAnchor` con el UUID del marcador.
-6. El layout se guarda en el proyecto y se copia a `output/layout.json`.
-7. `index.html` carga `output/layout.json`.
-8. El cliente activa contenido cuando MindAR detecta la imagen entrenada.
+## 8. Colaboracion y cuentas
 
-## 10. Flujo De Assets
+La colaboracion se mantiene en `COLLAB_STATE` y no persiste al reiniciar el servidor.
 
-1. El usuario sube un recurso desde la mediateca o desde el modal AR.
-2. El backend lo guarda en `output/`.
-3. `/api/list-assets` lo lista con metadata.
-4. El editor puede asignarlo al objeto seleccionado.
-5. Si el asset esta referenciado en el layout guardado, aparece como "en uso".
+- heartbeat periodico por navegador;
+- presencia y objeto seleccionado;
+- locks con TTL aproximado de 18 segundos;
+- aviso o recarga ante una version remota;
+- liberacion al salir o cambiar seleccion.
 
-## 11. Backlog
+No hay WebSocket, CRDT ni merge de operaciones. La unidad de sincronizacion es el layout guardado.
 
-Las mejoras pendientes estan en `MEJORAS_PENDIENTES.md`.
+Las cuentas remotas se almacenan en `projects/users.json`. El acceso local detectado por `/api/connection-info` usa un administrador automatico para facilitar el desarrollo. Este sistema es adecuado para una herramienta local/LAN, no para exponer directamente el servidor a Internet sin una capa adicional de seguridad.
 
-Prioridades actuales:
+## 9. API
 
-1. Editor guiado de targets MindAR.
-2. Inspector profesional de contenido AR.
-3. Optimizacion de assets 3D.
-4. QA movil.
-5. Roles, comentarios y estados de revision.
-6. Sincronizacion granular en vivo.
+### Layout y proyectos
+
+| Endpoint | Metodo |
+|---|---:|
+| `/api/save-layout?project=...&version=...` | POST |
+| `/api/load-layout?project=...` | GET |
+| `/api/list-projects` | GET |
+| `/api/list-archived-projects` | GET |
+| `/api/duplicate-project` | POST |
+| `/api/rename-project` | POST |
+| `/api/archive-project` | POST |
+| `/api/restore-project` | POST |
+| `/api/delete-project` | POST |
+| `/api/export-project?project=...` | POST |
+| `/api/import-project?name=...` | POST |
+
+### Assets y publicacion
+
+| Endpoint | Metodo |
+|---|---:|
+| `/api/list-assets` | GET |
+| `/api/list-models` | GET |
+| `/api/upload-media?name=...` | POST |
+| `/api/upload-model?name=...` | POST |
+| `/api/delete-asset?name=...` | POST |
+| `/api/delete-model?name=...` | POST |
+| `/api/compress-model` | POST |
+| `/api/export-experience?name=...` | POST |
+
+### Colaboracion y acceso
+
+| Endpoint | Metodo |
+|---|---:|
+| `/api/collab-heartbeat` | POST |
+| `/api/collab-release` | POST |
+| `/api/collab-state?project=...` | GET |
+| `/api/login` | POST |
+| `/api/register` | POST |
+| `/api/connection-info` | GET |
+
+`/api/generate-model` esta retirado y devuelve un error de compatibilidad.
+
+## 10. Dependencias y despliegue
+
+Python usa modulos estandar: HTTP, sockets, JSON, ZIP, archivos y procesos. Blender es externo y opcional.
+
+El frontend depende de CDN para A-Frame, MindAR y fuentes. En movil, `getUserMedia` exige un contexto seguro: HTTPS o `localhost`.
+
+El servidor actual no implementa TLS, reverse proxy, sesiones firmadas, base de datos ni permisos de produccion. Para despliegue publico debe colocarse detras de infraestructura apropiada.
+
+## 11. Verificacion
+
+```powershell
+python -m py_compile moby_studio\lanzador_ar.py
+Invoke-WebRequest -UseBasicParsing http://localhost:8000/editor.html
+Invoke-WebRequest -UseBasicParsing http://localhost:8000/index.html
+git diff --check
+```
+
+El backlog vigente esta en [MEJORAS_PENDIENTES.md](MEJORAS_PENDIENTES.md).
