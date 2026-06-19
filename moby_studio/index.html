@@ -1592,6 +1592,7 @@
         renderer="colorManagement: true; antialias: true; alpha: true;"
         background="transparent: true"
         cursor="rayOrigin: mouse"
+        raycaster="objects: .clickable, .interactive-entity"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false"
         gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
@@ -1919,6 +1920,120 @@
             }
         }
 
+        function configurarAudioAR(audioEl, obj) {
+            audioEl.setAttribute('preload', 'auto');
+            audioEl.setAttribute('crossorigin', 'anonymous');
+            audioEl.dataset.arAudio = 'on';
+            audioEl.loop = obj.loop === true;
+            audioEl.volume = Number.isFinite(Number(obj.volume)) ? Math.max(0, Math.min(1, Number(obj.volume))) : 0.9;
+            audioEl.load();
+        }
+
+        function actualizarReproductorAudioAR(player, reproduciendo) {
+            if (!player) return;
+            const playIcon = player.querySelector('[data-audio-play-icon]');
+            const pauseIcons = player.querySelectorAll('[data-audio-pause-icon]');
+            if (playIcon) playIcon.setAttribute('visible', reproduciendo ? 'false' : 'true');
+            pauseIcons.forEach(icon => icon.setAttribute('visible', reproduciendo ? 'true' : 'false'));
+            player.querySelectorAll('[data-audio-wave]').forEach((bar, index) => {
+                bar.removeAttribute('animation__wave');
+                if (reproduciendo) {
+                    const peak = 0.75 + ((index % 5) * 0.18);
+                    bar.setAttribute('animation__wave', `property: scale; from: 1 0.35 1; to: 1 ${peak} 1; dir: alternate; dur: ${260 + (index % 4) * 75}; easing: easeInOutSine; loop: true`);
+                } else {
+                    bar.setAttribute('scale', '1 0.35 1');
+                }
+            });
+        }
+
+        async function reproducirAudioAR(audioEl, obj, player) {
+            audioEl.volume = Number.isFinite(Number(obj.volume)) ? Math.max(0, Math.min(1, Number(obj.volume))) : 0.9;
+            try {
+                await audioEl.play();
+                actualizarReproductorAudioAR(player, true);
+            } catch (err) {
+                console.warn('[Audio AR] El navegador bloqueo la reproduccion:', err);
+                actualizarReproductorAudioAR(player, false);
+                mostrarNotificacion('Toca el reproductor para activar el audio.', 'warning');
+            }
+        }
+
+        function crearReproductorAudioAR(obj, audioEl) {
+            const player = document.createElement('a-entity');
+            player.setAttribute('id', obj.uuid);
+            player.setAttribute('billboard-ui', '');
+            player.setAttribute('class', 'clickable');
+
+            const panel = document.createElement('a-plane');
+            panel.setAttribute('width', '1.8');
+            panel.setAttribute('height', '0.62');
+            panel.setAttribute('material', 'shader: flat; color: #071426; opacity: 0.96; transparent: true; side: double;');
+            player.appendChild(panel);
+
+            const accent = document.createElement('a-plane');
+            accent.setAttribute('width', '1.8');
+            accent.setAttribute('height', '0.035');
+            accent.setAttribute('position', '0 0.292 0.012');
+            accent.setAttribute('material', 'shader: flat; color: #ec4899; side: double;');
+            player.appendChild(accent);
+
+            const button = document.createElement('a-circle');
+            button.setAttribute('radius', '0.18');
+            button.setAttribute('position', '-0.62 0 0.025');
+            button.setAttribute('material', 'shader: flat; color: #ec4899; side: double;');
+            player.appendChild(button);
+
+            const play = document.createElement('a-triangle');
+            play.setAttribute('data-audio-play-icon', '');
+            play.setAttribute('vertex-a', '-0.045 -0.07 0');
+            play.setAttribute('vertex-b', '-0.045 0.07 0');
+            play.setAttribute('vertex-c', '0.075 0 0');
+            play.setAttribute('position', '-0.605 0 0.04');
+            play.setAttribute('material', 'shader: flat; color: #ffffff; side: double;');
+            player.appendChild(play);
+
+            [-0.035, 0.035].forEach(offset => {
+                const pause = document.createElement('a-plane');
+                pause.setAttribute('data-audio-pause-icon', '');
+                pause.setAttribute('width', '0.035');
+                pause.setAttribute('height', '0.13');
+                pause.setAttribute('position', `${-0.62 + offset} 0 0.04`);
+                pause.setAttribute('material', 'shader: flat; color: #ffffff; side: double;');
+                pause.setAttribute('visible', 'false');
+                player.appendChild(pause);
+            });
+
+            const title = document.createElement('a-text');
+            title.setAttribute('value', obj.nombre || 'Audio espacial AR');
+            title.setAttribute('position', '-0.35 0.17 0.03');
+            title.setAttribute('width', '1.65');
+            title.setAttribute('color', '#f8fafc');
+            player.appendChild(title);
+
+            for (let index = 0; index < 14; index += 1) {
+                const bar = document.createElement('a-plane');
+                const height = 0.08 + ((index * 7) % 5) * 0.025;
+                bar.setAttribute('data-audio-wave', '');
+                bar.setAttribute('width', '0.035');
+                bar.setAttribute('height', height.toFixed(3));
+                bar.setAttribute('position', `${(-0.33 + index * 0.073).toFixed(3)} -0.06 0.03`);
+                bar.setAttribute('scale', '1 0.35 1');
+                bar.setAttribute('material', `shader: flat; color: ${index > 9 ? '#ec4899' : '#22d3ee'}; side: double;`);
+                player.appendChild(bar);
+            }
+
+            player.addEventListener('click', event => {
+                event.stopPropagation();
+                if (audioEl.paused) reproducirAudioAR(audioEl, obj, player);
+                else {
+                    audioEl.pause();
+                    actualizarReproductorAudioAR(player, false);
+                }
+            });
+            audioEl.addEventListener('ended', () => actualizarReproductorAudioAR(player, false));
+            return player;
+        }
+
         function prepararAudioVideosAR() {
             arUserGestureReady = true;
             document.querySelectorAll('video[data-ar-video-audio="on"]').forEach(videoEl => {
@@ -1927,6 +2042,7 @@
                 videoEl.removeAttribute('muted');
                 videoEl.load();
             });
+            document.querySelectorAll('audio[data-ar-audio="on"]').forEach(audioEl => audioEl.load());
         }
 
         function togglePresentationMode() {
@@ -3262,7 +3378,31 @@
                     }
                 }
                 
-                if (mediaType === 'video' && mediaUrl) {
+                if (mediaType === 'audio' && mediaUrl) {
+                    const audioId = `audio-resource-${obj.uuid}`;
+                    let audioEl = document.getElementById(audioId);
+                    if (!audioEl) {
+                        audioEl = document.createElement('audio');
+                        audioEl.setAttribute('id', audioId);
+                        audioEl.style.display = 'none';
+                        document.body.appendChild(audioEl);
+                    }
+                    audioEl.setAttribute('src', mediaUrl);
+                    configurarAudioAR(audioEl, obj);
+                    el = crearReproductorAudioAR(obj, audioEl);
+
+                    if (targetContainer) {
+                        targetContainer.addEventListener('targetFound', () => {
+                            el.setAttribute('visible', 'true');
+                            if (obj.autoplay !== false) reproducirAudioAR(audioEl, obj, el);
+                        });
+                        targetContainer.addEventListener('targetLost', () => {
+                            audioEl.pause();
+                            actualizarReproductorAudioAR(el, false);
+                            if (anchor !== 'base') el.setAttribute('visible', 'false');
+                        });
+                    }
+                } else if (mediaType === 'video' && mediaUrl) {
                     const videoId = `video-resource-${obj.uuid}`;
                     let videoEl = document.getElementById(videoId);
                     if (!videoEl) {

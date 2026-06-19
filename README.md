@@ -28,6 +28,7 @@ Implementado:
 - Paneles laterales del editor pulidos para guiar el flujo `Target -> Assets -> Anclar -> Probar`.
 - Plantilla principal `Marcador + Modelo 3D` para crear una experiencia AR funcional sin pasos de demo.
 - Gestion de proyectos con crear, duplicar, renombrar, archivar, restaurar y eliminar.
+- Transferencia de proyectos editables entre PCs mediante paquetes ZIP con layout y assets usados.
 - Visor simplificado: solo muestra controles necesarios para AR; chatbot y acciones extra se habilitan desde el editor.
 - Compresion Draco de modelos GLB usando Blender mediante `scripts/compress_model.py`.
 
@@ -238,6 +239,16 @@ Caracteristicas:
 - Aviso de version remota disponible.
 - Sincronizacion al guardar, no edicion granular en tiempo real.
 
+### Transferir Un Proyecto Entre PCs
+
+1. Guarda los cambios del proyecto.
+2. Abre `Gestionar proyectos` desde el icono de configuracion de la barra izquierda.
+3. En `Transferir entre PCs`, pulsa `Exportar proyecto` y descarga el ZIP generado.
+4. Copia ese ZIP a la otra PC donde este instalado Moby Studio.
+5. Abre el gestor, escribe opcionalmente un nombre de destino y pulsa `Importar ZIP`.
+
+El paquete contiene el layout editable, un manifiesto de version y los assets locales usados. Las URLs externas se conservan como referencias. Si la PC de destino ya tiene un asset con el mismo nombre pero contenido diferente, el importador conserva ambos, renombra el entrante y actualiza las referencias del layout. Un proyecto existente nunca se sobrescribe: se debe indicar otro nombre.
+
 ## API Principal
 
 | Endpoint | Metodo | Uso |
@@ -251,6 +262,8 @@ Caracteristicas:
 | `/api/archive-project` | POST | Archiva proyecto. |
 | `/api/restore-project` | POST | Restaura proyecto archivado. |
 | `/api/delete-project` | POST | Elimina permanentemente un proyecto activo o archivado, excepto `default`. |
+| `/api/export-project?project=...` | POST | Genera un paquete ZIP editable con layout, manifiesto y assets usados. |
+| `/api/import-project?name=...` | POST | Importa un paquete editable como proyecto nuevo; recibe el ZIP binario. |
 | `/api/collab-heartbeat` | POST | Registra presencia y lock temporal. |
 | `/api/collab-release` | POST | Libera locks del usuario. |
 | `/api/collab-state?project=...` | GET | Devuelve usuarios, locks y version remota. |

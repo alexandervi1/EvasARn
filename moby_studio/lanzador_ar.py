@@ -70,6 +70,11 @@ ASSET_EXTENSIONS = {
     ".mp4": "video",
     ".webm": "video",
     ".mov": "video",
+    ".mp3": "audio",
+    ".wav": "audio",
+    ".ogg": "audio",
+    ".m4a": "audio",
+    ".aac": "audio",
     ".mind": "target",
     ".json": "data"
 }
@@ -79,6 +84,11 @@ PROJECTS_DIR = "projects"
 ARCHIVE_DIR = "_archive"
 COLLAB_TTL_SECONDS = 18
 COLLAB_STATE = {}
+PROJECT_PACKAGE_FORMAT = "moby-studio-project"
+PROJECT_PACKAGE_VERSION = 1
+MAX_PROJECT_PACKAGE_BYTES = 250 * 1024 * 1024
+MAX_PROJECT_PACKAGE_FILES = 500
+MAX_PROJECT_PACKAGE_UNCOMPRESSED_BYTES = 600 * 1024 * 1024
 
 def send_json(handler, status, payload):
     handler.send_response(status)
@@ -225,6 +235,260 @@ def friendly_asset_name(file_name):
         "blue whale 3d model.glb": "Ballena Azul (Original)"
     }
     return known.get(file_name, name)
+
+def model_id_for_asset(file_name):
+    stem = os.path.splitext(os.path.basename(file_name))[0].replace(" ", "_")
+    return f"modelo-{stem}"
+
+def local_asset_name(value):
+    if not isinstance(value, str) or not value.strip():
+        return None
+    parsed = urllib.parse.urlparse(value.strip())
+    if parsed.scheme in ("http", "https", "data") or parsed.netloc:
+        return None
+    name = os.path.basename(urllib.parse.unquote(parsed.path.replace("\\", "/")))
+    return name or None
+
+def collect_project_asset_usage(layout):
+    usage = {}
+    output_dir = "output"
+    model_ids = {}
+    if os.path.isdir(output_dir):
+        for file_name in os.listdir(output_dir):
+            path = os.path.join(output_dir, file_name)
+            if os.path.isfile(path) and asset_kind(file_name) == "model":
+                model_ids[model_id_for_asset(file_name)] = file_name
+
+    model_ids.update({
+        "modelo-ballena": "blue whale 3d model.glb",
+        "modelo-rack": "servidor_rack.glb",
+        "modelo-buque": "buque_carga.glb"
+    })
+
+    entities = layout.get("entities", []) if isinstance(layout, dict) else []
+    for obj in entities if isinstance(entities, list) else []:
+        if not isinstance(obj, dict):
+            continue
+        object_id = obj.get("uuid") or obj.get("nombre") or "objeto"
+        for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl"):
+            file_name = local_asset_name(obj.get(field))
+            if file_name:
+                usage.setdefault(file_name, []).append(object_id)
+        model_id = obj.get("modelId")
+        if model_id in model_ids:
+            usage.setdefault(model_ids[model_id], []).append(object_id)
+    return usage
+
+def unique_project_name(base_name):
+    base = safe_project_name(base_name)
+    candidate = base
+    suffix = 2
+    while os.path.exists(os.path.join(PROJECTS_DIR, candidate)):
+        candidate = f"{base}-{suffix}"
+        suffix += 1
+    return candidate
+
+def unique_asset_name(file_name, project):
+    base, extension = os.path.splitext(os.path.basename(file_name))
+    candidate = f"{safe_project_name(project)}__{base}{extension}"
+    suffix = 2
+    while os.path.exists(os.path.join("output", candidate)):
+        candidate = f"{safe_project_name(project)}__{base}_{suffix}{extension}"
+        suffix += 1
+    return candidate
+
+def rewrite_imported_asset_references(layout, asset_name_map, model_id_map):
+    entities = layout.get("entities", []) if isinstance(layout, dict) else []
+    for obj in entities if isinstance(entities, list) else []:
+        if not isinstance(obj, dict):
+            continue
+        for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl"):
+            old_name = local_asset_name(obj.get(field))
+            new_name = asset_name_map.get(old_name)
+            if new_name and new_name != old_name:
+                obj[field] = f"output/{new_name}"
+        old_model_id = obj.get("modelId")
+        if old_model_id in model_id_map:
+            obj["modelId"] = model_id_map[old_model_id]
+
+def export_project_package(project):
+    project = safe_project_name(project)
+    layout_path = project_layout_path(project)
+    if not os.path.isfile(layout_path):
+        raise FileNotFoundError(f"El proyecto '{project}' no existe.")
+
+    layout = read_layout_file(layout_path)
+    if not isinstance(layout, dict):
+        raise ValueError("El layout del proyecto no es valido.")
+
+    exports_dir = os.path.join("output", "exports")
+    os.makedirs(exports_dir, exist_ok=True)
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    zip_name = f"{project}_proyecto_{timestamp}.zip"
+    zip_path = os.path.join(exports_dir, zip_name)
+    usage = collect_project_asset_usage(layout)
+    included_assets = []
+    missing_assets = []
+
+    manifest = {
+        "format": PROJECT_PACKAGE_FORMAT,
+        "formatVersion": PROJECT_PACKAGE_VERSION,
+        "project": project,
+        "exportedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "layout": "project/layout.json",
+        "assets": [],
+        "missingAssets": missing_assets
+    }
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as package:
+        package.writestr("project/layout.json", json.dumps(layout, indent=2, ensure_ascii=False))
+        for file_name in sorted(usage):
+            source_path = os.path.join("output", file_name)
+            if not os.path.isfile(source_path):
+                missing_assets.append(file_name)
+                continue
+            entry_path = f"assets/{file_name}"
+            package.write(source_path, entry_path)
+            asset_entry = {
+                "name": file_name,
+                "path": entry_path,
+                "kind": asset_kind(file_name),
+                "sizeBytes": os.path.getsize(source_path),
+                "usedBy": usage.get(file_name, [])
+            }
+            if asset_entry["kind"] == "model":
+                known_ids = {model_id_for_asset(file_name)}
+                legacy_ids = {
+                    "blue whale 3d model.glb": "modelo-ballena",
+                    "servidor_rack.glb": "modelo-rack",
+                    "buque_carga.glb": "modelo-buque"
+                }
+                if file_name in legacy_ids:
+                    known_ids.add(legacy_ids[file_name])
+                used_model_ids = sorted({
+                    str(obj.get("modelId"))
+                    for obj in layout.get("entities", [])
+                    if isinstance(obj, dict) and obj.get("modelId") in known_ids
+                })
+                asset_entry["modelIds"] = used_model_ids or [model_id_for_asset(file_name)]
+            manifest["assets"].append(asset_entry)
+            included_assets.append(file_name)
+        package.writestr("manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False))
+        package.writestr(
+            "LEEME.txt",
+            "Paquete editable de Moby Studio.\n"
+            "Importalo desde Gestion de proyectos > Transferir entre PCs.\n"
+        )
+
+    return {
+        "zipName": zip_name,
+        "zipPath": f"output/exports/{zip_name}",
+        "project": project,
+        "assetCount": len(included_assets),
+        "missingAssets": missing_assets,
+        "size": format_size(os.path.getsize(zip_path))
+    }
+
+def import_project_package(package_bytes, requested_name=None):
+    if not package_bytes:
+        raise ValueError("El paquete esta vacio.")
+    if len(package_bytes) > MAX_PROJECT_PACKAGE_BYTES:
+        raise ValueError("El paquete supera el limite de 250 MB.")
+
+    created_assets = []
+    with zipfile.ZipFile(io.BytesIO(package_bytes), "r") as package:
+        entries = package.infolist()
+        if len(entries) > MAX_PROJECT_PACKAGE_FILES:
+            raise ValueError("El paquete contiene demasiados archivos.")
+        total_size = sum(item.file_size for item in entries)
+        if total_size > MAX_PROJECT_PACKAGE_UNCOMPRESSED_BYTES:
+            raise ValueError("El contenido descomprimido supera el limite permitido.")
+        entry_names = {item.filename for item in entries}
+        if len(entry_names) != len(entries):
+            raise ValueError("El paquete contiene rutas duplicadas.")
+        if "manifest.json" not in entry_names:
+            raise ValueError("Falta manifest.json; no es un paquete de proyecto Moby Studio.")
+
+        manifest = json.loads(package.read("manifest.json").decode("utf-8"))
+        if manifest.get("format") != PROJECT_PACKAGE_FORMAT:
+            raise ValueError("Formato de paquete no reconocido.")
+        if int(manifest.get("formatVersion", 0)) != PROJECT_PACKAGE_VERSION:
+            raise ValueError("Version de paquete no compatible.")
+        layout_entry = manifest.get("layout")
+        if layout_entry != "project/layout.json" or layout_entry not in entry_names:
+            raise ValueError("El paquete no contiene un layout editable valido.")
+
+        layout = json.loads(package.read(layout_entry).decode("utf-8"))
+        if not isinstance(layout, dict) or not isinstance(layout.get("entities", []), list):
+            raise ValueError("El layout incluido no es valido.")
+
+        original_project = safe_project_name(manifest.get("project") or "proyecto-importado")
+        project = safe_project_name(requested_name) if requested_name else original_project
+        project_dir = os.path.join(PROJECTS_DIR, project)
+        if os.path.exists(project_dir):
+            suggestion = unique_project_name(project)
+            raise FileExistsError(f"El proyecto '{project}' ya existe. Prueba con '{suggestion}'.")
+
+        prepared_assets = []
+        asset_name_map = {}
+        model_id_map = {}
+        for asset in manifest.get("assets", []):
+            if not isinstance(asset, dict):
+                raise ValueError("El manifiesto contiene un asset invalido.")
+            original_name = os.path.basename(str(asset.get("name") or ""))
+            entry_path = str(asset.get("path") or "")
+            if not original_name or entry_path != f"assets/{original_name}" or entry_path not in entry_names:
+                raise ValueError("Una ruta de asset del paquete no es valida.")
+            if os.path.splitext(original_name.lower())[1] not in ASSET_EXTENSIONS:
+                raise ValueError(f"Tipo de asset no permitido: {original_name}")
+            data = package.read(entry_path)
+            target_name = original_name
+            target_path = os.path.join("output", target_name)
+            if os.path.isfile(target_path):
+                with open(target_path, "rb") as existing:
+                    same_content = existing.read() == data
+                if not same_content:
+                    target_name = unique_asset_name(original_name, project)
+                    target_path = os.path.join("output", target_name)
+            asset_name_map[original_name] = target_name
+            old_model_ids = asset.get("modelIds") or ([asset.get("modelId")] if asset.get("modelId") else [])
+            if target_name != original_name:
+                for old_model_id in old_model_ids:
+                    model_id_map[str(old_model_id)] = model_id_for_asset(target_name)
+            prepared_assets.append((target_path, data, not os.path.exists(target_path)))
+
+        rewrite_imported_asset_references(layout, asset_name_map, model_id_map)
+        layout["project"] = project
+        layout["version"] = 1
+        layout["updatedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        try:
+            os.makedirs("output", exist_ok=True)
+            for target_path, data, should_create in prepared_assets:
+                if should_create:
+                    with open(target_path, "wb") as asset_file:
+                        asset_file.write(data)
+                    created_assets.append(target_path)
+            os.makedirs(project_dir)
+            with open(os.path.join(project_dir, "layout.json"), "w", encoding="utf-8") as layout_file:
+                json.dump(layout, layout_file, indent=4, ensure_ascii=False)
+        except Exception:
+            if os.path.isdir(project_dir):
+                shutil.rmtree(project_dir, ignore_errors=True)
+            for asset_path in created_assets:
+                try:
+                    os.remove(asset_path)
+                except OSError:
+                    pass
+            raise
+
+    return {
+        "project": project,
+        "originalProject": original_project,
+        "assetCount": len(prepared_assets),
+        "renamedAssets": {old: new for old, new in asset_name_map.items() if old != new},
+        "missingAssets": manifest.get("missingAssets", [])
+    }
 
 def collect_layout_asset_usage():
     usage = {}
@@ -700,6 +964,48 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": f"Falla al eliminar asset: {str(e)}"}).encode('utf-8'))
+        elif self.path.startswith('/api/export-project'):
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            project = safe_project_name(params.get('project', ['default'])[0])
+            try:
+                export_data = export_project_package(project)
+                send_json(self, 200, {
+                    "status": "success",
+                    "message": f"Proyecto '{project}' exportado correctamente.",
+                    **export_data
+                })
+            except FileNotFoundError as e:
+                send_json(self, 404, {"error": str(e)})
+            except Exception as e:
+                print(f"[PROJECT EXPORT ERROR] {e}")
+                send_json(self, 500, {"error": f"No se pudo exportar el proyecto: {e}"})
+        elif self.path.startswith('/api/import-project'):
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length <= 0:
+                send_json(self, 400, {"error": "Selecciona un paquete ZIP para importar."})
+                return
+            if content_length > MAX_PROJECT_PACKAGE_BYTES:
+                send_json(self, 413, {"error": "El paquete supera el limite de 250 MB."})
+                return
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            requested_name = params.get('name', [None])[0]
+            package_bytes = self.rfile.read(content_length)
+            try:
+                import_data = import_project_package(package_bytes, requested_name)
+                send_json(self, 200, {
+                    "status": "success",
+                    "message": f"Proyecto '{import_data['project']}' importado correctamente.",
+                    **import_data
+                })
+            except FileExistsError as e:
+                send_json(self, 409, {"error": str(e)})
+            except (ValueError, json.JSONDecodeError, zipfile.BadZipFile, UnicodeDecodeError) as e:
+                send_json(self, 400, {"error": f"Paquete invalido: {e}"})
+            except Exception as e:
+                print(f"[PROJECT IMPORT ERROR] {e}")
+                send_json(self, 500, {"error": f"No se pudo importar el proyecto: {e}"})
         elif self.path.startswith('/api/export-experience'):
             query = urllib.parse.urlparse(self.path).query
             params = urllib.parse.parse_qs(query)

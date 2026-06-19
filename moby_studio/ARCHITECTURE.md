@@ -121,6 +121,8 @@ Endpoints activos:
 | `/api/list-assets` | GET | Lista assets con tipo, tamano, fecha, uso y proteccion. |
 | `/api/delete-asset?name=...` | POST | Elimina assets no protegidos. |
 | `/api/export-experience?name=...` | POST | Empaqueta visor, layout, assets usados y manifiesto en un ZIP. |
+| `/api/export-project?project=...` | POST | Empaqueta un proyecto editable con su layout y assets locales usados. |
+| `/api/import-project?name=...` | POST | Valida e importa un paquete editable como proyecto nuevo. |
 | `/api/list-models` | GET | Lista solo modelos para compatibilidad. |
 | `/api/upload-media?name=...` | POST | Sube cualquier recurso multimedia. |
 | `/api/upload-model?name=...` | POST | Sube modelos GLB/GLTF. |
@@ -129,6 +131,19 @@ Endpoints activos:
 | `/api/compress-model` | POST | Ejecuta compresion Draco con Blender. |
 
 ## 4. Persistencia
+
+### Paquete Portable De Proyecto
+
+Los paquetes de transferencia usan `format: "moby-studio-project"` y `formatVersion: 1`. El ZIP contiene:
+
+```text
+manifest.json
+project/layout.json
+assets/<archivos usados>
+LEEME.txt
+```
+
+La importacion no extrae rutas arbitrarias. Valida manifiesto, version, cantidad de archivos, tamano total y extensiones permitidas. Si un asset local entra en conflicto con otro archivo distinto, se renombra y el layout importado se reescribe antes de guardarse.
 
 ### `projects/<proyecto>/layout.json`
 

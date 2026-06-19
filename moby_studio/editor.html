@@ -50,8 +50,8 @@
             height: 100%;
             pointer-events: none;
             display: grid;
-            grid-template-columns: var(--sidebar-width, 280px) 1fr var(--inspector-width, 320px);
-            grid-template-rows: 70px 1fr;
+            grid-template-columns: var(--sidebar-width, 332px) 1fr var(--inspector-width, 320px);
+            grid-template-rows: 56px 1fr;
             grid-template-areas: 
                 "header header header"
                 "sidebar main inspector";
@@ -62,12 +62,12 @@
         /* HEADER SUPERIOR */
         header {
             grid-area: header;
-            background: linear-gradient(180deg, rgba(5, 7, 15, 0.95) 0%, rgba(5, 7, 15, 0.6) 100%);
+            background: rgba(7, 10, 18, 0.96);
             border-bottom: 1px solid var(--color-border-glass);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 25px;
+            padding: 0 14px 0 16px;
             pointer-events: auto;
             backdrop-filter: blur(10px);
         }
@@ -75,16 +75,16 @@
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 9px;
         }
 
         .logo-whale {
-            font-size: 24px;
+            font-size: 18px;
         }
 
         .logo-title {
             font-weight: 800;
-            font-size: 18px;
+            font-size: 14px;
             letter-spacing: 1px;
             background: linear-gradient(90deg, #00f3ff 0%, #0284c7 100%);
             -webkit-background-clip: text;
@@ -105,6 +105,25 @@
             display: flex;
             gap: 8px;
             align-items: center;
+        }
+
+        .header-context {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .header-project-label {
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.7px;
+            text-transform: uppercase;
+        }
+
+        .header-secondary-control {
+            display: none !important;
         }
 
         .header-btn, .header-select, .header-input-text {
@@ -305,19 +324,84 @@
             border-right: 1px solid var(--color-border-glass);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            padding: 25px 20px;
+            padding: 16px 16px 16px 68px;
             display: flex;
             flex-direction: column;
             gap: 20px;
             pointer-events: auto;
             overflow-y: auto;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: left;
+            position: relative;
+            overflow: hidden;
         }
         .sidebar.collapsed {
-            transform: translateX(-100%);
-            opacity: 0;
-            pointer-events: none !important;
+            transform: none;
+            opacity: 1;
+            padding: 0;
+            pointer-events: auto !important;
+        }
+
+        .sidebar.collapsed > :not(.activity-bar) {
+            display: none !important;
+        }
+
+        .activity-bar {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 52px;
+            padding: 8px 6px;
+            background: rgba(4, 7, 13, 0.96);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            z-index: 5;
+        }
+
+        .activity-spacer {
+            flex: 1;
+        }
+
+        .activity-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #64748b;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: color 0.18s ease, background 0.18s ease;
+        }
+
+        .activity-btn:hover {
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .activity-btn.active {
+            color: #f8fafc;
+            background: rgba(14, 165, 233, 0.12);
+        }
+
+        .activity-btn.active::before {
+            content: "";
+            position: absolute;
+            left: -6px;
+            width: 2px;
+            height: 24px;
+            border-radius: 0 2px 2px 0;
+            background: var(--color-docker);
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.45);
+        }
+
+        .activity-btn svg {
+            width: 20px;
+            height: 20px;
         }
 
         .panel-section-title {
@@ -1055,34 +1139,6 @@
             color: var(--color-error);
         }
 
-        /* INSTRUCCIONES EN EL LIENZO */
-        .viewport-instructions {
-            position: absolute;
-            bottom: 20px;
-            left: calc(var(--sidebar-width, 280px) + 20px);
-            background: rgba(5, 7, 15, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 11px;
-            color: #94a3b8;
-            backdrop-filter: blur(5px);
-            display: flex;
-            gap: 15px;
-            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .inst-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .inst-icon {
-            color: var(--color-docker);
-            font-weight: bold;
-        }
-
         .viewport-ar-summary {
             position: absolute;
             top: 82px;
@@ -1138,8 +1194,8 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 243, 255, 0.05);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 6px 12px;
-            border-radius: 30px;
+            padding: 5px 7px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             gap: 5px;
@@ -1151,14 +1207,14 @@
         .toolbar-btn {
             background: transparent;
             border: 1px solid transparent;
-            border-radius: 20px;
+            border-radius: 7px;
             color: #94a3b8;
-            padding: 8px 16px;
+            padding: 7px 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 600;
             transition: all 0.2s ease;
         }
@@ -1181,6 +1237,111 @@
             background: var(--color-border-glass);
             margin: 0 4px;
         }
+
+        .viewport-view-controls {
+            position: absolute;
+            right: 18px;
+            bottom: 18px;
+            z-index: 20;
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            border-radius: 9px;
+            background: rgba(5, 7, 15, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+            backdrop-filter: blur(12px);
+            pointer-events: auto;
+        }
+
+        .viewport-view-btn {
+            height: 30px;
+            min-width: 44px;
+            padding: 0 9px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.35px;
+            cursor: pointer;
+        }
+
+        .viewport-view-btn:hover {
+            color: #f8fafc;
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .viewport-precision-hud {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            min-height: 38px;
+            max-width: calc(100% - 210px);
+            padding: 5px 7px;
+            border-radius: 9px;
+            background: rgba(5, 7, 15, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
+            backdrop-filter: blur(12px);
+            pointer-events: none;
+        }
+
+        .precision-item {
+            min-width: 62px;
+            padding: 2px 9px;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .precision-item:last-child { border-right: 0; }
+
+        .precision-label {
+            display: block;
+            color: #475569;
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.55px;
+            text-transform: uppercase;
+        }
+
+        .precision-value {
+            display: block;
+            margin-top: 1px;
+            color: #cbd5e1;
+            font-family: Consolas, monospace;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .precision-value.accent { color: var(--color-docker); }
+
+        .viewport-center-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+            pointer-events: none;
+            opacity: 0.32;
+        }
+
+        .viewport-center-guide::before,
+        .viewport-center-guide::after {
+            content: "";
+            position: absolute;
+            background: #cbd5e1;
+        }
+
+        .viewport-center-guide::before { left: 8px; top: 0; width: 1px; height: 18px; }
+        .viewport-center-guide::after { left: 0; top: 8px; width: 18px; height: 1px; }
 
         .delete-btn:hover {
             color: var(--color-error);
@@ -1210,7 +1371,7 @@
 
         /* === PESTAÑAS DEL SIDEBAR === */
         .sidebar-tabs {
-            display: flex;
+            display: none;
             gap: 0;
             border-bottom: 1px solid var(--color-border-glass);
             margin-bottom: 16px;
@@ -1252,40 +1413,6 @@
 
         .sidebar-panel.active {
             display: flex;
-        }
-
-        .workflow-guide {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 6px;
-            margin-bottom: 12px;
-            flex-shrink: 0;
-        }
-
-        .workflow-step {
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            background: rgba(255, 255, 255, 0.025);
-            border-radius: 8px;
-            padding: 7px 5px;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 8.8px;
-            line-height: 1.25;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-
-        .workflow-step strong {
-            display: block;
-            color: #e2e8f0;
-            font-size: 10px;
-            margin-bottom: 2px;
-        }
-
-        .workflow-step.active {
-            border-color: rgba(0, 243, 255, 0.35);
-            background: rgba(0, 243, 255, 0.06);
         }
 
         .sidebar-helper-card {
@@ -2234,10 +2361,10 @@
             height: 812px !important;
             top: 50% !important;
             left: 50% !important;
-            transform: translate(-50%, -50%) !important;
+            transform: translate(-50%, -50%) scale(var(--mobile-preview-scale, 0.78)) !important;
             border-radius: 40px !important;
             border: 12px solid #1e293b !important;
-            box-shadow: 0 0 0 9999px rgba(5, 7, 15, 0.85), 0 20px 60px rgba(0, 243, 255, 0.22) !important;
+            box-shadow: 0 0 0 9999px rgba(3, 6, 12, 0.86), 0 24px 80px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255,255,255,0.08) !important;
             z-index: 5 !important;
             overflow: hidden;
             background: #000;
@@ -2245,6 +2372,70 @@
         
         .iphone-sim-active a-scene {
             border-radius: 28px !important;
+        }
+
+        .mobile-preview-tools {
+            display: none;
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 160;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px 6px 12px;
+            border-radius: 10px;
+            background: rgba(7, 10, 18, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+            pointer-events: auto;
+        }
+
+        #hud-editor.mobile-preview-active .mobile-preview-tools { display: flex; }
+
+        #hud-editor.mobile-preview-active #transform-toolbar,
+        #hud-editor.mobile-preview-active .viewport-ar-summary,
+        #hud-editor.mobile-preview-active .viewport-view-controls,
+        #hud-editor.mobile-preview-active .viewport-precision-hud,
+        #hud-editor.mobile-preview-active .viewport-center-guide,
+        #hud-editor.mobile-preview-active #viewport-navigation-star {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mobile-preview-title {
+            color: #f8fafc;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .mobile-preview-meta {
+            color: #64748b;
+            font-size: 9px;
+            font-family: Consolas, monospace;
+        }
+
+        .mobile-preview-select,
+        .mobile-preview-close {
+            height: 28px !important;
+            min-height: 28px;
+            border-radius: 6px !important;
+            font-size: 9px !important;
+        }
+
+        .mobile-preview-close {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0 10px;
+            background: rgba(255,255,255,0.05);
+            color: #cbd5e1;
+            cursor: pointer;
+        }
+
+        .mobile-safe-area {
+            position: absolute;
+            inset: 44px 12px 28px;
+            border: 1px dashed rgba(56, 189, 248, 0.32);
+            border-radius: 18px;
         }
 
         .inspector-action-row {
@@ -2298,7 +2489,7 @@
         /* === RESPONSIVE UTILITIES AND TOGGLE BUTTONS === */
         .floating-toggle-btn {
             position: absolute;
-            top: 85px;
+            top: 68px;
             width: 36px;
             height: 36px;
             background: rgba(10, 15, 30, 0.85);
@@ -2322,14 +2513,14 @@
             box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
         }
         #btn-toggle-sidebar {
-            left: calc(var(--sidebar-width, 280px) + 12px);
+            left: calc(var(--sidebar-width, 332px) + 12px);
         }
         #btn-toggle-inspector {
             right: calc(var(--inspector-width, 320px) + 12px);
         }
 
         #hud-editor.sidebar-collapsed {
-            --sidebar-width: 0px;
+            --sidebar-width: 52px;
         }
         #hud-editor.inspector-collapsed {
             --inspector-width: 0px;
@@ -2401,9 +2592,6 @@
             #btn-toggle-inspector {
                 right: 12px;
             }
-            .viewport-instructions {
-                display: none;
-            }
             .viewport-ar-summary {
                 top: 86px;
                 left: 12px;
@@ -2438,6 +2626,271 @@
                 padding: 0 10px;
             }
         }
+
+        /* Escritorio compacto: conserva el lienzo usable al reducir la ventana. */
+        @media (max-width: 1350px) {
+            .btn-label {
+                display: none;
+            }
+
+            .toolbar-btn {
+                width: 34px;
+                height: 34px;
+                padding: 0;
+                justify-content: center;
+            }
+
+            #transform-toolbar {
+                top: 12px;
+                padding: 4px 5px;
+            }
+
+            .logo-badge,
+            .header-project-label {
+                display: none;
+            }
+
+            header {
+                padding-inline: 10px;
+            }
+
+            .header-buttons {
+                gap: 5px;
+            }
+
+            .header-btn {
+                padding-inline: 9px;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            #hud-editor,
+            #hud-editor.sidebar-collapsed,
+            #hud-editor.inspector-collapsed {
+                grid-template-columns: 52px minmax(0, 1fr) 0;
+                grid-template-rows: 56px minmax(0, 1fr);
+                grid-template-areas:
+                    "header header header"
+                    "sidebar main inspector";
+                --sidebar-width: 52px;
+                --inspector-width: 0px;
+            }
+
+            .sidebar,
+            .sidebar.collapsed {
+                position: relative;
+                top: auto;
+                left: auto;
+                width: 52px;
+                height: 100%;
+                padding: 0;
+                transform: none;
+                opacity: 1;
+                overflow: hidden;
+                pointer-events: auto !important;
+                z-index: 70;
+            }
+
+            .sidebar > :not(.activity-bar),
+            .sidebar.collapsed > :not(.activity-bar) {
+                display: none !important;
+            }
+
+            .sidebar.compact-open {
+                width: min(310px, calc(100vw - 60px));
+                padding: 16px 16px 16px 68px;
+                background: rgba(7, 11, 22, 0.98);
+                box-shadow: 14px 0 38px rgba(0,0,0,0.48);
+            }
+
+            .sidebar.compact-open > :not(.activity-bar) {
+                display: flex !important;
+            }
+
+            .sidebar.compact-open > .sidebar-tabs {
+                display: none !important;
+            }
+
+            .sidebar.compact-open > .sidebar-panel:not(.active) {
+                display: none !important;
+            }
+
+            .inspector,
+            .inspector.collapsed {
+                position: absolute;
+                top: 56px;
+                right: 0;
+                bottom: 0;
+                width: min(320px, calc(100vw - 60px));
+                height: auto;
+                transform: translateX(100%);
+                opacity: 0;
+                pointer-events: none !important;
+                z-index: 75;
+                box-shadow: -14px 0 38px rgba(0,0,0,0.48);
+            }
+
+            .inspector.active-compact {
+                transform: translateX(0);
+                opacity: 1;
+                pointer-events: auto !important;
+            }
+
+            #btn-toggle-sidebar {
+                left: 64px;
+            }
+
+            .sidebar.compact-open ~ #btn-toggle-sidebar,
+            #hud-editor:has(.sidebar.compact-open) #btn-toggle-sidebar {
+                left: min(322px, calc(100vw - 48px));
+            }
+
+            #btn-toggle-inspector {
+                right: 12px;
+            }
+
+            #viewport-navigation-star {
+                display: none;
+            }
+
+            .viewport-ar-summary {
+                top: 62px;
+                left: 12px;
+                right: auto;
+                width: 220px;
+                padding: 7px 9px;
+            }
+
+            .viewport-ar-summary-head {
+                margin-bottom: 0;
+            }
+
+            #viewport-ar-summary-body {
+                display: none;
+            }
+
+            .viewport-precision-hud {
+                left: 12px;
+                right: 230px;
+                bottom: 12px;
+                max-width: none;
+                transform: none;
+                overflow: hidden;
+            }
+
+            .precision-item:nth-child(4),
+            .precision-item:nth-child(5) {
+                display: none;
+            }
+
+            .viewport-view-controls {
+                right: 12px;
+                bottom: 12px;
+            }
+
+            .viewport-view-btn {
+                min-width: 40px;
+                padding-inline: 6px;
+                font-size: 8px;
+            }
+
+            .logo-area {
+                min-width: 0;
+                gap: 6px;
+            }
+
+            .logo-title {
+                font-size: 12px;
+            }
+
+            .save-state-badge {
+                padding-inline: 6px;
+                font-size: 9px;
+            }
+
+            #project-select {
+                width: 105px !important;
+            }
+
+            .header-btn {
+                height: 32px;
+                font-size: 10px;
+                padding-inline: 7px;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .logo-title,
+            .save-state-badge {
+                display: none;
+            }
+
+            #project-select {
+                width: 92px !important;
+            }
+
+            .header-action-label {
+                display: none;
+            }
+
+            .header-buttons .header-btn {
+                width: 34px;
+                min-width: 34px;
+                padding: 0;
+            }
+
+            .viewport-precision-hud {
+                right: 188px;
+            }
+
+            .precision-item:first-child {
+                display: none;
+            }
+
+            .viewport-view-btn {
+                min-width: 36px;
+                padding-inline: 5px;
+            }
+
+            .viewport-view-btn:first-child {
+                display: none;
+            }
+        }
+
+        @media (max-height: 650px) {
+            #transform-toolbar {
+                top: 8px;
+            }
+
+            .floating-toggle-btn {
+                top: 62px;
+            }
+
+            .viewport-ar-summary {
+                top: 58px;
+                padding: 6px 8px;
+            }
+
+            .viewport-ar-summary-head {
+                margin-bottom: 0;
+            }
+
+            #viewport-ar-summary-body,
+            #viewport-navigation-star {
+                display: none;
+            }
+
+            .viewport-precision-hud,
+            .viewport-view-controls {
+                bottom: 8px;
+            }
+        }
+
+        @media (max-height: 480px) {
+            .viewport-ar-summary {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2452,45 +2905,47 @@
                 <span class="logo-title">MOBY STUDIO</span>
                 <span class="logo-badge">EDITOR 3D</span>
                 <span class="save-state-badge" id="save-state-badge">Guardado</span>
-                <span class="autosave-chip" id="autosave-chip">Autosave listo</span>
+                <span class="autosave-chip header-secondary-control" id="autosave-chip">Autosave listo</span>
             </div>
             
             <div class="header-buttons">
+                <span class="header-project-label">Proyecto</span>
                 <select id="project-select" class="header-select" style="width: 125px;" onchange="cambiarProyectoActivo(this.value)">
                     <option value="default">default</option>
                 </select>
-                <button class="header-btn" onclick="abrirModalGestionProyectos()" title="Gestionar Proyectos (Duplicar, Renombrar, Archivar...)">
+                <button class="header-btn header-secondary-control" onclick="abrirModalGestionProyectos()" title="Gestionar Proyectos (Duplicar, Renombrar, Archivar...)">
                     📂
                 </button>
-                <input id="project-name-input" class="header-input-text" style="width: 100px;" placeholder="nuevo proyecto">
-                <button class="header-btn" onclick="crearProyectoDesdeInput()">Crear</button>
-                <input id="collab-user-name" class="header-input-text" style="width: 90px; background: rgba(0,0,0,0.15); border-color: rgba(255,255,255,0.05);" placeholder="tu nombre" readonly>
-                <button class="header-btn" style="padding: 0 8px;" onclick="cerrarSesion()" title="Cerrar Sesión / Cambiar de Usuario">
+                <input id="project-name-input" class="header-input-text header-secondary-control" style="width: 100px;" placeholder="nuevo proyecto">
+                <button class="header-btn header-secondary-control" onclick="crearProyectoDesdeInput()">Crear</button>
+                <input id="collab-user-name" class="header-input-text header-secondary-control" style="width: 90px; background: rgba(0,0,0,0.15); border-color: rgba(255,255,255,0.05);" placeholder="tu nombre" readonly>
+                <button class="header-btn header-secondary-control" style="padding: 0 8px;" onclick="cerrarSesion()" title="Cerrar Sesión / Cambiar de Usuario">
                     🚪
                 </button>
-                <select id="user-role-select" class="header-select" style="width: 105px; background: rgba(0,0,0,0.15); border-color: rgba(255,255,255,0.05);" disabled>
+                <select id="user-role-select" class="header-select header-secondary-control" style="width: 105px; background: rgba(0,0,0,0.15); border-color: rgba(255,255,255,0.05);" disabled>
                     <option value="owner">👑 Owner</option>
                     <option value="editor" selected>✍️ Editor</option>
                     <option value="revisor">🧐 Revisor</option>
                     <option value="cliente">👁️ Cliente</option>
                 </select>
-                <span class="autosave-chip active" id="presence-chip">Solo tú</span>
-                <button class="header-btn" id="btn-toggle-iphone-sim" onclick="toggleIphoneSimulator()" title="Simulador iPhone (375x812)">
+                <span class="autosave-chip active header-secondary-control" id="presence-chip">Solo tú</span>
+                <button class="header-btn header-secondary-control" id="btn-toggle-iphone-sim" onclick="toggleIphoneSimulator()" title="Simulador iPhone (375x812)">
                     📱 Vista Móvil
                 </button>
-                <button class="header-btn" onclick="abrirManualEditor()" title="Manual de uso del editor">
+                <button class="header-btn header-secondary-control" onclick="abrirManualEditor()" title="Manual de uso del editor">
                     ?
                 </button>
                 <a href="index.html" class="header-btn" style="text-decoration: none;" onclick="return abrirVistaFinalSiLista(event)">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    Vista Final Play
+                    <span class="header-action-label">Vista final</span>
                 </a>
                 <button class="header-btn btn-save" onclick="guardarDiseno()">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    Guardar Cambios
+                    <span class="header-action-label">Guardar</span>
                 </button>
                 <button class="header-btn" onclick="cambiarTabSidebar('publish'); validarPublicacion()">
-                    Publicar
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="m22 2-7 20-4-9-9-4z"/></svg>
+                    <span class="header-action-label">Publicar</span>
                 </button>
             </div>
         </header>
@@ -2515,7 +2970,32 @@
         </button>
 
         <!-- SIDEBAR CON PESTAÑAS -->
-        <div class="sidebar" style="padding: 16px 16px 16px; gap: 0;">
+        <div class="sidebar" style="gap: 0;">
+
+            <nav class="activity-bar" aria-label="Navegación principal">
+                <button class="activity-btn" data-activity="scene" onclick="abrirSeccionActividad('scene', null, this)" title="Escena" aria-label="Escena">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6l2 2h8v12H4z"/><path d="M8 11h8M8 15h5"/></svg>
+                </button>
+                <button class="activity-btn active" data-activity="create" onclick="abrirSeccionActividad('library', 'models', this)" title="Agregar contenido" aria-label="Agregar contenido">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>
+                </button>
+                <button class="activity-btn" data-activity="assets" onclick="abrirSeccionActividad('library', 'media', this)" title="Recursos" aria-label="Recursos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></svg>
+                </button>
+                <button class="activity-btn" data-activity="validate" onclick="abrirSeccionActividad('publish', 'validation', this)" title="Validar" aria-label="Validar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>
+                </button>
+                <button class="activity-btn" data-activity="publish" onclick="abrirSeccionActividad('publish', 'qa', this)" title="Probar y publicar" aria-label="Probar y publicar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><path d="M9 5h10v10"/><path d="M5 8v11h11"/></svg>
+                </button>
+                <div class="activity-spacer"></div>
+                <button class="activity-btn" onclick="abrirModalGestionProyectos()" title="Gestionar proyectos" aria-label="Gestionar proyectos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg>
+                </button>
+                <button class="activity-btn" onclick="abrirManualEditor()" title="Ayuda" aria-label="Ayuda">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.4 2.2c-.8.4-1.2.9-1.2 1.8"/><path d="M12 17h.01"/></svg>
+                </button>
+            </nav>
 
             <!-- TABS HEADER -->
             <div class="sidebar-tabs">
@@ -2528,13 +3008,6 @@
                 <button class="sidebar-tab" id="tab-publish" onclick="cambiarTabSidebar('publish')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Publicar
                 </button>
-            </div>
-
-            <div class="workflow-guide">
-                <div class="workflow-step active"><strong>1</strong>Target</div>
-                <div class="workflow-step"><strong>2</strong>Assets</div>
-                <div class="workflow-step"><strong>3</strong>Anclar</div>
-                <div class="workflow-step"><strong>4</strong>Probar</div>
             </div>
 
             <!-- === PANEL PUBLICAR Y QA MÓVIL COMBINADO === -->
@@ -2726,7 +3199,7 @@
                 <!-- SUB SECCIÓN 1: MODELOS LOCALES / INTEGRADOS -->
                 <div id="lib-sec-models" style="display: block; width: 100%;">
                     <div class="sidebar-helper-card" style="margin-bottom: 12px;">
-                        Flujo recomendado: primero crea un Marcador AR, luego sube imagen y `.mind`, después agrega contenido y anclalo al target desde el inspector.
+                        Elige una plantilla y completa en el asistente la imagen física, el archivo `.mind` y el contenido que aparecerá en AR.
                     </div>
 
                     <div class="api-key-section" style="margin-bottom: 12px; border-color: rgba(0, 243, 255, 0.18); background: rgba(0, 243, 255, 0.025); padding: 12px;">
@@ -2752,7 +3225,16 @@
                                     <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Reproductor de video asociado al marcador.</div>
                                 </div>
                             </div>
-                            <div class="quick-ar-card" onclick="crearExperienciaARRapida('modelo-ballena', 'Modelo 3D AR', '3d')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
+                            <div class="quick-ar-card" onclick="crearExperienciaARRapida(null, 'Audio Espacial AR', 'audio')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
+                                <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 6v12M23 10v4"/></svg>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; color: #fff; font-size: 11px;">Marcador + Audio</div>
+                                    <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Reproductor espacial con ondas animadas.</div>
+                                </div>
+                            </div>
+                            <div class="quick-ar-card" onclick="crearExperienciaARRapida(null, 'Modelo 3D AR', '3d')" style="display: flex; gap: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 10px; border-radius: 8px; cursor: pointer; align-items: center;">
                                 <div style="display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                                 </div>
@@ -2904,6 +3386,7 @@
                             <button class="header-btn media-filter active" data-filter="all" onclick="setMediaFilter('all')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Todos</button>
                             <button class="header-btn media-filter" data-filter="image" onclick="setMediaFilter('image')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Imágenes</button>
                             <button class="header-btn media-filter" data-filter="video" onclick="setMediaFilter('video')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Videos</button>
+                            <button class="header-btn media-filter" data-filter="audio" onclick="setMediaFilter('audio')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Audio</button>
                             <button class="header-btn media-filter" data-filter="model" onclick="setMediaFilter('model')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Modelos</button>
                             <button class="header-btn media-filter" data-filter="target" onclick="setMediaFilter('target')" style="height: 26px; font-size: 9.5px; padding: 0 8px; border-radius: 4px;">Targets</button>
                         </div>
@@ -2975,20 +3458,60 @@
                 </button>
             </div>
 
-            <div class="viewport-instructions">
-                <div class="inst-item"><span class="inst-icon">[Q]</span> Órbita</div>
-                <div class="inst-item"><span class="inst-icon">[W]</span> Mover (Z-Depth Scroll)</div>
-                <div class="inst-item"><span class="inst-icon">[E]</span> Rotar (Y-Rot Scroll)</div>
-                <div class="inst-item"><span class="inst-icon">[R]</span> Escalar (Size Scroll)</div>
-                <div class="inst-item"><span class="inst-icon">[Supr]</span> Eliminar</div>
-            </div>
-
             <div id="viewport-ar-summary" class="viewport-ar-summary">
                 <div class="viewport-ar-summary-head">
                     <span class="viewport-ar-summary-title">Estado MindAR</span>
                     <span id="viewport-ar-summary-chip" class="viewport-ar-summary-chip">Pendiente</span>
                 </div>
                 <div id="viewport-ar-summary-body">Crea un target, asigna imagen fisica, sube .mind y ancla contenido.</div>
+            </div>
+
+            <div class="viewport-center-guide" aria-hidden="true"></div>
+
+            <div class="viewport-precision-hud" aria-label="Datos de precisión de la selección">
+                <div class="precision-item" style="min-width: 110px;">
+                    <span class="precision-label">Selección</span>
+                    <span class="precision-value accent" id="precision-selection">Sin selección</span>
+                </div>
+                <div class="precision-item">
+                    <span class="precision-label">Modo</span>
+                    <span class="precision-value" id="precision-mode">Órbita</span>
+                </div>
+                <div class="precision-item">
+                    <span class="precision-label">Posición X/Y/Z</span>
+                    <span class="precision-value" id="precision-position">—</span>
+                </div>
+                <div class="precision-item">
+                    <span class="precision-label">Rotación</span>
+                    <span class="precision-value" id="precision-rotation">—</span>
+                </div>
+                <div class="precision-item">
+                    <span class="precision-label">Escala</span>
+                    <span class="precision-value" id="precision-scale">—</span>
+                </div>
+                <div class="precision-item">
+                    <span class="precision-label">Snap</span>
+                    <span class="precision-value" id="precision-snap">OFF</span>
+                </div>
+            </div>
+
+            <div class="viewport-view-controls" aria-label="Vistas rápidas del lienzo">
+                <button class="viewport-view-btn" onclick="aplicarVistaLienzo('focus')" title="Centrar selección">ENFOCAR</button>
+                <button class="viewport-view-btn" onclick="aplicarVistaLienzo('front')" title="Vista frontal">FRONTAL</button>
+                <button class="viewport-view-btn" onclick="aplicarVistaLienzo('top')" title="Vista superior">SUPERIOR</button>
+                <button class="viewport-view-btn" onclick="toggleIphoneSimulator()" title="Previsualización móvil">MÓVIL</button>
+            </div>
+
+            <div class="mobile-preview-tools" aria-label="Controles del simulador móvil">
+                <span class="mobile-preview-title">Vista móvil</span>
+                <span class="mobile-preview-meta">375 × 812</span>
+                <select id="mobile-preview-scale" class="mobile-preview-select" onchange="cambiarEscalaVistaMovil(this.value)" title="Escala de previsualización">
+                    <option value="auto">Ajustar</option>
+                    <option value="0.5">50%</option>
+                    <option value="0.75">75%</option>
+                    <option value="1">100%</option>
+                </select>
+                <button class="mobile-preview-close" onclick="toggleIphoneSimulator()">Cerrar</button>
             </div>
         </div>
 
@@ -3398,11 +3921,40 @@
                         <div class="ar-modal-title">
                             <span>📂</span> Gestión de Proyectos Moby
                         </div>
-                        <div class="ar-modal-subtitle">Duplica, renombra, archiva, restaura o elimina tus experiencias colaborativas.</div>
+                        <div class="ar-modal-subtitle">Organiza y transfiere proyectos editables entre instalaciones locales de Moby Studio.</div>
                     </div>
                     <button type="button" class="ar-modal-close" onclick="cerrarModalGestionProyectos()">&times;</button>
                 </div>
                 <div class="ar-modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+
+                    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 12px;">
+                        <section style="padding: 12px; border-radius: 10px; background: rgba(0,243,255,0.035); border: 1px solid rgba(0,243,255,0.15);">
+                            <div style="font-weight: 800; color: #e2e8f0; font-size: 11px; margin-bottom: 4px;">Crear proyecto</div>
+                            <div style="color: #64748b; font-size: 9.5px; line-height: 1.35; margin-bottom: 9px;">Inicia un espacio de trabajo vacío en esta PC.</div>
+                            <div style="display: flex; gap: 6px;">
+                                <input id="manager-new-project-name" class="control-input" type="text" placeholder="nombre-del-proyecto" style="flex: 1; min-width: 0; font-size: 10px; padding: 7px 9px;">
+                                <button class="btn btn-save" onclick="crearProyectoGestionUI()" style="margin: 0; min-height: 32px; padding: 0 12px; font-size: 10px;">Crear</button>
+                            </div>
+                        </section>
+
+                        <section style="padding: 12px; border-radius: 10px; background: rgba(34,197,94,0.035); border: 1px solid rgba(34,197,94,0.16);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 9px;">
+                                <div>
+                                    <div style="font-weight: 800; color: #e2e8f0; font-size: 11px;">Transferir entre PCs</div>
+                                    <div style="color: #64748b; font-size: 9.5px; line-height: 1.35; margin-top: 3px;">El ZIP incluye el layout editable y los assets locales utilizados.</div>
+                                </div>
+                                <span id="project-transfer-current" style="padding: 3px 7px; border-radius: 999px; color: #86efac; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); font-size: 9px; font-weight: 800; white-space: nowrap;">default</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: auto minmax(110px, 1fr) auto; gap: 6px; align-items: center;">
+                                <button id="btn-export-project-package" class="btn btn-view" onclick="exportarProyectoPortable()" style="margin: 0; min-height: 32px; padding: 0 10px; font-size: 10px;">Exportar proyecto</button>
+                                <input id="import-project-name" class="control-input" type="text" placeholder="nombre opcional al importar" style="min-width: 0; font-size: 10px; padding: 7px 9px;">
+                                <button class="btn btn-save" onclick="document.getElementById('import-project-package-input').click()" style="margin: 0; min-height: 32px; padding: 0 10px; font-size: 10px; background: #15803d;">Importar ZIP</button>
+                                <input id="import-project-package-input" type="file" accept=".zip,application/zip" style="display: none;" onchange="importarProyectoPortable(this.files[0])">
+                            </div>
+                            <a id="project-package-download" href="#" download style="display: none; margin-top: 8px; color: #67e8f9; font-size: 9.5px; font-weight: 700; text-decoration: none;">Descargar paquete generado</a>
+                            <div id="project-transfer-status" style="display: none; margin-top: 7px; color: #94a3b8; font-size: 9.5px; line-height: 1.35;"></div>
+                        </section>
+                    </div>
                     
                     <!-- TAB ACTIVE PROJECTS -->
                     <div>
@@ -3618,6 +4170,7 @@
                                     <option value="3d">Modelo 3D (.glb)</option>
                                     <option value="image">Imagen estática (.png / .jpg)</option>
                                     <option value="video">Video inmersivo (.mp4)</option>
+                                    <option value="audio">Audio espacial (.mp3 / .wav)</option>
                                 </select>
                             </div>
                             <div class="control-group" id="ar-content-url-group" style="padding: 0;">
@@ -3755,6 +4308,7 @@
         
         <!-- BISEL / ELEMENTOS EXCLUSIVOS DEL SIMULADOR IPHONE -->
         <div id="iphone-sim-bezel" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10000; box-sizing: border-box; flex-direction: column; justify-content: space-between; padding: 10px 18px 8px 18px;">
+            <div class="mobile-safe-area" title="Área segura aproximada"></div>
             <!-- Notch / Dynamic Island + Status bar -->
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <span style="font-size: 10px; font-weight: 700; color: #fff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: -0.1px;">9:41</span>
@@ -3779,16 +4333,14 @@
         <a-scene 
             renderer="colorManagement: true; antialias: true;"
             cursor="rayOrigin: mouse"
+            raycaster="objects: .interactive-entity, .gizmo-handle"
             vr-mode-ui="enabled: false"
+            loading-screen="enabled: false"
             gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;">
         
-        <!-- PRECARGA DE ASSETS DE MODELOS 3D -->
-        <a-assets>
-            <a-asset-item id="modelo-ballena" src="output/blue%20whale%203d%20model.glb"></a-asset-item>
-            <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
-            <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
-        </a-assets>
+        <!-- Los modelos se registran al subirlos. No se precargan rutas opcionales inexistentes. -->
+        <a-assets timeout="5000"></a-assets>
 
         <!-- Iluminación -->
         <a-entity light="type: ambient; color: #444444; intensity: 1.8"></a-entity>
@@ -3920,6 +4472,7 @@
             
             // Actualizar Gizmo visual
             actualizarGizmo3D();
+            actualizarHudPrecision();
             
             mostrarNotificacion(`Modo activo: ${getModeLabel(mode).toUpperCase()}`);
         }
@@ -3932,6 +4485,35 @@
                 case 'scale': return 'Escala';
                 default: return mode;
             }
+        }
+
+        function actualizarHudPrecision() {
+            const selectionEl = document.getElementById('precision-selection');
+            const modeEl = document.getElementById('precision-mode');
+            const positionEl = document.getElementById('precision-position');
+            const rotationEl = document.getElementById('precision-rotation');
+            const scaleEl = document.getElementById('precision-scale');
+            const snapEl = document.getElementById('precision-snap');
+            if (!selectionEl) return;
+
+            modeEl.textContent = getModeLabel(activeEditMode);
+            snapEl.textContent = isSnapEnabled ? 'ON · 0.5 / 15°' : 'OFF';
+            snapEl.classList.toggle('accent', isSnapEnabled);
+
+            if (!entidadSeleccionada) {
+                selectionEl.textContent = 'Sin selección';
+                positionEl.textContent = '—';
+                rotationEl.textContent = '—';
+                scaleEl.textContent = '—';
+                return;
+            }
+
+            const pos = entidadSeleccionada.posicion || { x: 0, y: 0, z: 0 };
+            const rotY = Number(entidadSeleccionada.rotacion?.y || 0);
+            selectionEl.textContent = entidadSeleccionada.nombre || entidadSeleccionada.uuid;
+            positionEl.textContent = `${Number(pos.x).toFixed(2)} / ${Number(pos.y).toFixed(2)} / ${Number(pos.z).toFixed(2)}`;
+            rotationEl.textContent = `Y ${rotY.toFixed(1)}°`;
+            scaleEl.textContent = Number(entidadSeleccionada.escala || 1).toFixed(2);
         }
 
         // Actualizar visualización del Gizmo 3D (RGB) en la escena (Limitado a modo Translate)
@@ -4142,11 +4724,20 @@
             if (!entidadSeleccionada) return;
 
             // Leer valores de los sliders
-            const px = parseFloat(document.getElementById('slide-pos-x').value);
-            const py = parseFloat(document.getElementById('slide-pos-y').value);
-            const pz = parseFloat(document.getElementById('slide-pos-z').value);
+            let px = parseFloat(document.getElementById('slide-pos-x').value);
+            let py = parseFloat(document.getElementById('slide-pos-y').value);
+            let pz = parseFloat(document.getElementById('slide-pos-z').value);
             const ry = parseInt(document.getElementById('slide-rot-y').value);
             const s = parseFloat(document.getElementById('slide-scale').value);
+
+            if (isSnapEnabled) {
+                px = Math.round(px / 0.5) * 0.5;
+                py = Math.round(py / 0.5) * 0.5;
+                pz = Math.round(pz / 0.5) * 0.5;
+                document.getElementById('slide-pos-x').value = px;
+                document.getElementById('slide-pos-y').value = py;
+                document.getElementById('slide-pos-z').value = pz;
+            }
 
             // Actualizar nuestro array local del objeto
             entidadSeleccionada.posicion = { x: px, y: py, z: pz };
@@ -4174,6 +4765,8 @@
                 gizmo.setAttribute('position', `${px} ${py} ${pz}`);
                 gizmo.setAttribute('rotation', `0 ${ry} 0`);
             }
+            sincronizarNumericosTransformacion();
+            actualizarHudPrecision();
         }
 
         // --- EVOLUCIÓN: ESTRELLA DE NAVEGACIÓN 3D (BLENDER/UNITY VIEWPORT COMPASS) ---
@@ -4383,6 +4976,25 @@
             cameraAnimationId = requestAnimationFrame(step);
         }
 
+        function aplicarVistaLienzo(view) {
+            const pos = entidadSeleccionada?.posicion || { x: 0, y: 0, z: -3.5 };
+            if (view === 'top') {
+                alinearCamaraSuave(
+                    { x: Number(pos.x), y: 5, z: Number(pos.z) },
+                    { x: -90, y: 0 },
+                    'superior'
+                );
+                return;
+            }
+
+            const targetPos = {
+                x: Number(pos.x),
+                y: Math.max(1.2, Number(pos.y) + 0.35),
+                z: Number(pos.z) + (view === 'focus' ? 3.2 : 5)
+            };
+            alinearCamaraSuave(targetPos, { x: 0, y: 0 }, view === 'focus' ? 'centrada' : 'frontal');
+        }
+
         // --- EVOLUCIÓN: SISTEMA DE RAYCASTING PARA CLICK DERECHO Y MENÚ CONTEXTUAL ---
         let objetoEnConfiguracionAR = null;
 
@@ -4474,7 +5086,7 @@
             objetoEnConfiguracionAR = objeto;
             
             // Adaptar dinámicamente el título del modal
-            const titleSpan = document.querySelector('.ar-modal-title');
+            const titleSpan = document.querySelector('#ar-trigger-modal-overlay .ar-modal-title');
             if (titleSpan) {
                 if (objeto.isMarker) {
                     titleSpan.innerHTML = '<span>🎯</span> Configurar Marcador AR';
@@ -4744,6 +5356,11 @@
                 contentInput.placeholder = "Pega una URL directa .mp4/.webm o sube un video...";
                 fileInput.accept = "video/*";
                 if (sourceNote) sourceNote.innerText = "Usa un link directo al archivo de video, no una pagina tipo YouTube, o sube un MP4/WebM local.";
+            } else if (mediaType === 'audio') {
+                contentLabel.innerText = "Audio a reproducir";
+                contentInput.placeholder = "Pega una URL directa .mp3/.wav/.ogg o sube un audio...";
+                fileInput.accept = "audio/*,.m4a,.aac";
+                if (sourceNote) sourceNote.innerText = "El visor mostrará un reproductor espacial con ondas y pausará al perder el target.";
             } else if (mediaType === 'oira-node') {
                 contentLabel.innerText = "Nodo legado";
                 contentInput.placeholder = "No requiere archivo externo";
@@ -4769,13 +5386,25 @@
             return String(value).split('/').pop() || value;
         }
 
+        function tieneFuenteModelo3D(objeto, candidateUrl = '') {
+            if (candidateUrl || objeto?.glbUrl || objeto?.mediaUrl) return true;
+            if (!objeto?.modelId) return false;
+            const assetEl = document.getElementById(objeto.modelId);
+            return assetEl?.tagName?.toLowerCase() === 'a-asset-item' && Boolean(assetEl.getAttribute('src'));
+        }
+
         function auditarEscenaMindAR() {
             const markers = escenaObjetos.filter(obj => obj.isMarker);
             const content = escenaObjetos.filter(obj => !obj.isMarker);
             const targetsSinImagen = markers.filter(marker => !marker.markerImage);
             const targetsSinMind = markers.filter(marker => !marker.mindTargetUrl);
             const contenidoSinTarget = content.filter(obj => !obj.arAnchor || obj.arAnchor === 'base');
-            const contenidoSinArchivo = content.filter(obj => (obj.mediaType === 'image' || obj.mediaType === 'video') && !obj.mediaUrl);
+            const contenidoSinArchivo = content.filter(obj => {
+                const mediaType = obj.mediaType || '3d';
+                if (mediaType === 'image' || mediaType === 'video' || mediaType === 'audio') return !obj.mediaUrl;
+                if (mediaType === '3d') return !tieneFuenteModelo3D(obj);
+                return false;
+            });
             const mindUrls = [...new Set(markers.map(marker => marker.mindTargetUrl).filter(Boolean))];
             const indices = new Map();
             const indicesDuplicados = [];
@@ -4798,7 +5427,7 @@
             if (indicesDuplicados.length > 0) errores.push(`${indicesDuplicados.length} target(s) repiten el mismo indice dentro del .mind.`);
             if (content.length === 0) errores.push('Agrega contenido AR anclado a un target.');
             if (contenidoSinTarget.length > 0) errores.push(`${contenidoSinTarget.length} contenido(s) sin target MindAR.`);
-            if (contenidoSinArchivo.length > 0) errores.push(`${contenidoSinArchivo.length} imagen/video sin archivo multimedia.`);
+            if (contenidoSinArchivo.length > 0) errores.push(`${contenidoSinArchivo.length} contenido(s) sin archivo multimedia valido.`);
 
             return {
                 listo: errores.length === 0,
@@ -4951,7 +5580,9 @@
             const hasTarget = objetoEnConfiguracionAR.isMarker
                 ? Boolean(markerImage && mindTargetUrl)
                 : Boolean(selectedMarker) && Boolean(markerImage && mindTargetUrl);
-            const hasContent = objetoEnConfiguracionAR.isMarker || mediaType === '3d' || mediaType === 'oira-node' || Boolean(mediaUrl);
+            const hasContent = objetoEnConfiguracionAR.isMarker
+                || mediaType === 'oira-node'
+                || (mediaType === '3d' ? tieneFuenteModelo3D(objetoEnConfiguracionAR, mediaUrl) : Boolean(mediaUrl));
             if (statusEl) {
                 statusEl.className = 'ar-status-chip';
                 if (hasTarget && hasContent) {
@@ -5040,11 +5671,6 @@
                 const data = await response.json();
                 if (data.status === 'success') {
                     document.getElementById('ar-marker-image').value = data.src;
-                    const marker = obtenerMarcadorConfigurableModal();
-                    if (marker) {
-                        marker.markerImage = data.src;
-                        actualizarVisualMarcador(marker);
-                    }
                     actualizarResumenModalAR();
                     mostrarNotificacion("¡Marcador subido con éxito!");
                 } else {
@@ -5059,6 +5685,19 @@
         // Subir archivo del Recurso AR (GLB, Imagen o Video)
         async function subirArchivoContenidoAR(file) {
             if (!file) return;
+            const mediaType = document.getElementById('ar-media-type')?.value || '3d';
+            const extension = `.${String(file.name || '').split('.').pop().toLowerCase()}`;
+            const allowedByType = {
+                '3d': ['.glb', '.gltf'],
+                image: ['.png', '.jpg', '.jpeg', '.webp', '.gif'],
+                video: ['.mp4', '.webm', '.mov'],
+                audio: ['.mp3', '.wav', '.ogg', '.m4a', '.aac']
+            };
+            if (!allowedByType[mediaType]?.includes(extension)) {
+                const expected = allowedByType[mediaType]?.join(', ') || 'un archivo compatible';
+                mostrarNotificacion(`Archivo incompatible. Para ${mediaType} usa: ${expected}.`, "error");
+                return;
+            }
             mostrarNotificacion("Subiendo recurso multimedia...");
 
             try {
@@ -5071,12 +5710,6 @@
                 const data = await response.json();
                 if (data.status === 'success') {
                     document.getElementById('ar-media-url').value = data.src;
-                    if (objetoEnConfiguracionAR && document.getElementById('ar-media-type')?.value === '3d') {
-                        objetoEnConfiguracionAR.mediaType = '3d';
-                        objetoEnConfiguracionAR.mediaUrl = data.src;
-                        objetoEnConfiguracionAR.glbUrl = data.src;
-                        objetoEnConfiguracionAR.modelId = null;
-                    }
                     actualizarResumenModalAR();
                     mostrarNotificacion("¡Recurso multimedia subido con éxito!");
                 } else {
@@ -5118,7 +5751,6 @@
         // Guardar configuración AR en el objeto de escena local
         function guardarConfiguracionAR() {
             if (!objetoEnConfiguracionAR) return;
-            registrarEstadoHistorial('Configurar AR');
 
             const markerImage = document.getElementById('ar-marker-image').value.trim();
             const recognitionKey = document.getElementById('ar-recognition-key').value.trim();
@@ -5144,10 +5776,16 @@
                 mostrarNotificacion("Falta el archivo .mind compilado para tracking real.", "error");
                 return;
             }
-            if (!objetoEnConfiguracionAR.isMarker && (mediaType === 'image' || mediaType === 'video') && !mediaUrl) {
+            if (!objetoEnConfiguracionAR.isMarker && (mediaType === 'image' || mediaType === 'video' || mediaType === 'audio') && !mediaUrl) {
                 mostrarNotificacion("Falta el archivo multimedia que se proyectara sobre el target.", "error");
                 return;
             }
+            if (!objetoEnConfiguracionAR.isMarker && mediaType === '3d' && !tieneFuenteModelo3D(objetoEnConfiguracionAR, mediaUrl)) {
+                mostrarNotificacion("Falta subir o asignar un modelo GLB/GLTF real.", "error");
+                return;
+            }
+
+            registrarEstadoHistorial('Configurar AR');
 
             if (markerConfigurable) {
                 markerConfigurable.markerImage = markerImage || null;
@@ -5168,11 +5806,10 @@
                         objetoEnConfiguracionAR.modelId = null;
                     } else {
                         objetoEnConfiguracionAR.glbUrl = null;
-                        objetoEnConfiguracionAR.modelId = objetoEnConfiguracionAR.modelId || 'modelo-ballena';
                     }
                 } else {
                     objetoEnConfiguracionAR.glbUrl = null;
-                    if (mediaType === 'image' || mediaType === 'video') {
+                    if (mediaType === 'image' || mediaType === 'video' || mediaType === 'audio') {
                         objetoEnConfiguracionAR.modelId = null;
                     }
                 }
@@ -5221,14 +5858,20 @@
             const hud = document.getElementById('hud-editor');
             const sidebar = document.querySelector('.sidebar');
             const btn = document.getElementById('btn-toggle-sidebar');
+
+            if (window.innerWidth <= 1100) {
+                const isOpen = sidebar.classList.toggle('compact-open');
+                document.querySelector('.inspector')?.classList.remove('active-compact');
+                if (btn) {
+                    btn.innerHTML = isOpen
+                        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`
+                        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+                }
+                return;
+            }
             
             const isCollapsed = hud.classList.toggle('sidebar-collapsed');
             sidebar.classList.toggle('collapsed', isCollapsed);
-            
-            // For mobile overlay drawer compatibility
-            if (window.innerWidth <= 768) {
-                sidebar.classList.toggle('active-mobile');
-            }
 
             // Update button arrow direction icon dynamically
             if (btn) {
@@ -5242,20 +5885,42 @@
             const hud = document.getElementById('hud-editor');
             const inspector = document.querySelector('.inspector');
             const btn = document.getElementById('btn-toggle-inspector');
+
+            if (window.innerWidth <= 1100) {
+                const isOpen = inspector.classList.toggle('active-compact');
+                document.querySelector('.sidebar')?.classList.remove('compact-open');
+                if (btn) {
+                    btn.innerHTML = isOpen
+                        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`
+                        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+                }
+                return;
+            }
             
             const isCollapsed = hud.classList.toggle('inspector-collapsed');
             inspector.classList.toggle('collapsed', isCollapsed);
-            
-            // For mobile overlay drawer compatibility
-            if (window.innerWidth <= 768) {
-                inspector.classList.toggle('active-mobile');
-            }
 
             // Update button arrow direction icon dynamically
             if (btn) {
                 btn.innerHTML = isCollapsed ? 
                     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>` : 
                     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+            }
+        }
+
+        function sincronizarLayoutResponsive() {
+            const hud = document.getElementById('hud-editor');
+            const sidebar = document.querySelector('.sidebar');
+            const inspector = document.querySelector('.inspector');
+            if (!hud || !sidebar || !inspector) return;
+
+            if (window.innerWidth <= 1100) {
+                hud.classList.remove('sidebar-collapsed', 'inspector-collapsed');
+                sidebar.classList.remove('collapsed', 'active-mobile');
+                inspector.classList.remove('collapsed', 'active-mobile');
+            } else {
+                sidebar.classList.remove('compact-open');
+                inspector.classList.remove('active-compact');
             }
         }
 
@@ -5268,12 +5933,8 @@
             initColaboracion();
             cargarProyectosYCargarActual();
             initNavigationStar();
-            
-            // Si la pantalla es pequeña (Móvil / Tablet), colapsar paneles por defecto para optimizar espacio del Viewport 3D
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-                toggleInspector();
-            }
+            actualizarHudPrecision();
+            sincronizarLayoutResponsive();
         });
 
         // Crear una nueva entidad 3D en el lienzo
@@ -5330,8 +5991,12 @@
             };
 
             if (mediaType === '3d') {
-                nuevoObjeto.modelId = modelId || 'modelo-ballena';
-                nuevoObjeto.escala = nuevoObjeto.modelId === 'modelo-ballena' ? 1.5 : 1.0;
+                nuevoObjeto.modelId = modelId || null;
+                nuevoObjeto.escala = 1.0;
+            } else if (mediaType === 'audio') {
+                nuevoObjeto.autoplay = true;
+                nuevoObjeto.loop = false;
+                nuevoObjeto.volume = 0.9;
             }
             sincronizarContenidoConTarget(nuevoObjeto, arAnchor, { force: true });
 
@@ -5414,13 +6079,8 @@
             renderOutliner();
             seleccionarObjeto(contenido);
             marcarCambiosSinGuardar();
-
-            if (mediaType === 'image' || mediaType === 'video') {
-                abrirModalAR(contenido);
-                mostrarNotificacion("Sube la imagen fisica, agrega un .mind existente y configura el contenido que se proyectara encima.", "success");
-            } else {
-                mostrarNotificacion("Experiencia AR creada: configura la imagen target y sube su .mind.", "success");
-            }
+            abrirModalAR(contenido);
+            mostrarNotificacion("Plantilla creada. Completa target, archivo .mind y contenido antes de guardar.", "success");
             });
         }
 
@@ -5435,8 +6095,8 @@
             marcador.mindTargetIndex = marcador.mindTargetIndex || 0;
 
             if (tipo === 'demo') {
-                crearContenidoAR('Video Demo', 'video', marcador.uuid, null, null);
-                const apoyo = crearContenidoAR('Modelo de Apoyo', '3d', marcador.uuid, 'modelo-rack', null);
+                const contenidoPrincipal = crearContenidoAR('Video Demo', 'video', marcador.uuid, null, null);
+                const apoyo = crearContenidoAR('Modelo de Apoyo', '3d', marcador.uuid, null, null);
                 apoyo.posicion = { x: 0.42, y: 1.0, z: -3.5 };
                 apoyo.escala = 0.55;
                 const apoyoEl = document.getElementById(apoyo.uuid);
@@ -5444,9 +6104,10 @@
                     apoyoEl.setAttribute('position', `${apoyo.posicion.x} ${apoyo.posicion.y} ${apoyo.posicion.z}`);
                     apoyoEl.setAttribute('scale', `${apoyo.escala} ${apoyo.escala} ${apoyo.escala}`);
                 }
+                abrirModalAR(contenidoPrincipal);
             } else {
-                crearContenidoAR('Ficha Explicativa', 'image', marcador.uuid, null, null);
-                const producto = crearContenidoAR('Producto 3D', '3d', marcador.uuid, 'modelo-ballena', null);
+                const contenidoPrincipal = crearContenidoAR('Ficha Explicativa', 'image', marcador.uuid, null, null);
+                const producto = crearContenidoAR('Producto 3D', '3d', marcador.uuid, null, null);
                 producto.posicion = { x: -0.45, y: 1.0, z: -3.5 };
                 producto.escala = 0.75;
                 const productoEl = document.getElementById(producto.uuid);
@@ -5454,6 +6115,7 @@
                     productoEl.setAttribute('position', `${producto.posicion.x} ${producto.posicion.y} ${producto.posicion.z}`);
                     productoEl.setAttribute('scale', `${producto.escala} ${producto.escala} ${producto.escala}`);
                 }
+                abrirModalAR(contenidoPrincipal);
             }
 
             actualizarOpcionesAnclaje();
@@ -5496,6 +6158,7 @@
         function tipoEntidad(obj) {
             if (obj.isMarker) return 'Target';
             if (obj.mediaType === 'oira-node') return 'Nodo legado';
+            if (obj.mediaType === 'audio') return 'Audio';
             if (obj.mediaType === 'video') return 'Video';
             if (obj.mediaType === 'image') return 'Imagen';
             return 'Modelo 3D';
@@ -5510,6 +6173,9 @@
             }
             if (obj.mediaType === 'video') {
                 return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>`;
+            }
+            if (obj.mediaType === 'audio') {
+                return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>`;
             }
             if (obj.mediaType === 'image') {
                 return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
@@ -6209,7 +6875,7 @@
             checks.push({
                 level: audit.contenidoSinArchivo.length === 0 ? 'ok' : 'error',
                 title: 'Archivos multimedia',
-                detail: audit.contenidoSinArchivo.length === 0 ? 'Imagenes y videos tienen archivo asignado.' : `${audit.contenidoSinArchivo.length} imagen/video sin archivo.`
+                detail: audit.contenidoSinArchivo.length === 0 ? 'El contenido multimedia tiene archivo asignado.' : `${audit.contenidoSinArchivo.length} elemento(s) multimedia sin archivo.`
             });
 
             const urlsExternas = escenaObjetos.filter(obj => archivoLocalReferenciado(obj.mediaUrl || obj.markerImage || obj.mindTargetUrl) === false && (obj.mediaUrl || obj.markerImage || obj.mindTargetUrl));
@@ -6408,6 +7074,7 @@
                 renderOutliner();
                 marcarCambiosSinGuardar();
                 actualizarEstadoInspectorObjeto(entidadSeleccionada);
+                actualizarHudPrecision();
             }
         }
 
@@ -6537,6 +7204,59 @@
             return fallback;
         }
 
+        function crearReproductorAudioEditor(obj) {
+            const player = document.createElement('a-entity');
+            player.setAttribute('data-audio-player', 'true');
+
+            const bg = document.createElement('a-plane');
+            bg.setAttribute('width', '1.8');
+            bg.setAttribute('height', '0.62');
+            bg.setAttribute('material', 'color: #090d1a; shader: flat; side: double; opacity: 0.96; transparent: true');
+            player.appendChild(bg);
+
+            const accent = document.createElement('a-plane');
+            accent.setAttribute('width', '1.8');
+            accent.setAttribute('height', '0.025');
+            accent.setAttribute('position', '0 -0.298 0.012');
+            accent.setAttribute('material', 'color: #ec4899; shader: flat; side: double');
+            player.appendChild(accent);
+
+            const play = document.createElement('a-circle');
+            play.setAttribute('radius', '0.16');
+            play.setAttribute('position', '-0.64 0 0.02');
+            play.setAttribute('material', 'color: #db2777; shader: flat; side: double');
+            player.appendChild(play);
+
+            const playIcon = document.createElement('a-triangle');
+            playIcon.setAttribute('vertex-a', '-0.04 0.065 0');
+            playIcon.setAttribute('vertex-b', '-0.04 -0.065 0');
+            playIcon.setAttribute('vertex-c', '0.07 0 0');
+            playIcon.setAttribute('position', '-0.625 0 0.03');
+            playIcon.setAttribute('material', 'color: #ffffff; shader: flat; side: double');
+            player.appendChild(playIcon);
+
+            const title = document.createElement('a-text');
+            title.setAttribute('value', obj.nombre || 'Audio espacial');
+            title.setAttribute('align', 'left');
+            title.setAttribute('color', '#fce7f3');
+            title.setAttribute('width', '1.75');
+            title.setAttribute('position', '-0.38 0.18 0.025');
+            player.appendChild(title);
+
+            const bars = [0.28, 0.58, 0.86, 0.46, 0.72, 0.36, 0.92, 0.62, 0.42, 0.78, 0.52, 0.3];
+            bars.forEach((height, index) => {
+                const bar = document.createElement('a-plane');
+                bar.setAttribute('width', '0.045');
+                bar.setAttribute('height', (height * 0.24).toFixed(3));
+                bar.setAttribute('position', `${(-0.32 + index * 0.085).toFixed(3)} -0.08 0.025`);
+                bar.setAttribute('material', `color: ${index % 3 === 0 ? '#f472b6' : '#67e8f9'}; shader: flat; side: double`);
+                bar.setAttribute(`animation__wave${index}`, `property: scale; from: 1 0.45 1; to: 1 1.25 1; dur: ${430 + index * 37}; dir: alternate; loop: true; easing: easeInOutSine`);
+                player.appendChild(bar);
+            });
+
+            return player;
+        }
+
         function renderizarEntidad3D(obj) {
             const container = document.getElementById('entities-container');
             const existente = document.getElementById(obj.uuid);
@@ -6601,6 +7321,8 @@
                     label.setAttribute('position', '0 0 0.02');
                     el.appendChild(panel);
                     el.appendChild(label);
+                } else if (mediaType === 'audio') {
+                    el.appendChild(crearReproductorAudioEditor(obj));
                 } else if (mediaType === 'oira-node') {
                     const panel = document.createElement('a-plane');
                     panel.setAttribute('width', '1.15');
@@ -6788,6 +7510,7 @@
 
             // Actualizar Gizmo visual
             actualizarGizmo3D();
+            actualizarHudPrecision();
         }
 
         // --- EVOLUCIÓN: CONTROL DE DIMENSIONES Y PROPIEDADES DE VIDEO AR ---
@@ -6996,11 +7719,22 @@
             registrarEstadoHistorial('Transformar objeto', { coalesceMs: 500 });
 
             // Leer valores de los sliders
-            const px = parseFloat(document.getElementById('slide-pos-x').value);
-            const py = parseFloat(document.getElementById('slide-pos-y').value);
-            const pz = parseFloat(document.getElementById('slide-pos-z').value);
-            const ry = parseInt(document.getElementById('slide-rot-y').value);
+            let px = parseFloat(document.getElementById('slide-pos-x').value);
+            let py = parseFloat(document.getElementById('slide-pos-y').value);
+            let pz = parseFloat(document.getElementById('slide-pos-z').value);
+            let ry = parseInt(document.getElementById('slide-rot-y').value);
             const s = parseFloat(document.getElementById('slide-scale').value);
+
+            if (isSnapEnabled) {
+                px = Math.round(px / 0.5) * 0.5;
+                py = Math.round(py / 0.5) * 0.5;
+                pz = Math.round(pz / 0.5) * 0.5;
+                ry = Math.round(ry / 15) * 15;
+                document.getElementById('slide-pos-x').value = px;
+                document.getElementById('slide-pos-y').value = py;
+                document.getElementById('slide-pos-z').value = pz;
+                document.getElementById('slide-rot-y').value = ry;
+            }
 
             // Actualizar nuestro array local del objeto
             entidadSeleccionada.posicion = { x: px, y: py, z: pz };
@@ -7027,6 +7761,7 @@
 
             // Actualizar Gizmo visual
             actualizarGizmo3D();
+            actualizarHudPrecision();
 
         }
 
@@ -7152,6 +7887,7 @@
             actualizarGizmo3D();
             renderOutliner();
             marcarCambiosSinGuardar();
+            actualizarHudPrecision();
         }
 
         // Guardar y Subir la composición completa a la API del servidor
@@ -7380,14 +8116,34 @@
             if (empty) empty.style.display = 'flex';
         }
 
+        async function resolverFuentesModelosLayout(entities) {
+            const pendientes = (entities || []).filter(obj =>
+                !obj?.isMarker && (obj.mediaType || '3d') === '3d' && obj.modelId && !obj.glbUrl
+            );
+            if (pendientes.length === 0 || isOfflineMode) return;
+            try {
+                const response = await fetch('/api/list-assets', { cache: 'no-store' });
+                if (!response.ok) return;
+                const assets = await response.json();
+                const modelsById = new Map(
+                    assets.filter(asset => asset.kind === 'model').map(asset => [asset.modelId, asset])
+                );
+                pendientes.forEach(obj => {
+                    const asset = modelsById.get(obj.modelId);
+                    if (asset?.src) obj.glbUrl = asset.src;
+                });
+            } catch (err) {
+                console.warn('No se pudieron resolver modelos heredados:', err);
+            }
+        }
+
         // Descargar la configuración inicial del diseño guardado en la red
         async function cargarDisenoDesdeServidor(project = proyectoActivo, options = {}) {
+            const silent = Boolean(options.silent);
+            const skipDraftCheck = Boolean(options.skipDraftCheck);
+            const safeProject = normalizarNombreProyecto(project);
             if (isOfflineMode) {
                 try {
-                    const silent = Boolean(options.silent);
-                    const skipDraftCheck = Boolean(options.skipDraftCheck);
-                    const safeProject = normalizarNombreProyecto(project);
-                    
                     const localDataStr = localStorage.getItem(`moby_studio_offline_project_layout_${safeProject}`);
                     if (!localDataStr) {
                         limpiarEscenaEditor();
@@ -7439,6 +8195,7 @@
                         entidadesACargar = data;
                     }
                     
+                    await resolverFuentesModelosLayout(entidadesACargar);
                     if (entidadesACargar.length > 0) {
                         escenaObjetos = entidadesACargar;
                         escenaObjetos.forEach(obj => {
@@ -7468,9 +8225,6 @@
                 return;
             }
             try {
-                const silent = Boolean(options.silent);
-                const skipDraftCheck = Boolean(options.skipDraftCheck);
-                const safeProject = normalizarNombreProyecto(project);
                 const response = await fetch(`/api/load-layout?project=${encodeURIComponent(safeProject)}`, { cache: 'no-store' });
                 if (!response.ok) {
                     limpiarEscenaEditor();
@@ -7529,7 +8283,8 @@
                     entidadesACargar = data;
                 }
                 
-                // 2. Renderizar cada objeto en 3D
+                // 2. Resolver modelos heredados y renderizar cada objeto en 3D
+                await resolverFuentesModelosLayout(entidadesACargar);
                 if (entidadesACargar.length > 0) {
                     escenaObjetos = entidadesACargar;
                     
@@ -7727,9 +8482,52 @@
             }
         }
 
-        // --- MEDIATECA: Cambio de Pestaña del Sidebar ---
+        // Navegacion principal: conserva los paneles heredados y solo cambia su acceso visual.
+        function abrirSeccionActividad(tab, subsection, button) {
+            const hud = document.getElementById('hud-editor');
+            const sidebar = document.querySelector('.sidebar');
+
+            if (window.innerWidth <= 1100) {
+                sidebar.classList.add('compact-open');
+                document.querySelector('.inspector')?.classList.remove('active-compact');
+            }
+
+            if (hud.classList.contains('sidebar-collapsed')) {
+                hud.classList.remove('sidebar-collapsed');
+                sidebar.classList.remove('collapsed');
+                const toggleBtn = document.getElementById('btn-toggle-sidebar');
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+                }
+            }
+
+            cambiarTabSidebar(tab);
+            if (tab === 'library' && subsection) switchLibrarySection(subsection);
+            if (tab === 'publish' && subsection) switchPublishSection(subsection);
+
+            document.querySelectorAll('.activity-btn[data-activity]').forEach(btn => btn.classList.remove('active'));
+            if (button) button.classList.add('active');
+        }
+
+        function sincronizarActividadSidebar(tab) {
+            let activity = tab;
+            if (tab === 'library') {
+                activity = document.getElementById('subtab-media')?.classList.contains('active') ? 'assets' : 'create';
+            } else if (tab === 'publish') {
+                activity = document.getElementById('subtab-qa')?.classList.contains('active') ? 'publish' : 'validate';
+            }
+
+            document.querySelectorAll('.activity-btn[data-activity]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.activity === activity);
+            });
+        }
+
         // --- MEDIATECA: Cambio de Pestaña del Sidebar ---
         function cambiarTabSidebar(tab) {
+            if (window.innerWidth <= 1100) {
+                document.querySelector('.sidebar')?.classList.add('compact-open');
+                document.querySelector('.inspector')?.classList.remove('active-compact');
+            }
             // Mapeo heredado (legacy fallback) para llamadas externas a pestañas consolidadas
             if (tab === 'models') {
                 cambiarTabSidebar('library');
@@ -7786,6 +8584,7 @@
                     switchPublishSection('validation');
                 }
             }
+            sincronizarActividadSidebar(tab);
         }
 
         function switchLibrarySection(section) {
@@ -7812,6 +8611,7 @@
                 if (secMedia) secMedia.style.display = 'block';
                 cargarMediateca();
             }
+            sincronizarActividadSidebar('library');
         }
 
         function switchPublishSection(section) {
@@ -7834,6 +8634,7 @@
                 if (secQA) secQA.style.display = 'flex';
                 cargarQAEstado();
             }
+            sincronizarActividadSidebar('publish');
         }
 
         // ================================================================
@@ -8065,6 +8866,7 @@
         function iconoAsset(asset) {
             if (asset.kind === 'image') return `<img src="${escapeAttr(asset.src)}" alt="">`;
             if (asset.kind === 'video') return `<video src="${escapeAttr(asset.src)}" muted></video>`;
+            if (asset.kind === 'audio') return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round"><path d="M3 10v4M7 7v10M11 4v16M15 8v8M19 6v12M23 10v4"/></svg>`;
             if (asset.kind === 'model') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #cbd5e1;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`;
             if (asset.kind === 'target') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #38bdf8;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`;
             if (asset.kind === 'data') return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`;
@@ -8088,6 +8890,7 @@
                 model: 'Modelo 3D',
                 image: 'Imagen',
                 video: 'Video',
+                audio: 'Audio',
                 target: 'Target AR',
                 data: 'Dato',
                 other: 'Archivo'
@@ -8185,7 +8988,7 @@
                         
                         <div class="media-item-actions" style="display: flex; gap: 4px; margin-left: auto; flex-shrink: 0;">
                             ${asset.kind === 'model' ? `<button class="media-btn compress" title="Comprimir GLB con Draco (Blender)" onclick="comprimirAssetMediateca('${jsArg(asset.name)}', this)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></button>` : ''}
-                            ${asset.kind === 'model' || asset.kind === 'image' || asset.kind === 'video' ? `<button class="media-btn add" title="Añadir a escena" onclick="agregarAssetAEscena('${jsArg(asset.name)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>` : ''}
+                            ${asset.kind === 'model' || asset.kind === 'image' || asset.kind === 'video' || asset.kind === 'audio' ? `<button class="media-btn add" title="Añadir a escena" onclick="agregarAssetAEscena('${jsArg(asset.name)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>` : ''}
                             <button class="media-btn assign" title="Asignar al objeto seleccionado" onclick="asignarAssetSeleccionado('${jsArg(asset.name)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></button>
                             <button class="media-btn" title="Copiar ruta" onclick="copiarRutaAsset('${jsArg(asset.src)}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
                             <button class="media-btn del" title="Eliminar del servidor" ${asset.protected ? 'disabled' : ''} onclick="eliminarAssetMediateca('${jsArg(asset.name)}', this)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -8260,7 +9063,7 @@
                 assets.appendChild(assetItem);
             }
             const nombreBase = fileName.replace('.glb','').replace('.gltf','');
-            crearEntidad(modelId, nombreBase);
+            crearEntidad(modelId, nombreBase, src);
             mostrarNotificacion(`✨ ${nombreBase} añadido a la escena`);
         }
 
@@ -8273,7 +9076,7 @@
                 return;
             }
 
-            if (asset.kind === 'image' || asset.kind === 'video') {
+            if (asset.kind === 'image' || asset.kind === 'video' || asset.kind === 'audio') {
                 const obj = crearContenidoAR(asset.friendlyName || asset.name, asset.kind, 'base', null, asset.src);
                 obj.mediaType = asset.kind;
                 seleccionarObjeto(obj);
@@ -8309,7 +9112,8 @@
             } else if (asset.kind === 'model') {
                 entidadSeleccionada.mediaType = '3d';
                 entidadSeleccionada.modelId = asset.modelId;
-                entidadSeleccionada.glbUrl = null;
+                entidadSeleccionada.glbUrl = asset.src;
+                entidadSeleccionada.mediaUrl = null;
                 let assetItem = document.getElementById(asset.modelId);
                 if (!assetItem) {
                     const assets = document.querySelector('a-assets');
@@ -8324,9 +9128,11 @@
                     renderizarEntidad3D(entidadSeleccionada);
                     seleccionarObjeto(entidadSeleccionada);
                 }
-            } else if (asset.kind === 'image' || asset.kind === 'video') {
+            } else if (asset.kind === 'image' || asset.kind === 'video' || asset.kind === 'audio') {
                 entidadSeleccionada.mediaType = asset.kind;
                 entidadSeleccionada.mediaUrl = asset.src;
+                entidadSeleccionada.modelId = null;
+                entidadSeleccionada.glbUrl = null;
                 const el = document.getElementById(entidadSeleccionada.uuid);
                 if (el) {
                     el.parentNode.removeChild(el);
@@ -8404,6 +9210,7 @@
                 btn.classList.remove('toolbar-snap-active');
                 mostrarNotificacion('🧲 Snapping desactivado');
             }
+            actualizarHudPrecision();
         }
 
         // --- TOOLBAR: Historial profesional por snapshots de escena ---
@@ -8547,18 +9354,37 @@
         // === EVOLUCIÓN: SISTEMA DE QA MÓVIL Y SIMULADOR DE BEZEL IPHONE ===
         // ================================================================
         let iphoneSimulatorActive = false;
+
+        function cambiarEscalaVistaMovil(value = 'auto') {
+            const wrapper = document.getElementById('scene-viewport-wrapper');
+            if (!wrapper) return;
+
+            let scale = Number(value);
+            if (value === 'auto' || !Number.isFinite(scale)) {
+                const availableHeight = Math.max(420, window.innerHeight - 118);
+                const availableWidth = Math.max(260, window.innerWidth - 110);
+                scale = Math.min(1, availableHeight / 836, availableWidth / 399);
+            }
+            scale = Math.max(0.45, Math.min(1, scale));
+            wrapper.style.setProperty('--mobile-preview-scale', scale.toFixed(3));
+        }
         
         function toggleIphoneSimulator() {
             const wrapper = document.getElementById('scene-viewport-wrapper');
             const bezel = document.getElementById('iphone-sim-bezel');
             const btn = document.getElementById('btn-toggle-iphone-sim');
             const qaBtn = document.getElementById('btn-qa-toggle-sim');
+            const hud = document.getElementById('hud-editor');
+            const scaleSelect = document.getElementById('mobile-preview-scale');
             
             iphoneSimulatorActive = !iphoneSimulatorActive;
             
             if (iphoneSimulatorActive) {
                 if (wrapper) wrapper.classList.add('iphone-sim-active');
                 if (bezel) bezel.style.display = 'flex';
+                if (hud) hud.classList.add('mobile-preview-active');
+                if (scaleSelect) scaleSelect.value = 'auto';
+                cambiarEscalaVistaMovil('auto');
                 
                 const activeText = "📱 Cerrar Vista Móvil";
                 if (btn) {
@@ -8577,6 +9403,7 @@
             } else {
                 if (wrapper) wrapper.classList.remove('iphone-sim-active');
                 if (bezel) bezel.style.display = 'none';
+                if (hud) hud.classList.remove('mobile-preview-active');
                 
                 const inactiveText = "📱 Vista Móvil";
                 if (btn) {
@@ -8600,6 +9427,14 @@
                 if (scene && scene.resize) scene.resize();
             }, 100);
         }
+
+        window.addEventListener('resize', () => {
+            sincronizarLayoutResponsive();
+            const scaleSelect = document.getElementById('mobile-preview-scale');
+            if (iphoneSimulatorActive && scaleSelect?.value === 'auto') {
+                cambiarEscalaVistaMovil('auto');
+            }
+        });
 
         async function cargarQAEstado() {
             const checklistContainer = document.getElementById('qa-checklist-list');
@@ -8897,12 +9732,132 @@
         // 3. GESTIÓN DE PROYECTOS MODAL
         async function abrirModalGestionProyectos() {
             await Promise.all([refrescarTablaProyectosActivos(), refrescarTablaProyectosArchivados()]);
+            const current = document.getElementById('project-transfer-current');
+            if (current) current.textContent = proyectoActivo;
             document.getElementById('project-management-modal-overlay').style.display = 'flex';
         }
 
         function cerrarModalGestionProyectos(event) {
             if (event && event.target !== event.currentTarget) return;
             document.getElementById('project-management-modal-overlay').style.display = 'none';
+        }
+
+        function actualizarEstadoTransferencia(texto, tipo = '') {
+            const status = document.getElementById('project-transfer-status');
+            if (!status) return;
+            status.style.display = 'block';
+            status.style.color = tipo === 'error' ? '#fca5a5' : (tipo === 'success' ? '#86efac' : '#94a3b8');
+            status.textContent = texto;
+        }
+
+        async function crearProyectoGestionUI() {
+            const managerInput = document.getElementById('manager-new-project-name');
+            const rawName = managerInput?.value?.trim() || '';
+            if (!rawName) {
+                actualizarEstadoTransferencia('Escribe un nombre para el nuevo proyecto.', 'error');
+                return;
+            }
+            const normalizedName = normalizarNombreProyecto(rawName);
+            if (normalizedName === 'default' && rawName.toLowerCase() !== 'default') {
+                actualizarEstadoTransferencia('Usa letras, números, guiones o guion bajo en el nombre.', 'error');
+                return;
+            }
+            try {
+                const response = await fetch('/api/list-projects', { cache: 'no-store' });
+                const data = await response.json();
+                if ((data.projects || []).some(project => project.name === normalizedName)) {
+                    actualizarEstadoTransferencia(`El proyecto '${normalizedName}' ya existe. Usa Abrir o elige otro nombre.`, 'error');
+                    return;
+                }
+            } catch (err) {
+                actualizarEstadoTransferencia('No se pudo comprobar el nombre del proyecto.', 'error');
+                return;
+            }
+            const headerInput = document.getElementById('project-name-input');
+            if (headerInput) headerInput.value = rawName;
+            await crearProyectoDesdeInput();
+            if (managerInput) managerInput.value = '';
+            await Promise.all([refrescarTablaProyectosActivos(), cargarListaProyectos()]);
+            const current = document.getElementById('project-transfer-current');
+            if (current) current.textContent = proyectoActivo;
+            actualizarEstadoTransferencia(`Proyecto '${proyectoActivo}' creado y abierto.`, 'success');
+        }
+
+        async function abrirProyectoGestionUI(project) {
+            await cambiarProyectoActivo(project);
+            if (proyectoActivo === project) cerrarModalGestionProyectos();
+        }
+
+        async function exportarProyectoPortable(project = proyectoActivo) {
+            const btn = document.getElementById('btn-export-project-package');
+            const link = document.getElementById('project-package-download');
+            if (hayCambiosSinGuardar && project === proyectoActivo) {
+                actualizarEstadoTransferencia('Guardando cambios antes de crear el paquete...');
+                await guardarDiseno();
+            }
+            if (btn) btn.disabled = true;
+            if (link) link.style.display = 'none';
+            actualizarEstadoTransferencia(`Preparando '${project}' con sus assets...`);
+            try {
+                const response = await fetch(`/api/export-project?project=${encodeURIComponent(project)}`, { method: 'POST' });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudo exportar el proyecto.');
+                if (link) {
+                    link.href = data.zipPath;
+                    link.download = data.zipName;
+                    link.textContent = `Descargar ${data.zipName} · ${data.size}`;
+                    link.style.display = 'inline-flex';
+                }
+                const missing = data.missingAssets?.length ? ` Faltan: ${data.missingAssets.join(', ')}.` : '';
+                actualizarEstadoTransferencia(`Paquete listo: ${data.assetCount} assets incluidos.${missing}`, data.missingAssets?.length ? '' : 'success');
+                mostrarNotificacion(`Proyecto '${project}' listo para transferir.`, 'success');
+            } catch (err) {
+                actualizarEstadoTransferencia(err.message || 'Error al exportar el proyecto.', 'error');
+                mostrarNotificacion('No se pudo exportar el proyecto.', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function importarProyectoPortable(file) {
+            const input = document.getElementById('import-project-package-input');
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith('.zip')) {
+                actualizarEstadoTransferencia('Selecciona un archivo ZIP de proyecto Moby Studio.', 'error');
+                if (input) input.value = '';
+                return;
+            }
+            if (file.size > 250 * 1024 * 1024) {
+                actualizarEstadoTransferencia('El paquete supera el límite de 250 MB.', 'error');
+                if (input) input.value = '';
+                return;
+            }
+
+            const requestedName = document.getElementById('import-project-name')?.value?.trim() || '';
+            const suffix = requestedName ? `?name=${encodeURIComponent(requestedName)}` : '';
+            actualizarEstadoTransferencia(`Validando e importando ${file.name}...`);
+            try {
+                const response = await fetch(`/api/import-project${suffix}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/zip' },
+                    body: file
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudo importar el paquete.');
+                await Promise.all([refrescarTablaProyectosActivos(), cargarListaProyectos(), cargarMediateca()]);
+                const renamedCount = Object.keys(data.renamedAssets || {}).length;
+                const detail = renamedCount ? ` ${renamedCount} assets fueron renombrados para evitar conflictos.` : '';
+                actualizarEstadoTransferencia(`Proyecto '${data.project}' importado.${detail}`, 'success');
+                mostrarNotificacion(`Proyecto '${data.project}' importado correctamente.`, 'success');
+                await cambiarProyectoActivo(data.project);
+                const current = document.getElementById('project-transfer-current');
+                if (current) current.textContent = proyectoActivo;
+            } catch (err) {
+                actualizarEstadoTransferencia(err.message || 'Error al importar el proyecto.', 'error');
+                mostrarNotificacion('No se pudo importar el proyecto.', 'error');
+            } finally {
+                if (input) input.value = '';
+            }
         }
 
         function abrirManualEditor() {
@@ -8939,10 +9894,12 @@
                     
                     return `
                         <tr style="${rowStyle} border-bottom: 1px solid rgba(255,255,255,0.04);">
-                            <td style="padding: 10px 12px; font-weight: 600;">📁 ${p.name} ${badge}</td>
+                            <td style="padding: 10px 12px; font-weight: 600;">📁 ${p.name} ${badge}<div style="margin-top:2px; color:#64748b; font-size:8.5px; font-weight:500;">${p.entities || 0} objetos</div></td>
                             <td style="padding: 10px 12px; color: #94a3b8;">v${p.version || 0}</td>
                             <td style="padding: 10px 12px; color: #94a3b8;">${p.updatedAt || 'Desconocida'}</td>
                             <td style="padding: 10px 12px; text-align: right; display: flex; justify-content: flex-end; gap: 6px; pointer-events: auto;">
+                                <button class="btn btn-save" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset;" onclick="abrirProyectoGestionUI('${p.name}')" ${isCurrent ? 'disabled' : ''}>Abrir</button>
+                                <button class="btn btn-secondary-action" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; width:auto;" onclick="exportarProyectoPortable('${p.name}')">Exportar</button>
                                 <button class="btn btn-save" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #0891b2;" onclick="duplicarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Duplicar</button>
                                 <button class="btn btn-view" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset;" onclick="renombrarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Renombrar</button>
                                 <button class="btn btn-delete" style="margin: 0; padding: 4px 8px; font-size: 9.5px; min-height: unset; background: #c2410c;" onclick="archivarProyectoUI('${p.name}')" ${puedoGestionarProyectos() ? '' : 'disabled'}>Archivar</button>
