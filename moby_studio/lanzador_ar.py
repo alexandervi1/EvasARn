@@ -130,6 +130,16 @@ def ensure_default_project():
             with open(default_path, "w", encoding="utf-8") as f:
                 json.dump({"stage": {"width": 3, "height": 3, "gridVisible": True}, "entities": [], "version": 0}, f, indent=4, ensure_ascii=False)
 
+def ensure_runtime_layout():
+    """Create a clean viewer layout on first run without replacing user data."""
+    ensure_default_project()
+    output_dir = "output"
+    runtime_path = os.path.join(output_dir, "layout.json")
+    if os.path.exists(runtime_path):
+        return
+    os.makedirs(output_dir, exist_ok=True)
+    shutil.copyfile(project_layout_path("default"), runtime_path)
+
 def list_projects():
     ensure_default_project()
     projects = []
@@ -1483,6 +1493,7 @@ def main():
     # Asegurar que el directorio de trabajo es la raíz del servicio
     current_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(current_dir)
+    ensure_runtime_layout()
 
     # 1. Detectar IP Local o usar URL personalizada pasada por argumento
     ip_detectada = get_local_ip()

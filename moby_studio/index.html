@@ -1419,17 +1419,7 @@
     <div id="ar-detection-pill" class="ar-detection-pill">Target AR detectado</div>
     <div id="viewer-toast-stack" class="viewer-toast-stack" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Indicadores de Radar Estilo Pokémon Go (Para orientar al usuario hacia Moby) -->
-    <div id="radar-left" class="radar-arrow radar-left" style="display: none;">
-        <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-        <span>🐳 Moby a tu izquierda</span>
-    </div>
-    <div id="radar-right" class="radar-arrow radar-right" style="display: none;">
-        <span>Moby a tu derecha 🐳</span>
-        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-    </div>
-
-    <!-- HUD / Interfaz del Chat de IA -->
+    <!-- HUD del visor AR -->
     <div id="hud-container">
         <!-- Cabecera Superior -->
         <header>
@@ -1464,7 +1454,7 @@
             </div>
             <div class="ar-start-status" id="ar-start-status">Cargando configuracion del visor...</div>
             <div class="ar-start-actions">
-                <button type="button" class="ar-start-button" id="btn-ar-start" onclick="activarCamaraRA()">
+                <button type="button" class="ar-start-button" id="btn-ar-start" onclick="activarCamaraRA()" disabled>
                     <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
                         <circle cx="12" cy="13" r="4"/>
@@ -1598,13 +1588,6 @@
         gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;">
         
-        <!-- Precarga y Caché de TODOS los Modelos 3D para Metáforas Visuales -->
-        <a-assets>
-            <a-asset-item id="modelo-ballena" src="output/blue%20whale%203d%20model.glb"></a-asset-item>
-            <a-asset-item id="modelo-rack" src="output/servidor_rack.glb"></a-asset-item>
-            <a-asset-item id="modelo-buque" src="output/buque_carga.glb"></a-asset-item>
-        </a-assets>
-
         <!-- Iluminación PBR Premium -->
         <a-entity light="type: ambient; color: #cbd5e1; intensity: 0.8"></a-entity>
         <a-entity 
@@ -1621,50 +1604,8 @@
             position="1 3.5 2">
         </a-entity>
         
-        <!-- Luz Puntual Neón debajo del Holograma -->
-        <a-entity id="neon-light" light="type: point; color: #00f3ff; intensity: 2.5; distance: 4.5; decay: 1.2;" position="0 0.15 -3.0"></a-entity>
-        
         <!-- Fondo virtual oculto por defecto: el visor final debe priorizar la camara real. -->
         <a-sky color="#05070e" visible="false"></a-sky>
-
-        <!-- PLATAFORMA DE PROYECCIÓN HOLOGRÁFICA (Anillos Concéntricos Rotatorios) -->
-        <a-entity position="0 0.05 -3.0" visible="false">
-            <!-- Anillo Interior (Celeste) -->
-            <a-ring 
-                color="#00f3ff" 
-                radius-inner="0.65" 
-                radius-outer="0.67" 
-                rotation="-90 0 0" 
-                material="side: double; transparent: true; opacity: 0.8; roughness: 0.1; metalness: 0.9;"
-                animation="property: rotation; to: -90 0 360; dur: 8000; easing: linear; loop: true">
-            </a-ring>
-            <!-- Anillo Medio (Azul Docker - Sentido Opuesto) -->
-            <a-ring 
-                color="#0284c7" 
-                radius-inner="0.88" 
-                radius-outer="0.91" 
-                rotation="-90 0 0" 
-                material="side: double; transparent: true; opacity: 0.6; roughness: 0.1; metalness: 0.9;"
-                animation="property: rotation; to: -90 0 -360; dur: 12000; easing: linear; loop: true">
-            </a-ring>
-            <!-- Anillo Exterior (Verde Neón) -->
-            <a-ring 
-                color="#22c55e" 
-                radius-inner="1.12" 
-                radius-outer="1.14" 
-                rotation="-90 0 0" 
-                material="side: double; transparent: true; opacity: 0.4; roughness: 0.1; metalness: 0.9;"
-                animation="property: rotation; to: -90 0 360; dur: 18000; easing: linear; loop: true">
-            </a-ring>
-        </a-entity>
-
-        <!-- SISTEMA DE PARTÍCULAS / NODOS DE DATOS FLOTANTES -->
-        <a-entity position="0 0 -3.0" visible="false">
-            <a-sphere color="#00f3ff" radius="0.04" position="-0.9 1.4 0.3" material="transparent: true; opacity: 0.85; emissive: #00f3ff; emissiveIntensity: 2;" animation="property: position; to: -0.9 1.6 0.3; dir: alternate; dur: 3500; easing: easeInOutSine; loop: true"></a-sphere>
-            <a-sphere color="#22c55e" radius="0.035" position="0.95 0.9 -0.4" material="transparent: true; opacity: 0.85; emissive: #22c55e; emissiveIntensity: 2;" animation="property: position; to: 0.95 0.7 -0.4; dir: alternate; dur: 4200; easing: easeInOutSine; loop: true"></a-sphere>
-            <a-sphere color="#0284c7" radius="0.045" position="-0.7 0.6 -0.6" material="transparent: true; opacity: 0.8; emissive: #0284c7; emissiveIntensity: 1.5;" animation="property: position; to: -0.7 0.8 -0.6; dir: alternate; dur: 2800; easing: easeInOutSine; loop: true"></a-sphere>
-            <a-sphere color="#a855f7" radius="0.03" position="0.65 1.5 -0.7" material="transparent: true; opacity: 0.9; emissive: #a855f7; emissiveIntensity: 2;" animation="property: position; to: 0.65 1.3 -0.7; dir: alternate; dur: 3100; easing: easeInOutSine; loop: true"></a-sphere>
-        </a-entity>
 
         <!-- Camara principal controlada por MindAR. No usar look-controls en tracking por imagen. -->
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -2048,7 +1989,7 @@
         function togglePresentationMode() {
             feedbackMovil(16);
             const enabled = document.body.classList.toggle("presentation-mode");
-            setMobileClientState(enabled ? "Presentacion" : (cameraStream ? "Camara activa" : "AR listo"));
+            setMobileClientState(enabled ? "Presentacion" : (mindARActive || cameraStream ? "Camara activa" : "AR listo"));
             mostrarNotificacion(enabled ? "Modo presentacion activado." : "Interfaz completa activada.");
         }
 
@@ -2182,6 +2123,7 @@
         let cameraStream = null;
         let mindARActive = false;
         let mindARStarting = false;
+        let arConfigurationReady = false;
 
         function setARStartStatus(message, mode = "idle") {
             const panel = document.getElementById("ar-start-panel");
@@ -2196,12 +2138,18 @@
                 document.getElementById("btn-camera-toggle")
             ].filter(Boolean);
             buttons.forEach(button => {
-                button.disabled = isLoading;
+                button.disabled = isLoading || (!arConfigurationReady && button.id === "btn-ar-start");
             });
             const startButton = document.getElementById("btn-ar-start");
             if (startButton) {
                 startButton.querySelector("span").textContent = isLoading ? "Iniciando..." : "Iniciar AR";
             }
+        }
+
+        function setARConfigurationReady(ready) {
+            arConfigurationReady = Boolean(ready);
+            const startButton = document.getElementById("btn-ar-start");
+            if (startButton && !mindARStarting) startButton.disabled = !arConfigurationReady;
         }
 
         function setARSessionActive(active) {
@@ -2387,6 +2335,19 @@
             }
 
             const imageTargets = obtenerTargetsMindARConfigurados();
+            if (imageTargets.length === 0) {
+                setMobileClientState("Falta .mind");
+                setARStartStatus("No hay un target MindAR listo. Publica imagen y archivo .mind desde el editor.", "error");
+                mostrarNotificacion("No se puede iniciar AR sin un target MindAR publicado.", "error");
+                return;
+            }
+            const mindTargetUrls = new Set(imageTargets.map(marker => marker.mindTargetUrl));
+            if (mindTargetUrls.size > 1) {
+                setMobileClientState("MindAR invalido");
+                setARStartStatus("La escena usa varios archivos .mind. Debe utilizar uno solo con indices diferentes.", "error");
+                mostrarNotificacion("Corrige la configuracion MindAR antes de iniciar la camara.", "error");
+                return;
+            }
             if (imageTargets.length > 0) {
                 try {
                     setARStartButtonLoading(true);
@@ -2418,8 +2379,9 @@
                     hablar("Tracking activo. Apunta al target.");
                 } catch (err) {
                     console.error("[MindAR] No se pudo iniciar el tracking:", err);
-                    mindARActive = false;
-                    setARSessionActive(false);
+                    await detenerSistemaMindAR().catch(stopErr => console.warn("[MindAR] Limpieza tras error:", stopErr));
+                    document.body.classList.remove("camera-active-body");
+                    document.body.style.backgroundColor = "#05070f";
                     setMobileClientState("Error MindAR");
                     setARStartStatus(err.message || err.name || "No se pudo iniciar AR.", "error");
                     if (btnCamara) {
@@ -2440,6 +2402,8 @@
                 return;
             }
 
+            /* Fallback de camara sin tracking retirado: el visor final solo inicia AR valida. */
+            return;
             try {
                 // Diagnosticar dispositivos de video antes de iniciar
                 if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
@@ -2600,8 +2564,6 @@
                 feedbackMovil(35);
                 markerContainer.dataset.detected = "true";
                 markerContainer.setAttribute('visible', 'true');
-                markerContainer.dispatchEvent(new CustomEvent('targetFound', { detail: { source } }));
-                lanzarContenedorEnMarcador(markerId);
                 setMobileClientState("Target activo");
                 mostrarNotificacion(`Target detectado: ${marker.nombre || markerId}`);
                 if (marker.oiraIntro) {
@@ -2615,7 +2577,6 @@
                 }
             } else if (!detected && alreadyDetected) {
                 markerContainer.dataset.detected = "false";
-                markerContainer.dispatchEvent(new CustomEvent('targetLost', { detail: { source } }));
                 setMobileClientState(mindARActive || cameraStream ? "Buscando target" : "AR listo");
                 const pill = document.getElementById('ar-detection-pill');
                 if (pill) pill.classList.remove('active');
@@ -3014,9 +2975,6 @@
             }
         }
         
-        // Iniciar detector de radar cada 100ms
-        setInterval(actualizarRadarPokemonGo, 100);
-
         // --- REGISTRAR EVENTOS DE TOQUE EN LAS ENTIDADES 3D ---
         function inicializarEventosInteractivos() {
             // 1. Toque en Moby (Ballena)
@@ -3162,12 +3120,21 @@
             placeholder.appendChild(label);
             wrapper.appendChild(placeholder);
 
-            const source = obj.mediaUrl || obj.glbUrl || (obj.modelId ? `#${obj.modelId}` : null);
+            const legacyModelSources = {
+                'modelo-ballena': 'output/blue whale 3d model.glb',
+                'modelo-rack': 'output/servidor_rack.glb',
+                'modelo-buque': 'output/buque_carga.glb'
+            };
+            const source = obj.mediaUrl || obj.glbUrl || legacyModelSources[obj.modelId] || null;
             if (source) {
                 const model = document.createElement('a-entity');
                 model.setAttribute('gltf-model', source);
                 model.addEventListener('model-loaded', () => placeholder.setAttribute('visible', 'false'));
-                model.addEventListener('model-error', () => placeholder.setAttribute('visible', 'true'));
+                model.addEventListener('model-error', () => {
+                    placeholder.setAttribute('visible', 'true');
+                    console.warn(`[Visor] No se pudo cargar el modelo: ${source}`);
+                    mostrarNotificacion(`No se pudo cargar el modelo "${obj.nombre || '3D'}".`, 'warning');
+                });
                 wrapper.appendChild(model);
             }
             return wrapper;
@@ -3177,6 +3144,7 @@
 
         // Cargar escenario de forma dinámica desde output/layout.json
         async function cargarEscenarioDinamico() {
+            setARConfigurationReady(false);
             // Limpiar entidades interactivas previas en todos los contenedores para evitar duplicados
             document.querySelectorAll('.interactive-entity').forEach(el => el.parentNode.removeChild(el));
             // Limpiar contenedores de marcadores dinámicos que hayamos creado
@@ -3200,6 +3168,8 @@
                         // Formato de compatibilidad antiguo
                         datosLienzo = rawData;
                     }
+                } else {
+                    console.warn(`[Visor] No se pudo cargar output/layout.json: HTTP ${response.status}`);
                 }
             } catch (err) {
                 console.warn("No se pudo descargar layout.json. Usando escenario por defecto panorámico.", err);
@@ -3261,6 +3231,7 @@
             }
             if (markerMind && sceneEl) {
                 sceneEl.setAttribute('mindar-image', `imageTargetSrc: ${markerMind.mindTargetUrl}; autoStart: false; uiLoading: no; uiScanning: no; uiError: no; filterMinCF: 0.0001; filterBeta: 0.001; warmupTolerance: 5; missTolerance: 5;`);
+                setARConfigurationReady(true);
                 setMobileClientState("Tracking imagen");
                 setARStartStatus("Pulsa Iniciar AR y apunta la camara a la imagen target.", "idle");
             } else if (hasInvalidMindConfig) {
@@ -3388,6 +3359,10 @@
                         document.body.appendChild(audioEl);
                     }
                     audioEl.setAttribute('src', mediaUrl);
+                    audioEl.onerror = () => {
+                        console.warn(`[Visor] No se pudo cargar el audio: ${mediaUrl}`);
+                        mostrarNotificacion(`No se pudo cargar el audio "${obj.nombre || 'AR'}".`, 'warning');
+                    };
                     configurarAudioAR(audioEl, obj);
                     el = crearReproductorAudioAR(obj, audioEl);
 
@@ -3414,6 +3389,10 @@
                     } else {
                         videoEl.setAttribute('src', mediaUrl);
                     }
+                    videoEl.onerror = () => {
+                        console.warn(`[Visor] No se pudo cargar el video: ${mediaUrl}`);
+                        mostrarNotificacion(`No se pudo cargar el video "${obj.nombre || 'AR'}".`, 'warning');
+                    };
                     configurarVideoAR(videoEl, obj);
                     
                     const pWidth = Number(obj.panelWidth) || 1.6;
@@ -3449,6 +3428,11 @@
                     imagePanel.setAttribute('src', mediaUrl);
                     imagePanel.setAttribute('width', pWidth);
                     imagePanel.setAttribute('height', pHeight);
+                    imagePanel.addEventListener('materialtextureloaded', () => imagePanel.dataset.assetLoaded = 'true');
+                    imagePanel.addEventListener('materialtextureerror', () => {
+                        console.warn(`[Visor] No se pudo cargar la imagen: ${mediaUrl}`);
+                        mostrarNotificacion(`No se pudo cargar la imagen "${obj.nombre || 'AR'}".`, 'warning');
+                    });
                     el = crearMarcoEspacial(obj, imagePanel, { width: pWidth, height: pHeight, title: obj.nombre || 'Imagen AR' });
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
@@ -3536,7 +3520,6 @@
                 }
             });
 
-            inicializarEventosInteractivos();
         }
 
         // Iniciar carga del escenario dinámico al cargar la página
