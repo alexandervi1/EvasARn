@@ -55,6 +55,7 @@ Abre `Agregar contenido` en la barra izquierda. Las plantillas actuales son:
 - `Marcador + Video`
 - `Marcador + Audio`
 - `Marcador + Modelo 3D`
+- `Boton interactivo`
 
 Cada plantilla crea un target y un contenido ya vinculado. Para empezar desde cero tambien puedes crear un `Marcador AR` y agregar recursos manualmente.
 
@@ -87,6 +88,7 @@ Puedes subir el archivo desde el modal AR o desde `Recursos`.
 | Imagen | `.png`, `.jpg`, `.jpeg`, `.webp`, `.gif` |
 | Video | `.mp4`, `.webm`, `.mov` |
 | Audio | `.mp3`, `.wav`, `.ogg`, `.m4a`, `.aac` |
+| Boton | `.glb`, `.gltf` para boton 3D; o texto y color para boton 2D |
 
 Al usar la mediateca:
 
@@ -94,6 +96,7 @@ Al usar la mediateca:
 2. Filtra por su tipo si es necesario.
 3. Pulsa agregar para crear contenido o asignalo al objeto seleccionado.
 4. Para un `.mind`, selecciona primero el target y usa la accion de asignacion.
+5. Para un boton, define su aspecto y luego asigna la accion al contenido que deba controlar.
 
 Los `.mind` no se agregan como objetos visuales independientes.
 
@@ -126,7 +129,18 @@ Ajusta ancho y alto del panel desde el inspector. Para video, revisa autoplay, l
 
 ### Audio
 
-El visor crea un reproductor espacial con play/pausa y barras animadas. El audio se pausa cuando se pierde el target. Si autoplay es bloqueado, toca el reproductor.
+El visor crea un reproductor espacial con ondas animadas. No muestra controles internos de play/pausa; la reproduccion se controla con botones externos o con la interaccion que configures en la escena. Si autoplay es bloqueado, usa un boton de la propia experiencia.
+
+### Botones interactivos
+
+Los botones son contenido AR normal. Puedes:
+
+1. Poner un boton 2D con texto y color.
+2. Subir un modelo GLB como boton personalizado.
+3. Asignar acciones como `next`, `previous`, `show`, `hide`, `toggle`, `play`, `pause` y `stop`.
+4. Hacer que el boton permanezca oculto hasta que se detecte por primera vez su target asociado.
+
+Si el boton no tiene target asociado, no se publica como control global.
 
 ### Modelo 3D
 
@@ -154,6 +168,8 @@ Corrige los errores, guarda y vuelve a ejecutar la validacion.
 4. Apunta al target impreso o mostrado en otro dispositivo.
 
 El contenido aparece en `targetFound` y se oculta o pausa en `targetLost`.
+
+Los botones asociados al target se activan despues de esa primera deteccion; antes de eso permanecen ocultos.
 
 ## 12. Probar en telefono
 
@@ -215,6 +231,12 @@ Usa `Exportar experiencia` cuando quieras un paquete para ejecucion, no para con
 
 ### El audio no inicia
 
-- Toca el reproductor AR.
+- Toca un boton externo configurado para reproducir el audio.
 - Comprueba el volumen del objeto y del dispositivo.
 - Verifica que el formato sea compatible con el navegador.
+
+### Un boton no responde
+
+- Confirma que el boton tenga un `arAnchor` valido.
+- Revisa que el target asociado ya haya sido detectado al menos una vez.
+- Verifica que la accion configurada apunte a un objeto existente.
