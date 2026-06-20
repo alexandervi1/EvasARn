@@ -1734,6 +1734,8 @@
             servidor: null,
             buque: null
         };
+        let viewerLayoutObjects = [];
+        const viewerElementsById = new Map();
 
         // Escalas por defecto de cada modelo en visualización
         const defaultScales = {
@@ -1748,6 +1750,7 @@
         let arUserGestureReady = false;
 
         const markerRegistry = new Map();
+        const unlockedMarkerIds = new Set();
 
         function esDispositivoMovil() {
             return window.matchMedia('(max-width: 760px), (pointer: coarse)').matches;
@@ -1903,7 +1906,6 @@
             const player = document.createElement('a-entity');
             player.setAttribute('id', obj.uuid);
             player.setAttribute('billboard-ui', '');
-            player.setAttribute('class', 'clickable');
 
             const panel = document.createElement('a-plane');
             panel.setAttribute('width', '1.8');
@@ -1918,35 +1920,9 @@
             accent.setAttribute('material', 'shader: flat; color: #ec4899; side: double;');
             player.appendChild(accent);
 
-            const button = document.createElement('a-circle');
-            button.setAttribute('radius', '0.18');
-            button.setAttribute('position', '-0.62 0 0.025');
-            button.setAttribute('material', 'shader: flat; color: #ec4899; side: double;');
-            player.appendChild(button);
-
-            const play = document.createElement('a-triangle');
-            play.setAttribute('data-audio-play-icon', '');
-            play.setAttribute('vertex-a', '-0.045 -0.07 0');
-            play.setAttribute('vertex-b', '-0.045 0.07 0');
-            play.setAttribute('vertex-c', '0.075 0 0');
-            play.setAttribute('position', '-0.605 0 0.04');
-            play.setAttribute('material', 'shader: flat; color: #ffffff; side: double;');
-            player.appendChild(play);
-
-            [-0.035, 0.035].forEach(offset => {
-                const pause = document.createElement('a-plane');
-                pause.setAttribute('data-audio-pause-icon', '');
-                pause.setAttribute('width', '0.035');
-                pause.setAttribute('height', '0.13');
-                pause.setAttribute('position', `${-0.62 + offset} 0 0.04`);
-                pause.setAttribute('material', 'shader: flat; color: #ffffff; side: double;');
-                pause.setAttribute('visible', 'false');
-                player.appendChild(pause);
-            });
-
             const title = document.createElement('a-text');
             title.setAttribute('value', obj.nombre || 'Audio espacial AR');
-            title.setAttribute('position', '-0.35 0.17 0.03');
+            title.setAttribute('position', '-0.75 0.17 0.03');
             title.setAttribute('width', '1.65');
             title.setAttribute('color', '#f8fafc');
             player.appendChild(title);
@@ -1957,20 +1933,12 @@
                 bar.setAttribute('data-audio-wave', '');
                 bar.setAttribute('width', '0.035');
                 bar.setAttribute('height', height.toFixed(3));
-                bar.setAttribute('position', `${(-0.33 + index * 0.073).toFixed(3)} -0.06 0.03`);
+                bar.setAttribute('position', `${(-0.72 + index * 0.105).toFixed(3)} -0.06 0.03`);
                 bar.setAttribute('scale', '1 0.35 1');
                 bar.setAttribute('material', `shader: flat; color: ${index > 9 ? '#ec4899' : '#22d3ee'}; side: double;`);
                 player.appendChild(bar);
             }
 
-            player.addEventListener('click', event => {
-                event.stopPropagation();
-                if (audioEl.paused) reproducirAudioAR(audioEl, obj, player);
-                else {
-                    audioEl.pause();
-                    actualizarReproductorAudioAR(player, false);
-                }
-            });
             audioEl.addEventListener('ended', () => actualizarReproductorAudioAR(player, false));
             return player;
         }
@@ -2579,6 +2547,7 @@
             const alreadyDetected = markerContainer.dataset.detected === "true";
             if (detected && !alreadyDetected) {
                 feedbackMovil(35);
+                unlockedMarkerIds.add(markerId);
                 markerContainer.dataset.detected = "true";
                 markerContainer.setAttribute('visible', 'true');
                 setMobileClientState("Target activo");
@@ -3160,6 +3129,74 @@
 
 
 
+        function crearBotonInteractivoViewer(obj) {
+            const button = document.createElement('a-entity');
+            button.setAttribute('id', obj.uuid);
+            button.setAttribute('billboard-ui', '');
+            let surface;
+            if (obj.buttonAppearance === 'model' && obj.buttonModelUrl) {
+                surface = document.createElement('a-entity');
+                surface.setAttribute('gltf-model', obj.buttonModelUrl);
+            } else {
+                surface = document.createElement('a-plane');
+                surface.setAttribute('width', '1.05'); surface.setAttribute('height', '0.34');
+                surface.setAttribute('material', `shader: flat; color: ${obj.buttonColor || '#2563eb'}; side: double`);
+            }
+            const label = document.createElement('a-text');
+            label.setAttribute('value', obj.buttonLabel || 'Siguiente'); label.setAttribute('align', 'center');
+            label.setAttribute('color', '#ffffff'); label.setAttribute('width', '2.1'); label.setAttribute('position', '0 0 0.025');
+            button.appendChild(surface); button.appendChild(label);
+            button.addEventListener('click', event => { event.stopPropagation(); ejecutarInteraccionViewer(obj, button); });
+            return button;
+        }
+
+        function establecerVisibilidadViewer(id, visible) {
+            const target = viewerElementsById.get(id) || document.getElementById(id);
+            if (!target) return false;
+            const targetData = viewerLayoutObjects.find(item => item.uuid === id);
+            const anchor = targetData?.arAnchor || 'base';
+            if (visible && anchor !== 'base' && !unlockedMarkerIds.has(anchor)) return false;
+            if (visible && targetData?.mediaType === 'button' && anchor === 'base') return false;
+            target.setAttribute('visible', visible ? 'true' : 'false');
+            return true;
+        }
+
+        function ejecutarInteraccionViewer(obj, button) {
+            const action = obj.interaction?.action || 'next';
+            button.setAttribute('animation__touch', 'property: scale; from: 1 1 1; to: 0.92 0.92 0.92; dir: alternate; dur: 90; loop: 1');
+            feedbackMovil(12);
+            if (action === 'next' || action === 'previous') {
+                const siblings = viewerLayoutObjects.filter(item => !item.isMarker && item.mediaType !== 'button' && (item.arAnchor || 'base') === (obj.arAnchor || 'base'));
+                if (!siblings.length) return mostrarNotificacion('No hay contenidos para recorrer.');
+                const visibleIndex = siblings.findIndex(item => { const element = viewerElementsById.get(item.uuid); return element && element.getAttribute('visible') !== false && element.getAttribute('visible') !== 'false'; });
+                siblings.forEach(item => establecerVisibilidadViewer(item.uuid, false));
+                const step = action === 'previous' ? -1 : 1;
+                const next = siblings[(visibleIndex + step + siblings.length) % siblings.length];
+                establecerVisibilidadViewer(next.uuid, true);
+                mostrarNotificacion(next.nombre || 'Siguiente contenido');
+                return;
+            }
+            const target = viewerElementsById.get(obj.interaction?.targetId);
+            if (!target) return mostrarNotificacion('El botón no tiene un destino válido.');
+            if (action === 'play' || action === 'pause' || action === 'stop') {
+                const targetData = viewerLayoutObjects.find(item => item.uuid === obj.interaction.targetId);
+                const media = document.getElementById(`${targetData?.mediaType === 'video' ? 'video' : 'audio'}-resource-${obj.interaction.targetId}`);
+                if (!media || !['audio', 'video'].includes(targetData?.mediaType)) return mostrarNotificacion('El destino debe ser un audio o video.');
+                if (action === 'play') {
+                    if (targetData.mediaType === 'video') reproducirVideoAR(media, targetData);
+                    else reproducirAudioAR(media, targetData, target);
+                } else {
+                    media.pause();
+                    if (action === 'stop') media.currentTime = 0;
+                    if (targetData.mediaType === 'audio') actualizarReproductorAudioAR(target, false);
+                    mostrarNotificacion(action === 'stop' ? 'Reproducción detenida.' : 'Reproducción pausada.');
+                }
+                return;
+            }
+            const visible = target.getAttribute('visible') !== false && target.getAttribute('visible') !== 'false';
+            establecerVisibilidadViewer(obj.interaction.targetId, action === 'show' ? true : action === 'hide' ? false : !visible);
+        }
+
         // Cargar escenario de forma dinámica desde output/layout.json
         async function cargarEscenarioDinamico() {
             setARConfigurationReady(false);
@@ -3168,6 +3205,8 @@
             // Limpiar contenedores de marcadores dinámicos que hayamos creado
             document.querySelectorAll('.dynamic-marker-container').forEach(el => el.parentNode.removeChild(el));
             markerRegistry.clear();
+            unlockedMarkerIds.clear();
+            viewerElementsById.clear();
             
             let datosLienzo = null;
             let stageConfig = { width: 3.0, height: 3.0, gridVisible: true };
@@ -3206,6 +3245,7 @@
                 datosLienzo = [];
                 setARStartStatus("No hay una experiencia publicada. Publica desde el editor antes de abrir el visor.", "error");
             }
+            viewerLayoutObjects = datosLienzo;
 
             // 1. Identificar todos los marcadores en los datos del escenario
             let marcadores = datosLienzo.filter(obj => obj.isMarker === true);
@@ -3361,13 +3401,23 @@
                     const markerContainer = document.getElementById(`anchor-${anchor}`);
                     if (markerContainer) {
                         targetContainer = markerContainer;
-                        if (!obj.relativeToAnchor) {
+                        if (obj.anchorOffset) {
+                            posX = Number(obj.anchorOffset.x || 0);
+                            posY = Number(obj.anchorOffset.y || 0);
+                            posZ = Number(obj.anchorOffset.z || 0);
+                        } else if (!obj.relativeToAnchor) {
                             posX = 0; posY = 0.25; posZ = 0.1;
                         }
                     }
                 }
                 
-                if (mediaType === 'audio' && mediaUrl) {
+                if (mediaType === 'button') {
+                    el = crearBotonInteractivoViewer(obj);
+                    if (targetContainer) {
+                        targetContainer.addEventListener('targetFound', () => { if (!obj.hidden) el.setAttribute('visible', 'true'); });
+                        targetContainer.addEventListener('targetLost', () => { if (anchor !== 'base') el.setAttribute('visible', 'false'); });
+                    }
+                } else if (mediaType === 'audio' && mediaUrl) {
                     const audioId = `audio-resource-${obj.uuid}`;
                     let audioEl = document.getElementById(audioId);
                     if (!audioEl) {
@@ -3386,8 +3436,8 @@
 
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => {
-                            el.setAttribute('visible', 'true');
-                            if (obj.autoplay !== false) reproducirAudioAR(audioEl, obj, el);
+                            if (!obj.hidden) el.setAttribute('visible', 'true');
+                            if (!obj.hidden && obj.autoplay !== false) reproducirAudioAR(audioEl, obj, el);
                         });
                         targetContainer.addEventListener('targetLost', () => {
                             audioEl.pause();
@@ -3426,8 +3476,8 @@
                     if (targetContainer) {
                         targetContainer.addEventListener('targetFound', () => {
                             console.log(`🎯 targetFound: Reproduciendo video ${videoId}`);
-                            el.setAttribute('visible', 'true');
-                            if (obj.autoplay !== false) {
+                            if (!obj.hidden) el.setAttribute('visible', 'true');
+                            if (!obj.hidden && obj.autoplay !== false) {
                                 reproducirVideoAR(videoEl, obj);
                             }
                         });
@@ -3453,7 +3503,7 @@
                     });
                     el = crearMarcoEspacial(obj, imagePanel, { width: pWidth, height: pHeight, title: obj.nombre || 'Imagen AR' });
                     if (targetContainer) {
-                        targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
+                        targetContainer.addEventListener('targetFound', () => { if (!obj.hidden) el.setAttribute('visible', 'true'); });
                         targetContainer.addEventListener('targetLost', () => {
                             if (anchor !== 'base') el.setAttribute('visible', 'false');
                         });
@@ -3486,7 +3536,7 @@
                     el.appendChild(label);
 
                     if (targetContainer) {
-                        targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
+                        targetContainer.addEventListener('targetFound', () => { if (!obj.hidden) el.setAttribute('visible', 'true'); });
                         targetContainer.addEventListener('targetLost', () => {
                             if (anchor !== 'base') el.setAttribute('visible', 'false');
                         });
@@ -3506,15 +3556,17 @@
                 const contentClass = anchor === 'base' ? 'interactive-entity' : 'interactive-entity ar-experience-content';
                 const existingClass = el.getAttribute('class');
                 el.setAttribute('class', existingClass ? `${existingClass} ${contentClass}` : contentClass);
-                el.setAttribute('visible', anchor === 'base' ? 'true' : 'false');
+                const visibleInitially = anchor === 'base' && mediaType !== 'button' && !obj.hidden;
+                el.setAttribute('visible', visibleInitially ? 'true' : 'false');
                 if (anchor !== 'base' && mediaType === '3d' && targetContainer) {
-                    targetContainer.addEventListener('targetFound', () => el.setAttribute('visible', 'true'));
+                    targetContainer.addEventListener('targetFound', () => { if (!obj.hidden) el.setAttribute('visible', 'true'); });
                     targetContainer.addEventListener('targetLost', () => el.setAttribute('visible', 'false'));
                 }
                 
                 if (targetContainer) {
                     targetContainer.appendChild(el);
                 }
+                viewerElementsById.set(obj.uuid, el);
 
                 if (obj.oiraNarration) {
                     el.setAttribute('data-oira-narration', obj.oiraNarration);

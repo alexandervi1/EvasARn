@@ -40,7 +40,7 @@ Responsabilidades:
 - mantener `escenaObjetos`, seleccion, contador y configuracion del escenario;
 - renderizar targets y contenido dentro del lienzo A-Frame;
 - editar transformaciones y relaciones `arAnchor`;
-- crear plantillas de imagen, video, audio y modelo 3D;
+- crear plantillas de imagen, video, audio, modelo 3D y botones interactivos;
 - administrar la mediateca;
 - guardar y cargar proyectos versionados;
 - mantener borradores, Undo/Redo, presencia y locks;
@@ -67,8 +67,9 @@ let proyectoVersion = 0;
 
 ### Subsistemas
 
-- **Barra de actividad**: escena, creacion, recursos, validacion, publicacion, proyectos y ayuda.
-- **Lienzo**: composicion visual, seleccion, transformaciones y preview movil.
+- **Barra de actividad**: escena, creacion, recursos, validacion, publicacion, proyectos y ayuda. Es la fuente principal de navegacion; los subcontroles internos de seccion quedan ocultos.
+- **Lienzo**: composicion visual, seleccion directa, transformaciones y preview movil.
+- **Modos del lienzo**: Seleccionar (`V`), Orbita (`Q`), Mover (`W`), Rotar (`E`) y Escala (`R`).
 - **Inspector**: propiedades exactas, anclaje, archivo y notas.
 - **Modal AR**: configura target fisico, `.mind`, indice y contenido.
 - **Outliner**: separa targets, contenido anclado y mesa base.
@@ -95,8 +96,11 @@ Tipos renderizados:
 - `3d`: modelo GLB/GLTF o placeholder;
 - `image`: panel de imagen;
 - `video`: panel de video con control de reproduccion;
-- `audio`: reproductor espacial con ondas animadas;
-- `oira-node`: panel informativo heredado.
+- `audio`: reproductor espacial con ondas animadas y sin controles internos de play/pause;
+- `oira-node`: panel informativo heredado;
+- `button`: boton tactil 2D o GLB con acciones de navegacion, visibilidad y control multimedia.
+
+Los botones permanecen ocultos hasta el primer `targetFound` de su `arAnchor`; un boton sin target no se publica como control global. Si el target asociado no se ha detectado todavia, la interaccion no se habilita.
 
 El raycaster se limita a `.clickable` e `.interactive-entity`. El visor incluye controles de escala/distancia, modo presentacion, narracion, ayuda y mensajes de estado.
 
@@ -129,6 +133,7 @@ Campos comunes de entidad:
 - `uuid`, `nombre`
 - `posicion`, `rotacion`, `escala`
 - `arAnchor`
+- `anchorOffset`: posicion libre del contenido relativa al target fisico;
 - `relativeToAnchor`
 - `hidden`, `locked`
 
@@ -143,10 +148,11 @@ Campos de target:
 
 Campos de contenido:
 
-- `mediaType`: `3d`, `image`, `video`, `audio` u `oira-node`
+- `mediaType`: `3d`, `image`, `video`, `audio`, `button` u `oira-node`
 - `mediaUrl`
 - `modelId`, `glbUrl`
 - propiedades de panel, video o audio;
+- `buttonLabel`, `buttonColor`, `buttonAppearance`, `buttonModelUrl` e `interaction { action, targetId }` para botones tactiles. Las acciones son `next`, `previous`, `show`, `hide`, `toggle`, `play`, `pause` y `stop`;
 - `oiraLabel`, `oiraColor`, `oiraNarration` para compatibilidad.
 
 ## 5. Persistencia

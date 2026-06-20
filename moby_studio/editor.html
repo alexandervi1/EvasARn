@@ -335,6 +335,34 @@
             position: relative;
             overflow: hidden;
         }
+
+        #group-interaction-config {
+            gap: 14px;
+            border-color: rgba(74, 222, 128, 0.2);
+            background: linear-gradient(180deg, rgba(20, 83, 45, 0.13), rgba(15, 23, 42, 0.62));
+        }
+        #group-interaction-config .interaction-field { display: flex; flex-direction: column; gap: 7px; }
+        #group-interaction-config .interaction-label { color: #e2e8f0; font-size: 10.5px; font-weight: 750; }
+        #group-interaction-config .interaction-help { color: #64748b; font-size: 9px; line-height: 1.4; }
+        #group-interaction-config input[type="text"],
+        #group-interaction-config select {
+            display: block; width: 100%; height: 40px; min-height: 40px; box-sizing: border-box;
+            padding: 0 12px; border: 1px solid rgba(148, 163, 184, 0.26); border-radius: 9px;
+            background: #0b1220; color: #f8fafc; font-size: 11.5px; font-weight: 650;
+            outline: none; cursor: text; -webkit-appearance: auto; appearance: auto;
+        }
+        #group-interaction-config select { cursor: pointer; padding-right: 30px; }
+        #group-interaction-config input[type="text"]:focus,
+        #group-interaction-config select:focus { border-color: #4ade80; box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1); }
+        .interaction-choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+        .interaction-choice {
+            min-height: 38px; padding: 7px 8px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.82); color: #94a3b8; font-size: 9.5px; font-weight: 750;
+            line-height: 1.25; cursor: pointer; text-align: left;
+        }
+        .interaction-choice:hover { border-color: rgba(74, 222, 128, 0.5); color: #e2e8f0; }
+        .interaction-choice.active { border-color: #4ade80; background: rgba(34, 197, 94, 0.15); color: #dcfce7; box-shadow: inset 0 0 0 1px rgba(74, 222, 128, 0.16); }
+        .interaction-upload { min-height: 38px !important; margin: 0 !important; justify-content: center; }
         .sidebar.collapsed {
             transform: none;
             opacity: 1;
@@ -1237,6 +1265,9 @@
             background: var(--color-border-glass);
             margin: 0 4px;
         }
+
+        #panel-library > .segment-control,
+        #panel-publish > .segment-control { display: none !important; }
 
         .viewport-view-controls {
             position: absolute;
@@ -3243,6 +3274,10 @@
                                     <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Modelo 3D anclado al target físico.</div>
                                 </div>
                             </div>
+                            <div class="quick-ar-card" onclick="crearBotonInteractivo()" style="display:flex;gap:10px;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.2);padding:10px;border-radius:8px;cursor:pointer;align-items:center;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="m10 9 3 3-3 3"/></svg>
+                                <div><div style="font-weight:700;color:#fff;font-size:11px;">Botón interactivo</div><div style="font-size:9.5px;color:#64748b;margin-top:2px;">Dispara acciones táctiles en el visor.</div></div>
+                            </div>
                         </div>
                     </div>
 
@@ -3404,7 +3439,14 @@
         <div style="grid-area: main; position: relative;">
             <!-- UNITY-LIKE TRANSFORM TOOLBAR -->
             <div id="transform-toolbar">
-                <button class="toolbar-btn active" id="tool-orbit" onclick="setEditMode('orbit')" title="Navegar / Orbitar Escena (Teclado: Q)">
+                <button class="toolbar-btn active" id="tool-select" onclick="setEditMode('select')" title="Seleccionar objetos en el lienzo (Teclado: V)">
+                    <span class="btn-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 3 7.5 17 2.2-6.3L20 11.5 4 3Z"/><path d="m13.7 13.7 4.6 4.6"/></svg>
+                    </span>
+                    <span class="btn-label">Seleccionar</span>
+                </button>
+                <div class="toolbar-divider"></div>
+                <button class="toolbar-btn" id="tool-orbit" onclick="setEditMode('orbit')" title="Navegar / Orbitar Escena (Teclado: Q)">
                     <span class="btn-icon">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
                     </span>
@@ -3475,7 +3517,7 @@
                 </div>
                 <div class="precision-item">
                     <span class="precision-label">Modo</span>
-                    <span class="precision-value" id="precision-mode">Órbita</span>
+                    <span class="precision-value" id="precision-mode">Seleccionar</span>
                 </div>
                 <div class="precision-item">
                     <span class="precision-label">Posición X/Y/Z</span>
@@ -3529,7 +3571,7 @@
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <div class="mode-indicator-badge" style="margin: 0; padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 10px; font-weight: bold; color: #94a3b8;">
                             <span>Modo:</span>
-                            <span class="mode-indicator-val" id="inspector-mode-val" style="color: #00f3ff; font-weight: 800;">Órbita</span>
+                            <span class="mode-indicator-val" id="inspector-mode-val" style="color: #00f3ff; font-weight: 800;">Seleccionar</span>
                         </div>
                     </div>
                     <div class="selected-badge" id="selected-entity-badge" style="background: rgba(0, 243, 255, 0.06); border: 1px solid rgba(0, 243, 255, 0.25); padding: 10px; border-radius: 8px; font-weight: 700; font-size: 12px; color: #00f3ff; text-align: center; text-shadow: 0 0 8px rgba(0, 243, 255, 0.2);">
@@ -3760,6 +3802,17 @@
                             </label>
                         </div>
                     </div>
+                </div>
+
+                <div class="inspector-section-card" id="group-interaction-config" style="display:none;pointer-events:auto;">
+                    <div><div class="inspector-section-title" style="color:#4ade80;margin-bottom:4px;">Interacción táctil</div><div class="interaction-help">Diseña el botón y define qué ocurrirá cuando el usuario lo toque en el visor.</div></div>
+                    <div class="interaction-field"><label class="interaction-label" for="input-interaction-label">Texto visible</label><input type="text" id="input-interaction-label" maxlength="40" placeholder="Ejemplo: Siguiente" oninput="actualizarInteraccionSeleccionada()"><div class="interaction-help">Máximo 40 caracteres. Usa una acción corta y clara.</div></div>
+                    <div class="interaction-field"><span class="interaction-label">Apariencia</span><input type="hidden" id="select-button-appearance" value="panel"><div class="interaction-choice-grid"><button type="button" class="interaction-choice" data-appearance="panel" onclick="seleccionarAparienciaBoton('panel')">Panel 2D<br><small>Texto y color</small></button><button type="button" class="interaction-choice" data-appearance="model" onclick="seleccionarAparienciaBoton('model')">Modelo 3D<br><small>GLB personalizado</small></button></div></div>
+                    <div class="interaction-field" id="button-color-group"><label class="interaction-label" for="input-interaction-color">Color del panel</label><input type="color" id="input-interaction-color" oninput="actualizarInteraccionSeleccionada()" value="#2563eb" style="width:100%;height:38px;border:1px solid rgba(148,163,184,.26);border-radius:9px;background:#0b1220;padding:4px;"></div>
+                    <div class="interaction-field" id="button-model-group" style="display:none;"><span class="interaction-label">Modelo 3D del botón</span><input type="file" id="input-button-model" accept=".glb,.gltf" style="display:none" onchange="subirModeloBoton(this.files[0])"><button type="button" class="btn btn-secondary-action interaction-upload" onclick="document.getElementById('input-button-model').click()">Seleccionar archivo GLB / GLTF</button><div id="button-model-status" class="interaction-help">Sin modelo seleccionado</div></div>
+                    <div class="interaction-field"><span class="interaction-label">Acción al tocar</span><input type="hidden" id="select-interaction-action" value="next"><div class="interaction-choice-grid" id="interaction-action-grid"><button type="button" class="interaction-choice" data-action="next" onclick="seleccionarAccionInteraccion('next')">Siguiente</button><button type="button" class="interaction-choice" data-action="previous" onclick="seleccionarAccionInteraccion('previous')">Anterior</button><button type="button" class="interaction-choice" data-action="show" onclick="seleccionarAccionInteraccion('show')">Mostrar</button><button type="button" class="interaction-choice" data-action="hide" onclick="seleccionarAccionInteraccion('hide')">Ocultar</button><button type="button" class="interaction-choice" data-action="toggle" onclick="seleccionarAccionInteraccion('toggle')">Alternar</button><button type="button" class="interaction-choice" data-action="play" onclick="seleccionarAccionInteraccion('play')">Reproducir</button><button type="button" class="interaction-choice" data-action="pause" onclick="seleccionarAccionInteraccion('pause')">Pausar</button><button type="button" class="interaction-choice" data-action="stop" onclick="seleccionarAccionInteraccion('stop')">Detener</button></div></div>
+                    <div class="interaction-field" id="interaction-target-group" style="display:none;"><label class="interaction-label" for="select-interaction-target">Elemento destino</label><select id="select-interaction-target" onchange="actualizarInteraccionSeleccionada()"></select><div class="interaction-help" id="interaction-target-help">Selecciona el objeto que recibirá la acción.</div></div>
+                    <div class="ar-recognition-note" style="font-size:9.5px;color:#cbd5e1;">Siguiente y Anterior recorren los contenidos del mismo target sin necesitar un destino.</div>
                 </div>
 
                 <!-- TARJETA 5: COMPONENTE DE COMENTARIOS / NOTAS POR OBJETO -->
@@ -4332,8 +4385,6 @@
         <!-- ESCENA 3D DEL EDITOR (A-FRAME) -->
         <a-scene 
             renderer="colorManagement: true; antialias: true;"
-            cursor="rayOrigin: mouse"
-            raycaster="objects: .interactive-entity, .gizmo-handle"
             vr-mode-ui="enabled: false"
             loading-screen="enabled: false"
             gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/versioned/decoders/1.5.6/;"
@@ -4406,7 +4457,9 @@
         </a-entity>
 
         <!-- CÁMARA ORBITAL FIJA DEL EDITOR -->
-        <a-entity camera position="0 1.8 1.5" look-controls></a-entity>
+        <a-entity id="editor-camera" camera position="0 1.8 1.5" look-controls
+                  cursor="rayOrigin: mouse"
+                  raycaster="objects: .interactive-entity, .gizmo-handle"></a-entity>
 
     </a-scene>
     </div>
@@ -4441,11 +4494,12 @@
         let historialSuspendido = false;
         let historialSincronizado = true;
         let ultimaAccionHistorial = { label: '', at: 0 };
+        let activeLibrarySection = 'models';
 
-        // --- EVOLUCIÓN: CONTROL DE MODOS DE TRANSFORMACIÓN (Q, W, E, R) ---
-        let activeEditMode = 'orbit'; // 'orbit', 'translate', 'rotate', 'scale'
+        // --- EVOLUCIÓN: CONTROL DE MODOS DE TRANSFORMACIÓN (V, Q, W, E, R) ---
+        let activeEditMode = 'select'; // 'select', 'orbit', 'translate', 'rotate', 'scale'
 
-        function setEditMode(mode) {
+        function setEditMode(mode, silent = false) {
             activeEditMode = mode;
             
             // Actualizar clases de botones en el Toolbar
@@ -4454,6 +4508,7 @@
             });
             
             const btnMap = {
+                'select': 'tool-select',
                 'orbit': 'tool-orbit',
                 'translate': 'tool-translate',
                 'rotate': 'tool-rotate',
@@ -4475,12 +4530,27 @@
             // Actualizar Gizmo visual
             actualizarGizmo3D();
             actualizarHudPrecision();
+            actualizarModoInteraccionLienzo();
             
-            mostrarNotificacion(`Modo activo: ${getModeLabel(mode).toUpperCase()}`);
+            if (!silent) mostrarNotificacion(`Modo activo: ${getModeLabel(mode).toUpperCase()}`);
+        }
+
+        function actualizarModoInteraccionLienzo() {
+            const cameraEl = document.querySelector('[camera]');
+            if (cameraEl) cameraEl.setAttribute('look-controls', 'enabled', activeEditMode === 'orbit');
+            const scene = document.querySelector('a-scene');
+            const applyCursor = () => {
+                if (!scene?.canvas) return;
+                scene.canvas.style.cursor = activeEditMode === 'orbit' ? 'grab' : (activeEditMode === 'select' ? 'default' : 'crosshair');
+                inicializarSeleccionDirectaLienzo(scene.canvas);
+            };
+            applyCursor();
+            if (scene && !scene.canvas) scene.addEventListener('renderstart', applyCursor, { once: true });
         }
 
         function getModeLabel(mode) {
             switch(mode) {
+                case 'select': return 'Seleccionar';
                 case 'orbit': return 'Órbita';
                 case 'translate': return 'Mover';
                 case 'rotate': return 'Rotar';
@@ -4554,6 +4624,9 @@
             }
             
             switch(evt.code) {
+                case 'KeyV':
+                    setEditMode('select');
+                    break;
                 case 'KeyQ':
                     setEditMode('orbit');
                     break;
@@ -4755,6 +4828,7 @@
             entidadSeleccionada.posicion = { x: px, y: py, z: pz };
             entidadSeleccionada.rotacion = { y: ry };
             entidadSeleccionada.escala = s;
+            actualizarOffsetAnclaje(entidadSeleccionada);
 
             // Actualizar textos numéricos en el HUD
             document.getElementById('val-pos-x').innerText = px.toFixed(2);
@@ -5410,7 +5484,7 @@
             const content = escenaObjetos.filter(obj => !obj.isMarker);
             const targetsSinImagen = markers.filter(marker => !marker.markerImage);
             const targetsSinMind = markers.filter(marker => !marker.mindTargetUrl);
-            const contenidoSinTarget = content.filter(obj => !obj.arAnchor || obj.arAnchor === 'base');
+            const contenidoSinTarget = content.filter(obj => obj.mediaType !== 'button' && (!obj.arAnchor || obj.arAnchor === 'base'));
             const contenidoSinArchivo = content.filter(obj => {
                 const mediaType = obj.mediaType || '3d';
                 if (mediaType === 'image' || mediaType === 'video' || mediaType === 'audio') return !obj.mediaUrl;
@@ -5850,7 +5924,16 @@
         AFRAME.registerComponent('selectable', {
             init: function () {
                 const el = this.el;
+                el.addEventListener('mouseenter', function () {
+                    const canvas = document.querySelector('a-scene')?.canvas;
+                    if (canvas && activeEditMode === 'select') canvas.style.cursor = 'pointer';
+                });
+                el.addEventListener('mouseleave', function () {
+                    const canvas = document.querySelector('a-scene')?.canvas;
+                    if (canvas && activeEditMode === 'select') canvas.style.cursor = 'default';
+                });
                 el.addEventListener('click', function (evt) {
+                    if (activeEditMode === 'orbit') return;
                     // Evitar que el clic lo reciba la escena de fondo
                     evt.stopPropagation();
                     
@@ -5947,7 +6030,48 @@
             initNavigationStar();
             actualizarHudPrecision();
             sincronizarLayoutResponsive();
+            setEditMode(activeEditMode, true);
         });
+
+        function inicializarSeleccionDirectaLienzo(canvas) {
+            if (!canvas || canvas.dataset.directSelectionReady === 'true') return;
+            canvas.dataset.directSelectionReady = 'true';
+            let pointerStart = null;
+            canvas.addEventListener('pointerdown', event => {
+                pointerStart = { x: event.clientX, y: event.clientY };
+            });
+            canvas.addEventListener('pointerup', event => {
+                if (activeEditMode !== 'select' || event.button !== 0 || !pointerStart) return;
+                const movement = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y);
+                pointerStart = null;
+                if (movement > 5) return;
+
+                const camera = document.getElementById('editor-camera')?.getObject3D('camera');
+                const container = document.getElementById('entities-container');
+                if (!camera || !container) return;
+                const rect = canvas.getBoundingClientRect();
+                const mouse = new THREE.Vector2(
+                    ((event.clientX - rect.left) / rect.width) * 2 - 1,
+                    -((event.clientY - rect.top) / rect.height) * 2 + 1
+                );
+                const raycaster = new THREE.Raycaster();
+                raycaster.setFromCamera(mouse, camera);
+                const intersections = raycaster.intersectObjects(container.object3D.children, true);
+                for (const intersection of intersections) {
+                    let node = intersection.object;
+                    while (node && node !== container.object3D) {
+                        const id = node.el?.getAttribute?.('id');
+                        const objeto = id ? escenaObjetos.find(item => item.uuid === id) : null;
+                        if (objeto) {
+                            event.preventDefault();
+                            seleccionarObjeto(objeto);
+                            return;
+                        }
+                        node = node.parent;
+                    }
+                }
+            });
+        }
 
         // Crear una nueva entidad 3D en el lienzo
         function crearEntidad(modelId, nombreBase, glbUrl = null) {
@@ -6020,12 +6144,39 @@
             return nuevoObjeto;
         }
 
+        function crearBotonInteractivo() {
+            const firstMarker = escenaObjetos.find(item => item.isMarker);
+            const anchor = entidadSeleccionada?.isMarker ? entidadSeleccionada.uuid : (entidadSeleccionada?.arAnchor !== 'base' ? entidadSeleccionada?.arAnchor : null) || firstMarker?.uuid || 'base';
+            const boton = crearContenidoAR('Botón Siguiente', 'button', anchor, null, null);
+            boton.nombre = 'Botón Siguiente';
+            boton.buttonLabel = 'Siguiente';
+            boton.buttonColor = '#2563eb';
+            boton.interaction = { action: 'next', targetId: null };
+            boton.posicion.y = Number(boton.posicion.y || 0) - 0.55;
+            actualizarOffsetAnclaje(boton);
+            renderizarEntidad3D(boton);
+            seleccionarObjeto(boton);
+            mostrarNotificacion('Botón interactivo creado. Configura su acción en el inspector.', 'success');
+        }
+
         function aplicarTransformacionObjeto(obj) {
             const el = document.getElementById(obj.uuid);
             if (!el) return;
             el.setAttribute('position', `${obj.posicion.x} ${obj.posicion.y} ${obj.posicion.z}`);
             el.setAttribute('rotation', `0 ${obj.rotacion.y || 0} 0`);
             el.setAttribute('scale', `${obj.escala} ${obj.escala} ${obj.escala}`);
+        }
+
+        function actualizarOffsetAnclaje(obj) {
+            if (!obj || obj.isMarker || !obj.arAnchor || obj.arAnchor === 'base') return;
+            const marker = escenaObjetos.find(item => item.isMarker && item.uuid === obj.arAnchor);
+            if (!marker) return;
+            obj.anchorOffset = {
+                x: Number(obj.posicion?.x || 0) - Number(marker.posicion?.x || 0),
+                y: Number(obj.posicion?.y || 0) - Number(marker.posicion?.y || 0),
+                z: Number(obj.posicion?.z || 0) - Number(marker.posicion?.z || 0)
+            };
+            obj.relativeToAnchor = true;
         }
 
         function sincronizarContenidoConTarget(obj, anchorId, options = {}) {
@@ -6036,12 +6187,12 @@
             const mediaType = obj.mediaType || '3d';
             const altura = mediaType === '3d' ? 0.72 : 0.58;
             obj.arAnchor = anchorId;
-            obj.relativeToAnchor = false;
             obj.posicion = {
                 x: Number(marker.posicion?.x || 0),
                 y: Number(marker.posicion?.y || 0) + altura,
                 z: Number(marker.posicion?.z || -3.5) + 0.05
             };
+            actualizarOffsetAnclaje(obj);
             if (options.force && mediaType !== '3d') {
                 obj.rotacion = { y: 0 };
             }
@@ -6169,6 +6320,7 @@
 
         function tipoEntidad(obj) {
             if (obj.isMarker) return 'Target';
+            if (obj.mediaType === 'button') return 'Botón';
             if (obj.mediaType === 'oira-node') return 'Nodo legado';
             if (obj.mediaType === 'audio') return 'Audio';
             if (obj.mediaType === 'video') return 'Video';
@@ -7048,19 +7200,37 @@
             const marker = obj.isMarker ? obj : escenaObjetos.find(o => o.uuid === obj.arAnchor && o.isMarker);
             const hasMarkerImage = Boolean(marker?.markerImage);
             const hasMind = Boolean(marker?.mindTargetUrl);
-            const hasMedia = Boolean(obj.mediaUrl || obj.isMarker);
+            const isButton = obj.mediaType === 'button';
+            const hasMedia = Boolean(obj.mediaUrl || obj.isMarker || isButton);
 
             typeEl.textContent = obj.isMarker ? 'Target MindAR' : tipoEntidad(obj);
             anchorEl.textContent = obj.isMarker ? 'Es target' : (marker?.nombre || 'Mesa base');
             fileEl.textContent = obj.isMarker
                 ? (obj.mindTargetUrl ? nombreCortoRuta(obj.mindTargetUrl) : 'Falta .mind')
-                : (obj.mediaUrl ? nombreCortoRuta(obj.mediaUrl) : 'Sin media');
+                : (isButton ? (obj.buttonModelUrl ? nombreCortoRuta(obj.buttonModelUrl) : 'No requiere archivo') : (obj.mediaUrl ? nombreCortoRuta(obj.mediaUrl) : 'Sin media'));
 
             let statusText = 'Pendiente';
             let statusColor = '#f59e0b';
             let noteText = 'Completa target, archivo .mind y contenido anclado antes de publicar.';
 
-            if (obj.isMarker) {
+            if (isButton) {
+                if (!obj.arAnchor || obj.arAnchor === 'base') {
+                    statusText = 'Asigna un target';
+                    statusColor = '#ef4444';
+                    noteText = 'El botón permanecerá oculto en el visor hasta que lo asignes a un target y ese target sea detectado.';
+                } else if (!marker) {
+                    statusText = 'Target no encontrado';
+                    noteText = 'El botón no necesita .mind, pero su target asignado ya no existe.';
+                } else if (!hasMarkerImage || !hasMind) {
+                    statusText = 'Botón listo · target pendiente';
+                    statusColor = '#f59e0b';
+                    noteText = 'El botón no necesita .mind. El target físico al que está anclado sí debe completar su imagen y archivo .mind.';
+                } else {
+                    statusText = 'Interacción lista';
+                    statusColor = '#22c55e';
+                    noteText = 'El botón está listo y aparecerá cuando se detecte su target MindAR.';
+                }
+            } else if (obj.isMarker) {
                 if (hasMarkerImage && hasMind) {
                     statusText = 'Target listo';
                     statusColor = '#22c55e';
@@ -7187,7 +7357,9 @@
             if (obj.isMarker) return;
             const anchorId = obj.arAnchor || 'base';
             if (anchorId === 'base') {
-                agregarEtiquetaEstado(el, obj.nombre || 'Contenido AR', 'Sin target MindAR', '#ef4444');
+                const estado = obj.mediaType === 'button' ? 'Botón oculto · asigna target' : 'Sin target MindAR';
+                const color = '#ef4444';
+                agregarEtiquetaEstado(el, obj.nombre || 'Contenido AR', estado, color);
                 return;
             }
 
@@ -7255,26 +7427,12 @@
             accent.setAttribute('material', 'color: #ec4899; shader: flat; side: double');
             player.appendChild(accent);
 
-            const play = document.createElement('a-circle');
-            play.setAttribute('radius', '0.16');
-            play.setAttribute('position', '-0.64 0 0.02');
-            play.setAttribute('material', 'color: #db2777; shader: flat; side: double');
-            player.appendChild(play);
-
-            const playIcon = document.createElement('a-triangle');
-            playIcon.setAttribute('vertex-a', '-0.04 0.065 0');
-            playIcon.setAttribute('vertex-b', '-0.04 -0.065 0');
-            playIcon.setAttribute('vertex-c', '0.07 0 0');
-            playIcon.setAttribute('position', '-0.625 0 0.03');
-            playIcon.setAttribute('material', 'color: #ffffff; shader: flat; side: double');
-            player.appendChild(playIcon);
-
             const title = document.createElement('a-text');
             title.setAttribute('value', obj.nombre || 'Audio espacial');
             title.setAttribute('align', 'left');
             title.setAttribute('color', '#fce7f3');
             title.setAttribute('width', '1.75');
-            title.setAttribute('position', '-0.38 0.18 0.025');
+            title.setAttribute('position', '-0.75 0.18 0.025');
             player.appendChild(title);
 
             const bars = [0.28, 0.58, 0.86, 0.46, 0.72, 0.36, 0.92, 0.62, 0.42, 0.78, 0.52, 0.3];
@@ -7282,7 +7440,7 @@
                 const bar = document.createElement('a-plane');
                 bar.setAttribute('width', '0.045');
                 bar.setAttribute('height', (height * 0.24).toFixed(3));
-                bar.setAttribute('position', `${(-0.32 + index * 0.085).toFixed(3)} -0.08 0.025`);
+                bar.setAttribute('position', `${(-0.7 + index * 0.12).toFixed(3)} -0.08 0.025`);
                 bar.setAttribute('material', `color: ${index % 3 === 0 ? '#f472b6' : '#67e8f9'}; shader: flat; side: double`);
                 bar.setAttribute(`animation__wave${index}`, `property: scale; from: 1 0.45 1; to: 1 1.25 1; dur: ${430 + index * 37}; dir: alternate; loop: true; easing: easeInOutSine`);
                 player.appendChild(bar);
@@ -7332,7 +7490,26 @@
                 }
             } else {
                 const mediaType = obj.mediaType || '3d';
-                if (mediaType === 'image') {
+                if (mediaType === 'button') {
+                    if (obj.buttonAppearance === 'model' && obj.buttonModelUrl) {
+                        const model = document.createElement('a-entity');
+                        model.setAttribute('gltf-model', obj.buttonModelUrl);
+                        el.appendChild(model);
+                    } else {
+                        const panel = document.createElement('a-plane');
+                        panel.setAttribute('width', '1.05');
+                        panel.setAttribute('height', '0.34');
+                        panel.setAttribute('material', `color: ${obj.buttonColor || '#2563eb'}; shader: flat; side: double`);
+                        el.appendChild(panel);
+                    }
+                    const label = document.createElement('a-text');
+                    label.setAttribute('value', obj.buttonLabel || 'Siguiente');
+                    label.setAttribute('align', 'center');
+                    label.setAttribute('color', '#ffffff');
+                    label.setAttribute('width', '2.1');
+                    label.setAttribute('position', '0 0 0.02');
+                    el.appendChild(label);
+                } else if (mediaType === 'image') {
                     const panel = document.createElement('a-plane');
                     const w = obj.panelWidth || 1.4;
                     const h = obj.panelHeight || 0.9;
@@ -7515,6 +7692,21 @@
                 }
             }
 
+            const interactionGroup = document.getElementById('group-interaction-config');
+            if (interactionGroup) {
+                const isButton = !obj.isMarker && obj.mediaType === 'button';
+                interactionGroup.style.display = isButton ? 'flex' : 'none';
+                if (isButton) {
+                    document.getElementById('input-interaction-label').value = obj.buttonLabel || 'Siguiente';
+                    document.getElementById('input-interaction-color').value = obj.buttonColor || '#2563eb';
+                    document.getElementById('select-button-appearance').value = obj.buttonAppearance || 'panel';
+                    document.getElementById('button-model-status').textContent = obj.buttonModelUrl ? nombreCortoRuta(obj.buttonModelUrl) : 'Sin modelo seleccionado';
+                    document.getElementById('select-interaction-action').value = obj.interaction?.action || 'next';
+                    actualizarOpcionesDestinoInteraccion(obj);
+                    actualizarVisibilidadDestinoInteraccion();
+                }
+            }
+
             document.querySelectorAll('#inspector-content input, #inspector-content select, #inspector-content button').forEach(control => {
                 control.disabled = Boolean(remoteLock);
             });
@@ -7548,6 +7740,90 @@
         }
 
         // --- EVOLUCIÓN: CONTROL DE DIMENSIONES Y PROPIEDADES DE VIDEO AR ---
+        function actualizarOpcionesDestinoInteraccion(boton) {
+            const select = document.getElementById('select-interaction-target');
+            if (!select) return;
+            const action = document.getElementById('select-interaction-action')?.value || boton.interaction?.action || 'next';
+            const requiresMedia = ['play', 'pause', 'stop'].includes(action);
+            select.innerHTML = '<option value="">Selecciona un elemento</option>';
+            escenaObjetos.filter(obj => !obj.isMarker && obj.uuid !== boton.uuid && (!requiresMedia || obj.mediaType === 'audio' || obj.mediaType === 'video')).forEach(obj => {
+                const option = document.createElement('option');
+                option.value = obj.uuid;
+                option.textContent = `${tipoEntidad(obj)} · ${obj.nombre || obj.uuid}`;
+                select.appendChild(option);
+            });
+            select.value = boton.interaction?.targetId || '';
+        }
+
+        function actualizarVisibilidadDestinoInteraccion() {
+            const action = document.getElementById('select-interaction-action')?.value || 'next';
+            const group = document.getElementById('interaction-target-group');
+            if (group) group.style.display = (action === 'next' || action === 'previous') ? 'none' : 'block';
+            const modelGroup = document.getElementById('button-model-group');
+            const appearance = document.getElementById('select-button-appearance')?.value || 'panel';
+            if (modelGroup) modelGroup.style.display = appearance === 'model' ? 'flex' : 'none';
+            const colorGroup = document.getElementById('button-color-group');
+            if (colorGroup) colorGroup.style.display = appearance === 'panel' ? 'flex' : 'none';
+            document.querySelectorAll('#group-interaction-config [data-action]').forEach(button => button.classList.toggle('active', button.dataset.action === action));
+            document.querySelectorAll('#group-interaction-config [data-appearance]').forEach(button => button.classList.toggle('active', button.dataset.appearance === appearance));
+            const help = document.getElementById('interaction-target-help');
+            if (help) help.textContent = ['play', 'pause', 'stop'].includes(action) ? 'Solo se muestran reproductores de audio y video.' : 'Selecciona el objeto que recibirá la acción.';
+        }
+
+        function seleccionarAccionInteraccion(action) {
+            const input = document.getElementById('select-interaction-action');
+            if (!input) return;
+            input.value = action;
+            actualizarInteraccionSeleccionada();
+        }
+
+        function seleccionarAparienciaBoton(appearance) {
+            const input = document.getElementById('select-button-appearance');
+            if (!input) return;
+            input.value = appearance;
+            actualizarInteraccionSeleccionada();
+        }
+
+        function actualizarInteraccionSeleccionada() {
+            if (!entidadSeleccionada || entidadSeleccionada.mediaType !== 'button' || !puedoEditarObjeto(entidadSeleccionada)) return;
+            registrarEstadoHistorial('Configurar interacción', { coalesceMs: 600 });
+            entidadSeleccionada.buttonLabel = document.getElementById('input-interaction-label').value.trim() || 'Siguiente';
+            entidadSeleccionada.buttonColor = document.getElementById('input-interaction-color').value || '#2563eb';
+            entidadSeleccionada.buttonAppearance = document.getElementById('select-button-appearance').value || 'panel';
+            entidadSeleccionada.interaction = { action: document.getElementById('select-interaction-action').value || 'next', targetId: document.getElementById('select-interaction-target').value || null };
+            actualizarOpcionesDestinoInteraccion(entidadSeleccionada);
+            actualizarVisibilidadDestinoInteraccion();
+            renderizarEntidad3D(entidadSeleccionada);
+            marcarCambiosSinGuardar();
+            renderOutliner();
+        }
+
+        async function subirModeloBoton(file) {
+            if (!file || !entidadSeleccionada || entidadSeleccionada.mediaType !== 'button') return;
+            if (!/\.(glb|gltf)$/i.test(file.name)) return mostrarNotificacion('Solo se admiten archivos GLB o GLTF.', 'error');
+            const buttonId = entidadSeleccionada.uuid;
+            try {
+                mostrarNotificacion(`Subiendo botón 3D: ${file.name}...`);
+                const response = await fetch(`/api/upload-model?name=${encodeURIComponent(file.name)}`, { method: 'POST', body: file });
+                const data = await response.json();
+                if (!response.ok || data.status !== 'success') throw new Error(data.error || `HTTP ${response.status}`);
+                const boton = escenaObjetos.find(obj => obj.uuid === buttonId);
+                if (!boton) return;
+                boton.buttonAppearance = 'model';
+                boton.buttonModelUrl = data.src;
+                boton.buttonModelId = data.modelId || null;
+                seleccionarObjeto(boton);
+                renderizarEntidad3D(boton);
+                marcarCambiosSinGuardar();
+                mostrarNotificacion('Modelo 3D asignado al botón.', 'success');
+            } catch (error) {
+                console.error('Error al subir botón 3D:', error);
+                mostrarNotificacion('No se pudo subir el modelo del botón.', 'error');
+            } finally {
+                document.getElementById('input-button-model').value = '';
+            }
+        }
+
         function actualizarDimensionesMedia() {
             if (!entidadSeleccionada) return;
             
@@ -7774,6 +8050,7 @@
             entidadSeleccionada.posicion = { x: px, y: py, z: pz };
             entidadSeleccionada.rotacion = { y: ry };
             entidadSeleccionada.escala = s;
+            actualizarOffsetAnclaje(entidadSeleccionada);
 
             // Actualizar textos numéricos en el HUD
             document.getElementById('val-pos-x').innerText = px.toFixed(2);
@@ -8546,7 +8823,7 @@
         function sincronizarActividadSidebar(tab) {
             let activity = tab;
             if (tab === 'library') {
-                activity = document.getElementById('subtab-media')?.classList.contains('active') ? 'assets' : 'create';
+                activity = activeLibrarySection === 'media' ? 'assets' : 'create';
             } else if (tab === 'publish') {
                 activity = document.getElementById('subtab-qa')?.classList.contains('active') ? 'publish' : 'validate';
             }
@@ -8601,13 +8878,7 @@
             
             if (tab === 'scene') renderOutliner();
             if (tab === 'library') {
-                const activeSub = document.querySelector('#panel-library .segment-btn.active');
-                if (activeSub) {
-                    const sec = activeSub.id.replace('subtab-', '');
-                    switchLibrarySection(sec);
-                } else {
-                    switchLibrarySection('models');
-                }
+                switchLibrarySection(activeLibrarySection);
             }
             if (tab === 'publish') {
                 const activeSub = document.querySelector('#panel-publish .segment-btn.active');
@@ -8622,6 +8893,7 @@
         }
 
         function switchLibrarySection(section) {
+            activeLibrarySection = section;
             document.querySelectorAll('#panel-library .segment-btn').forEach(btn => {
                 btn.classList.remove('active');
             });

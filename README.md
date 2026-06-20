@@ -55,8 +55,10 @@ En acceso desde la misma PC, el editor inicia automaticamente como administrador
 - Editor visual en `moby_studio/editor.html` con barra lateral compacta, lienzo A-Frame e inspector.
 - Visor WebAR en `moby_studio/index.html` para escritorio y telefono.
 - Tracking de imagen real con MindAR y archivos `.mind`.
-- Plantillas `Marcador + Imagen`, `Marcador + Video`, `Marcador + Audio` y `Marcador + Modelo 3D`.
-- Contenido 3D, imagen, video, audio espacial con reproductor animado y nodos informativos heredados.
+- Plantillas `Marcador + Imagen`, `Marcador + Video`, `Marcador + Audio`, `Marcador + Modelo 3D` y `Boton interactivo`.
+- Contenido 3D, imagen, video, audio espacial con ondas visuales y nodos informativos heredados.
+- Botones interactivos con acciones configurables `next`, `previous`, `show`, `hide`, `toggle`, `play`, `pause` y `stop`, incluyendo botones 2D o modelos GLB personalizados.
+- Seleccion directa en el lienzo con modo puntero y atajos de transformacion (`V`, `Q`, `W`, `E`, `R`).
 - Mediateca con carga, filtros, asignacion, deteccion de uso y eliminacion protegida.
 - Proyectos versionados con crear, duplicar, renombrar, archivar, restaurar y eliminar.
 - Exportacion e importacion de proyectos editables entre PCs mediante ZIP.
@@ -73,7 +75,7 @@ En acceso desde la misma PC, el editor inicia automaticamente como administrador
 - La colaboracion sincroniza versiones guardadas y locks en memoria; no es edicion granular en tiempo real.
 - El servidor es local. El acceso movil con camara normalmente requiere publicar el puerto `8000` mediante HTTPS.
 - A-Frame, MindAR y las fuentes se cargan desde CDN, por lo que el primer uso requiere conexion a Internet.
-- El audio con autoplay depende de las restricciones del navegador; el usuario puede iniciarlo tocando el reproductor.
+- El audio depende de las restricciones del navegador; la experiencia esta pensada para controlarse con botones externos o por interaccion dentro de la escena.
 
 ## Requisitos
 
@@ -117,17 +119,18 @@ Para un telefono, expone `http://localhost:8000` mediante Cloudflare Tunnel, ngr
 3. Elige una plantilla AR.
 4. Configura la imagen fisica del target y su archivo `.mind`.
 5. Sube o selecciona el contenido desde la mediateca.
-6. Comprueba que el contenido este anclado al target correcto.
-7. Ajusta posicion, rotacion y escala en el lienzo o inspector.
-8. Abre `Validar`, corrige los errores y guarda.
-9. Abre `Probar y publicar` o carga `index.html` directamente.
-10. Inicia AR, concede permiso de camara y apunta al target fisico.
+6. Si necesitas interaccion, crea un boton y asignale acciones a otro contenido de la escena.
+7. Comprueba que el contenido este anclado al target correcto.
+8. Ajusta posicion, rotacion y escala en el lienzo o inspector.
+9. Abre `Validar`, corrige los errores y guarda.
+10. Abre `Probar y publicar` o carga `index.html` directamente.
+11. Inicia AR, concede permiso de camara y apunta al target fisico.
 
 Consulta [TUTORIAL_PRIMEROS_PASOS.md](moby_studio/TUTORIAL_PRIMEROS_PASOS.md) para el recorrido detallado.
 
 ## Interfaz del editor
 
-La barra de actividad izquierda separa las tareas principales:
+La barra de actividad izquierda separa las tareas principales y es la fuente unica de navegacion del editor:
 
 | Seccion | Uso |
 |---|---|
@@ -135,11 +138,11 @@ La barra de actividad izquierda separa las tareas principales:
 | Agregar contenido | Crear plantillas, targets y recursos para la escena. |
 | Recursos | Buscar, filtrar y administrar la mediateca. |
 | Validar | Auditar targets, archivos, anclajes y estado de guardado. |
-| Probar y publicar | Abrir QA movil y exportar la experiencia. |
+| Probar y publicar | Abrir validacion y QA movil, y exportar la experiencia. |
 | Gestionar proyectos | Administrar y transferir proyectos. |
 | Ayuda | Abrir el manual integrado. |
 
-El lienzo central permite componer la escena y el inspector derecho contiene transformaciones, anclaje, archivo multimedia, dimensiones y notas del objeto seleccionado. En pantallas estrechas los paneles se compactan para conservar el area de trabajo.
+El lienzo central permite componer la escena y seleccionar objetos directamente sobre la interfaz. El inspector derecho contiene transformaciones, anclaje, archivo multimedia, interacciones, dimensiones y notas del objeto seleccionado. En pantallas estrechas los paneles se compactan para conservar el area de trabajo.
 
 ## Contenido soportado
 

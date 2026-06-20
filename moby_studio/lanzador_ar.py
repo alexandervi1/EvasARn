@@ -280,7 +280,7 @@ def collect_project_asset_usage(layout):
         if not isinstance(obj, dict):
             continue
         object_id = obj.get("uuid") or obj.get("nombre") or "objeto"
-        for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl"):
+        for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl", "buttonModelUrl"):
             file_name = local_asset_name(obj.get(field))
             if file_name:
                 usage.setdefault(file_name, []).append(object_id)
@@ -312,7 +312,7 @@ def rewrite_imported_asset_references(layout, asset_name_map, model_id_map):
     for obj in entities if isinstance(entities, list) else []:
         if not isinstance(obj, dict):
             continue
-        for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl"):
+        for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl", "buttonModelUrl"):
             old_name = local_asset_name(obj.get(field))
             new_name = asset_name_map.get(old_name)
             if new_name and new_name != old_name:
@@ -527,7 +527,7 @@ def collect_layout_asset_usage():
                         if os.path.exists(os.path.join("output", file_name)):
                             usage.setdefault(file_name, []).append({"field": "modelId", "object": label})
                             break
-            for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl"):
+            for field in ("mediaUrl", "markerImage", "mindTargetUrl", "glbUrl", "buttonModelUrl"):
                 value = obj.get(field)
                 if isinstance(value, str) and value.startswith("output/"):
                     name = os.path.basename(value)
