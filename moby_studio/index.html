@@ -2049,6 +2049,22 @@
 
 
         // --- Efecto visual al detectar un target ---
+        function aplicarEmisionObjeto(elemento, color, intensidad) {
+            elemento.addEventListener('object3dset', () => {
+                const mesh = elemento.getObject3D('mesh');
+                if (!mesh) return;
+                mesh.traverse(node => {
+                    const materiales = Array.isArray(node.material) ? node.material : [node.material];
+                    materiales.filter(Boolean).forEach(material => {
+                        if (!material.emissive) return;
+                        material.emissive.set(color);
+                        material.emissiveIntensity = intensidad;
+                        material.needsUpdate = true;
+                    });
+                });
+            }, { once: true });
+        }
+
         function lanzarContenedorEnMarcador(marcadorId) {
             const scene = document.querySelector("a-scene");
             const anchorEl = document.getElementById("anchor-" + marcadorId);
@@ -2063,7 +2079,8 @@
             box.setAttribute("width", "0.22");
             box.setAttribute("height", "0.14");
             box.setAttribute("depth", "0.14");
-            box.setAttribute("material", "roughness: 0.2; metalness: 0.8; emissive: " + color + "; emissiveIntensity: 0.6;");
+            box.setAttribute("material", "roughness: 0.2; metalness: 0.8;");
+            aplicarEmisionObjeto(box, color, 0.6);
             box.setAttribute("position", "0 0.8 -1.0");
             
             scene.appendChild(box);
@@ -2831,7 +2848,8 @@
             box.setAttribute("width", "0.22");
             box.setAttribute("height", "0.14");
             box.setAttribute("depth", "0.14");
-            box.setAttribute("material", "roughness: 0.2; metalness: 0.8; emissive: " + color + "; emissiveIntensity: 0.6;");
+            box.setAttribute("material", "roughness: 0.2; metalness: 0.8;");
+            aplicarEmisionObjeto(box, color, 0.6);
             
             // Posicionar justo en frente del usuario/cámara
             box.setAttribute("position", "0 0.8 -1.0");

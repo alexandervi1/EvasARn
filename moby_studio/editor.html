@@ -4429,6 +4429,8 @@
         let isOfflineMode = false;
         let collabState = { users: [], locks: {} };
         let collabTimer = null;
+        let collabRetryTimer = null;
+        let collabFailureReported = false;
         let sincronizandoRemoto = false;
         let avisoCambioRemotoPendiente = false;
         let autosaveTimer = null;
@@ -4574,6 +4576,24 @@
         });
 
         // Componente A-Frame para arrastre interactivo de ejes (Gizmo 3D)
+        function resaltarVisualGizmo(elemento, intensidad = 0) {
+            const mesh = elemento && elemento.getObject3D('mesh');
+            if (!mesh) return;
+
+            mesh.traverse(node => {
+                const materiales = Array.isArray(node.material) ? node.material : [node.material];
+                materiales.filter(Boolean).forEach(material => {
+                    if (!material.color) return;
+                    if (!material.userData.gizmoColorOriginal) {
+                        material.userData.gizmoColorOriginal = `#${material.color.getHexString()}`;
+                    }
+                    material.color.set(material.userData.gizmoColorOriginal);
+                    if (intensidad > 0) material.color.lerp(new THREE.Color('#ffffff'), intensidad);
+                    material.needsUpdate = true;
+                });
+            });
+        }
+
         AFRAME.registerComponent('interactive-gizmo-handle', {
             schema: {
                 axis: { type: 'string', default: 'x' }
@@ -4592,10 +4612,8 @@
                     const visualCylinder = parentAxis.querySelector('a-cylinder:not(.gizmo-handle)');
                     const visualCone = parentAxis.querySelector('a-cone');
                     if (visualCylinder && visualCone) {
-                        visualCylinder.setAttribute('material', 'emissive', '#ffffff');
-                        visualCylinder.setAttribute('material', 'emissiveIntensity', '0.5');
-                        visualCone.setAttribute('material', 'emissive', '#ffffff');
-                        visualCone.setAttribute('material', 'emissiveIntensity', '0.5');
+                        resaltarVisualGizmo(visualCylinder, 0.5);
+                        resaltarVisualGizmo(visualCone, 0.5);
                     }
                 });
                 
@@ -4604,10 +4622,8 @@
                     const visualCylinder = parentAxis.querySelector('a-cylinder:not(.gizmo-handle)');
                     const visualCone = parentAxis.querySelector('a-cone');
                     if (visualCylinder && visualCone) {
-                        visualCylinder.removeAttribute('material', 'emissive');
-                        visualCylinder.removeAttribute('material', 'emissiveIntensity');
-                        visualCone.removeAttribute('material', 'emissive');
-                        visualCone.removeAttribute('material', 'emissiveIntensity');
+                        resaltarVisualGizmo(visualCylinder);
+                        resaltarVisualGizmo(visualCone);
                     }
                 });
                 
@@ -4633,10 +4649,8 @@
                     const visualCylinder = parentAxis.querySelector('a-cylinder:not(.gizmo-handle)');
                     const visualCone = parentAxis.querySelector('a-cone');
                     if (visualCylinder && visualCone) {
-                        visualCylinder.setAttribute('material', 'emissive', '#ffffff');
-                        visualCylinder.setAttribute('material', 'emissiveIntensity', '0.9');
-                        visualCone.setAttribute('material', 'emissive', '#ffffff');
-                        visualCone.setAttribute('material', 'emissiveIntensity', '0.9');
+                        resaltarVisualGizmo(visualCylinder, 0.9);
+                        resaltarVisualGizmo(visualCone, 0.9);
                     }
                 });
                 
@@ -4697,10 +4711,8 @@
                     const visualCylinder = parentAxis.querySelector('a-cylinder:not(.gizmo-handle)');
                     const visualCone = parentAxis.querySelector('a-cone');
                     if (visualCylinder && visualCone) {
-                        visualCylinder.removeAttribute('material', 'emissive');
-                        visualCylinder.removeAttribute('material', 'emissiveIntensity');
-                        visualCone.removeAttribute('material', 'emissive');
-                        visualCone.removeAttribute('material', 'emissiveIntensity');
+                        resaltarVisualGizmo(visualCylinder);
+                        resaltarVisualGizmo(visualCone);
                     }
                     
                     marcarCambiosSinGuardar();
@@ -6598,11 +6610,33 @@
                     })
                 });
                 if (!response.ok) return;
+                collabFailureReported = false;
+                if (collabRetryTimer) {
+                    clearTimeout(collabRetryTimer);
+                    collabRetryTimer = null;
+                }
                 collabState = await response.json();
                 manejarVersionRemotaColaboracion();
                 actualizarPresenciaUI();
             } catch (err) {
-                console.warn('No se pudo sincronizar colaboración:', err);
+                if (!collabFailureReported) {
+                    console.warn('Servidor de colaboración no disponible; se reintentará en 30 segundos.');
+                    collabFailureReported = true;
+                }
+                if (collabTimer) {
+                    clearInterval(collabTimer);
+                    collabTimer = null;
+                }
+                if (!collabRetryTimer) {
+                    collabRetryTimer = setTimeout(() => {
+                        collabRetryTimer = null;
+                        enviarHeartbeatColaboracion().then(() => {
+                            if (!collabTimer && !collabFailureReported) {
+                                collabTimer = setInterval(enviarHeartbeatColaboracion, 5000);
+                            }
+                        });
+                    }, 30000);
+                }
             }
         }
 
